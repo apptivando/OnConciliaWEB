@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { Prospecto, SECTORES, ESTADOS } from '@/lib/types'
+import { Prospecto, SECTORES } from '@/lib/types'
 import EstadoBadge from '@/components/EstadoBadge'
 import ProspectosClient from './ProspectosClient'
 import Link from 'next/link'

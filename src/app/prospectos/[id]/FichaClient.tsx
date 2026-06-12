@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Prospecto, Interaccion, EstadoProspecto, ESTADOS, ESTADOS_ORDEN } from '@/lib/types'
-import EstadoBadge from '@/components/EstadoBadge'
 import { generarMensaje } from '@/lib/mensajes'
 
 export default function FichaClient({

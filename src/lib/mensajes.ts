@@ -24,7 +24,7 @@ Buscamos las primeras 10 empresas para validarlo en condiciones reales, sin cost
 
 ¿Te interesa que te lo muestre en una llamada de 15 minutos esta semana?`,
 
-    3: ({ nombre, empresa }) =>
+    3: ({ nombre }) =>
       `Hola ${nombre},
 
 Te escribo como seguimiento a nuestra conexión en LinkedIn.
