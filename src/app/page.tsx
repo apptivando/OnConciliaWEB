@@ -30,8 +30,9 @@ export default function Home() {
         </h1>
 
         <p className="text-slate-300 max-w-lg mx-auto text-base leading-relaxed mb-8">
-          OnConcilia importa el extracto de tu banco, cruza los movimientos y
-          genera el reporte listo para entregar. En minutos, no en horas.
+          OnConcilia importa el extracto de tus bancos argentinos, categoriza
+          los movimientos y genera el reporte listo para tu contador.
+          En minutos, no en horas.
         </p>
 
         <LeadForm variant="hero" />
@@ -106,17 +107,17 @@ export default function Home() {
               {
                 n: "1",
                 title: "Importás el extracto bancario",
-                desc: "CSV o Excel de cualquier banco argentino — BNA, Santander, Galicia, BBVA, Macro y más.",
+                desc: "Subís el archivo de Nación, Santander, Macro, BICA, BERSA o Galicia — OnConcilia lo reconoce solo, sin planillas de mapeo.",
               },
               {
                 n: "2",
-                title: "OnConcilia lo cruza automáticamente",
-                desc: "Normaliza las columnas, categoriza los movimientos y detecta las diferencias sin que toques nada.",
+                title: "OnConcilia lo procesa automáticamente",
+                desc: "Normaliza los movimientos, los categoriza según las reglas de tu empresa y agrupa lo que no reconoce para que lo resuelvas en lote.",
               },
               {
                 n: "3",
                 title: "Descargás el reporte listo para entregar",
-                desc: "PDF o Excel con las diferencias marcadas. Solo revisás lo que no cuadra.",
+                desc: "PDF o Excel con todos los movimientos por banco, pendientes al cierre y resumen de categorías. Lo enviás directo al contador desde la misma pantalla.",
               },
             ].map((step) => (
               <div key={step.n} className="flex gap-4 py-5 items-start">
@@ -133,6 +134,82 @@ export default function Home() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Funciones */}
+      <section className="bg-slate-50 px-6 py-14">
+        <div className="max-w-3xl mx-auto">
+          <p className="text-brand text-xs font-semibold uppercase tracking-widest mb-2">
+            Funciones
+          </p>
+          <h2 className="text-navy text-2xl font-bold mb-8 tracking-tight">
+            Todo lo que necesitás para cerrar el mes
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+            <div className="bg-white border border-slate-200 rounded-2xl p-6">
+              <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-lg mb-4">
+                🏦
+              </div>
+              <h3 className="font-semibold text-navy text-base mb-2">
+                6 bancos argentinos — sin configuración
+              </h3>
+              <p className="text-slate-600 text-sm leading-relaxed mb-3">
+                Subí el extracto de Nación, Santander, Macro, BICA, BERSA o Galicia y OnConcilia lo reconoce solo. En segundos tenés todos los movimientos normalizados y listos para trabajar.
+              </p>
+              <span className="inline-block bg-blue-50 text-blue-700 text-xs font-medium px-3 py-1 rounded-full">
+                Importación automática
+              </span>
+            </div>
+
+            <div className="bg-white border border-slate-200 rounded-2xl p-6">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-lg mb-4">
+                ⚡
+              </div>
+              <h3 className="font-semibold text-navy text-base mb-2">
+                Miles de movimientos categorizados en un clic
+              </h3>
+              <p className="text-slate-600 text-sm leading-relaxed mb-3">
+                Ingresos, gastos, impuestos y comisiones se clasifican según las reglas de tu empresa. Lo que no reconoce lo agrupa para resolverlo en lote, sin revisar fila por fila.
+              </p>
+              <span className="inline-block bg-emerald-50 text-emerald-700 text-xs font-medium px-3 py-1 rounded-full">
+                Reglas propias por banco
+              </span>
+            </div>
+
+            <div className="bg-white border border-slate-200 rounded-2xl p-6">
+              <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center text-lg mb-4">
+                🧾
+              </div>
+              <h3 className="font-semibold text-navy text-base mb-2">
+                Comprobante fiscal de comisiones, armado solo
+              </h3>
+              <p className="text-slate-600 text-sm leading-relaxed mb-3">
+                Cada mes OnConcilia clasifica las comisiones bancarias por alícuota de IVA y genera el comprobante listo para tu contador. Sin calcular bases imponibles ni buscar percepciones a mano.
+              </p>
+              <span className="inline-block bg-violet-50 text-violet-700 text-xs font-medium px-3 py-1 rounded-full">
+                IVA y percepciones desglosados
+              </span>
+            </div>
+
+            <div className="bg-white border border-slate-200 rounded-2xl p-6">
+              <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-lg mb-4">
+                📎
+              </div>
+              <h3 className="font-semibold text-navy text-base mb-2">
+                Plazos fijos, préstamos y echeqs — todo en un lugar
+              </h3>
+              <p className="text-slate-600 text-sm leading-relaxed mb-3">
+                Registrá tus inversiones y préstamos y vinculálos con los movimientos reales de la cuenta. OnConcilia te muestra cuánto tenés invertido, qué cuotas vencen y qué cheques están pendientes.
+              </p>
+              <span className="inline-block bg-amber-50 text-amber-700 text-xs font-medium px-3 py-1 rounded-full">
+                Sin abrir el portal de cada banco
+              </span>
+            </div>
+
           </div>
         </div>
       </section>
