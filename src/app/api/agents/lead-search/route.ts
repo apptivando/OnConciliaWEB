@@ -112,6 +112,7 @@ async function updateContacto(p: {
 }
 
 export async function POST(req: Request) {
+  try {
   const { sector, ciudad } = await req.json()
 
   const SECTOR_LABELS: Record<string, string> = {
@@ -281,4 +282,9 @@ REGLAS:
     response.content.find((b): b is Anthropic.TextBlock => b.type === 'text')?.text ?? ''
 
   return Response.json({ prospectos_guardados: guardados.length, guardados, resumen })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Error desconocido'
+    console.error('[lead-search]', err)
+    return Response.json({ error: message }, { status: 500 })
+  }
 }

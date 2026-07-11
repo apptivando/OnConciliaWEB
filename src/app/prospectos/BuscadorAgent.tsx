@@ -13,18 +13,21 @@ export default function BuscadorAgent() {
     prospectos_guardados: number
     resumen: string
   } | null>(null)
+  const [error, setError] = useState('')
   const [form, setForm] = useState({ sector: 'estudio', ciudad: '' })
 
   function cerrar() {
     setOpen(false)
     setEstado('idle')
     setResultado(null)
+    setError('')
   }
 
   async function buscar(e: React.FormEvent) {
     e.preventDefault()
     setEstado('buscando')
     setResultado(null)
+    setError('')
     try {
       const res = await fetch('/api/agents/lead-search', {
         method: 'POST',
@@ -32,10 +35,16 @@ export default function BuscadorAgent() {
         body: JSON.stringify(form),
       })
       const data = await res.json()
+      if (!res.ok) {
+        setError(data.error ?? `Error ${res.status}`)
+        setEstado('error')
+        return
+      }
       setResultado(data)
       setEstado('listo')
       router.refresh()
-    } catch {
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error de red')
       setEstado('error')
     }
   }
@@ -135,7 +144,8 @@ export default function BuscadorAgent() {
 
               {estado === 'error' && (
                 <div className="py-10 text-center">
-                  <p className="text-red-500 text-sm mb-3">Algo salió mal. Intentá de nuevo.</p>
+                  <p className="text-red-500 text-sm mb-1">Algo salió mal.</p>
+                  {error && <p className="text-slate-400 text-xs mb-3 break-words">{error}</p>}
                   <button onClick={() => setEstado('idle')} className="text-brand text-sm underline">
                     Reintentar
                   </button>
