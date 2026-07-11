@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { Prospecto, SECTORES } from '@/lib/types'
 import EstadoBadge from '@/components/EstadoBadge'
 import ProspectosClient from './ProspectosClient'
+import BuscadorAgent from './BuscadorAgent'
 import Link from 'next/link'
 
 function vencido(fecha: string | null) {
@@ -52,7 +53,10 @@ export default async function ProspectosPage({
             <h1 className="text-navy text-xl font-bold">Prospectos</h1>
             <p className="text-slate-500 text-sm mt-0.5">Fase 1 — Outreach y validación</p>
           </div>
-          <ProspectosClient accion="nuevo" />
+          <div className="flex items-center gap-2">
+            <BuscadorAgent />
+            <ProspectosClient accion="nuevo" />
+          </div>
         </div>
 
         {/* Stats */}
