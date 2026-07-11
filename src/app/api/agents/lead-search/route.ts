@@ -50,6 +50,7 @@ async function saveProspecto(p: {
   email?: string
   telefono?: string
   linkedin_url?: string
+  sitio_web?: string
   notas?: string
 }): Promise<string> {
   const { data: existing } = await supabase
@@ -65,13 +66,11 @@ async function saveProspecto(p: {
     sector: p.sector,
     cargo: p.cargo || null,
     email: p.email || null,
+    telefono: p.telefono || null,
     linkedin_url: p.linkedin_url || null,
+    sitio_web: p.sitio_web || null,
     canal: 'otro',
-    notas: p.notas
-      ? `${p.notas}${p.telefono ? ` | Tel: ${p.telefono}` : ''}`
-      : p.telefono
-        ? `Tel: ${p.telefono}`
-        : 'Encontrado por agente IA',
+    notas: p.notas || 'Encontrado por agente IA',
   })
   if (error) return `ERROR: ${error.message}`
   return `GUARDADO: ${p.nombre} — ${p.empresa}`
@@ -82,26 +81,15 @@ async function updateContacto(p: {
   linkedin_url?: string
   email?: string
   telefono?: string
+  sitio_web?: string
 }): Promise<string> {
   const update: Record<string, string> = {}
   if (p.linkedin_url) update.linkedin_url = p.linkedin_url
   if (p.email) update.email = p.email
+  if (p.telefono) update.telefono = p.telefono
+  if (p.sitio_web) update.sitio_web = p.sitio_web
 
-  if (Object.keys(update).length === 0 && !p.telefono) return 'Nada que actualizar'
-
-  // Teléfono va en notas si no hay campo dedicado
-  if (p.telefono) {
-    const { data: existing } = await supabase
-      .from('prospectos')
-      .select('notas')
-      .ilike('empresa', `%${p.empresa}%`)
-      .maybeSingle()
-    if (existing) {
-      update.notas = existing.notas
-        ? `${existing.notas} | Tel: ${p.telefono}`
-        : `Tel: ${p.telefono}`
-    }
-  }
+  if (Object.keys(update).length === 0) return 'Nada que actualizar'
 
   const { error } = await supabase
     .from('prospectos')
@@ -153,6 +141,7 @@ export async function POST(req: Request) {
           email: { type: 'string' },
           telefono: { type: 'string' },
           linkedin_url: { type: 'string' },
+          sitio_web: { type: 'string' },
           notas: { type: 'string' },
         },
         required: ['nombre', 'empresa', 'sector'],
@@ -160,7 +149,7 @@ export async function POST(req: Request) {
     },
     {
       name: 'update_contacto',
-      description: 'Agrega email, LinkedIn o teléfono a un prospecto ya guardado',
+      description: 'Agrega email, LinkedIn, teléfono o sitio web a un prospecto ya guardado',
       input_schema: {
         type: 'object' as const,
         properties: {
@@ -168,6 +157,7 @@ export async function POST(req: Request) {
           linkedin_url: { type: 'string' },
           email: { type: 'string' },
           telefono: { type: 'string' },
+          sitio_web: { type: 'string' },
         },
         required: ['empresa'],
       },

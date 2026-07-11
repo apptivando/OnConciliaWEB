@@ -7,6 +7,9 @@ create table if not exists public.prospectos (
   canal text default 'linkedin' check (canal in ('linkedin', 'email', 'referido', 'otro')),
   linkedin_url text,
   email text,
+  telefono text,
+  whatsapp text,
+  sitio_web text,
   estado text not null default 'por_contactar' check (
     estado in (
       'por_contactar',

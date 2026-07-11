@@ -3,6 +3,7 @@ import { Prospecto, SECTORES } from '@/lib/types'
 import EstadoBadge from '@/components/EstadoBadge'
 import ProspectosClient from './ProspectosClient'
 import BuscadorAgent from './BuscadorAgent'
+import EnriquecerAgent from './EnriquecerAgent'
 import Link from 'next/link'
 
 function vencido(fecha: string | null) {
@@ -54,6 +55,7 @@ export default async function ProspectosPage({
             <p className="text-slate-500 text-sm mt-0.5">Fase 1 — Outreach y validación</p>
           </div>
           <div className="flex items-center gap-2">
+            <EnriquecerAgent />
             <BuscadorAgent />
             <ProspectosClient accion="nuevo" />
           </div>

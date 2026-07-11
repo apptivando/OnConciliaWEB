@@ -23,6 +23,9 @@ export interface Prospecto {
   canal: Canal
   linkedin_url: string | null
   email: string | null
+  telefono: string | null
+  whatsapp: string | null
+  sitio_web: string | null
   estado: EstadoProspecto
   proxima_accion: string | null
   fecha_proxima_accion: string | null

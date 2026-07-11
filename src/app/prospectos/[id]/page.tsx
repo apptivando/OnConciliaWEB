@@ -62,7 +62,7 @@ export default async function FichaPage({ params }: { params: { id: string } }) 
               )}
             </div>
 
-            {(p.linkedin_url || p.email) && (
+            {(p.linkedin_url || p.email || p.telefono || p.whatsapp || p.sitio_web) && (
               <div className="mt-3 pt-3 border-t border-slate-100 flex flex-col gap-1.5">
                 {p.linkedin_url && (
                   <a href={p.linkedin_url.startsWith('http') ? p.linkedin_url : `https://${p.linkedin_url}`}
@@ -74,6 +74,22 @@ export default async function FichaPage({ params }: { params: { id: string } }) 
                 {p.email && (
                   <a href={`mailto:${p.email}`} className="text-brand text-xs hover:underline">
                     → {p.email}
+                  </a>
+                )}
+                {p.whatsapp && (
+                  <a href={`https://wa.me/${p.whatsapp}`} target="_blank" rel="noopener noreferrer"
+                    className="text-brand text-xs hover:underline">
+                    → WhatsApp {p.whatsapp}
+                  </a>
+                )}
+                {p.telefono && (
+                  <span className="text-slate-500 text-xs">☎ {p.telefono}</span>
+                )}
+                {p.sitio_web && (
+                  <a href={p.sitio_web.startsWith('http') ? p.sitio_web : `https://${p.sitio_web}`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="text-brand text-xs hover:underline truncate">
+                    → {p.sitio_web}
                   </a>
                 )}
               </div>
