@@ -176,50 +176,34 @@ export async function POST(req: Request) {
 
   const systemPrompt = `Sos un agente de prospección para OnConcilia (SaaS de conciliación bancaria, Argentina).
 
-OBJETIVO: encontrar la mayor cantidad posible de ${SECTOR_LABELS[sector] ?? sector} en ${ciudad}. Meta mínima: 40 prospectos. No te detengas hasta agotar las fuentes.
+OBJETIVO: encontrar ${SECTOR_LABELS[sector] ?? sector} en ${ciudad}. Meta: 15-20 prospectos. Esta corrida tiene un tiempo límite corto, así que priorizá volumen de guardado por sobre profundidad de investigación por prospecto.
 
-FASE 1 — BÚSQUEDA MASIVA (hacé TODAS estas búsquedas, una por una):
-Búsquedas en Google (web_search):
-1. "estudios contables ${ciudad}"
+FASE 1 — BÚSQUEDA (hacé estas búsquedas, una por una, sin repetir):
+Maps (maps_search) — priorizalas primero, traen teléfono y dirección directo:
+1. "estudio contable ${ciudad}"
 2. "contador público ${ciudad}"
-3. "estudio contable ${ciudad} Entre Ríos" (o la provincia que corresponda)
-4. "asesor impositivo ${ciudad}"
-5. "auditor contable ${ciudad}"
-6. "CPCE ${ciudad}" y "consejo profesional ciencias económicas ${ciudad}"
-7. site:cpce-er.org.ar (o el consejo profesional de la provincia)
-8. "contador ${ciudad}" site:linkedin.com
-9. "estudio contable ${ciudad}" site:facebook.com
-10. "contador público matrícula ${ciudad}"
-11. páginas amarillas contador ${ciudad}
-12. Infobae / La Nación / diarios locales con listados de profesionales
 
-Búsquedas en Maps (maps_search) — MUY IMPORTANTES, traen teléfonos:
-13. "estudio contable ${ciudad}"
-14. "contador público ${ciudad}"
-15. "asesoría impositiva ${ciudad}"
-16. "auditoría ${ciudad}"
+Google (web_search):
+3. "estudios contables ${ciudad}"
+4. "contador público ${ciudad}"
+5. "asesor impositivo ${ciudad}"
+6. "contador ${ciudad}" site:linkedin.com
 
 FASE 2 — GUARDAR TODO:
 - Guardá CADA resultado encontrado, aunque solo tengas nombre y empresa
 - Si el resultado de Maps tiene teléfono, incluilo en el campo telefono
-- Si encontrás email en el sitio web o snippet, incluilo
-- No te preocupes si falta información — guardá lo que haya
-
-FASE 3 — SEGUNDA PASADA DE CONTACTO:
-Para cada prospecto guardado sin email ni LinkedIn, hacé una búsqueda específica:
-- web_search: "[nombre empresa] LinkedIn"
-- web_search: "[nombre empresa] contacto email ${ciudad}"
-- Si encontrás algo, actualizalo con update_contacto
+- Si encontrás email o LinkedIn en el sitio web o snippet, incluilo
+- No hagas búsquedas adicionales de contacto por prospecto — guardá lo que haya y seguí con el próximo
 
 REGLAS:
 - No guardes duplicados (si ya existe la empresa, el sistema lo rechaza)
 - Usá save_prospecto con nombre = nombre del contador/responsable si lo sabés, o el nombre del estudio si no
-- Continuá hasta haber agotado todas las fuentes listadas arriba`
+- Cuando termines las 6 búsquedas de la Fase 1, cerrá con un resumen breve — no seguí buscando más`
 
   const messages: Anthropic.MessageParam[] = [
     {
       role: 'user',
-      content: `Buscá ${SECTOR_LABELS[sector] ?? sector} en ${ciudad}. Hacé TODAS las búsquedas listadas en el sistema. Meta: 40+ prospectos.`,
+      content: `Buscá ${SECTOR_LABELS[sector] ?? sector} en ${ciudad}. Hacé las 6 búsquedas listadas en el sistema. Meta: 15-20 prospectos.`,
     },
   ]
 
@@ -234,7 +218,7 @@ REGLAS:
   const guardados: string[] = []
   let iteraciones = 0
 
-  while (response.stop_reason === 'tool_use' && iteraciones < 40) {
+  while (response.stop_reason === 'tool_use' && iteraciones < 10) {
     iteraciones++
     const toolUses = response.content.filter(
       (b): b is Anthropic.ToolUseBlock => b.type === 'tool_use'
