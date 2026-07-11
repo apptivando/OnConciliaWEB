@@ -11,8 +11,10 @@ export default function EnriquecerAgent() {
   const [estado, setEstado] = useState<Estado>('idle')
   const [error, setError] = useState('')
   const [resultado, setResultado] = useState<{
+    procesados_contacto: number
     enriquecidos: number
     descartados: number
+    procesados_scrape: number
     con_datos_nuevos: number
   } | null>(null)
 
@@ -45,8 +47,10 @@ export default function EnriquecerAgent() {
       }
 
       setResultado({
+        procesados_contacto: dataContacto.procesados ?? 0,
         enriquecidos: dataContacto.enriquecidos ?? 0,
         descartados: dataContacto.descartados ?? 0,
+        procesados_scrape: dataScrape.procesados ?? 0,
         con_datos_nuevos: dataScrape.con_datos_nuevos ?? 0,
       })
       setEstado('listo')
@@ -110,20 +114,24 @@ export default function EnriquecerAgent() {
                   <div className="w-14 h-14 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center text-2xl mx-auto mb-4">
                     ✓
                   </div>
-                  <div className="grid grid-cols-3 gap-2 text-center mb-4">
+                  <div className="grid grid-cols-3 gap-2 text-center mb-2">
                     <div>
                       <p className="text-navy font-bold text-xl">{resultado.enriquecidos}</p>
                       <p className="text-slate-500 text-xs">con datos nuevos</p>
                     </div>
                     <div>
                       <p className="text-navy font-bold text-xl">{resultado.con_datos_nuevos}</p>
-                      <p className="text-slate-500 text-xs">sitios scrapeados</p>
+                      <p className="text-slate-500 text-xs">sitios con email/whatsapp</p>
                     </div>
                     <div>
                       <p className="text-navy font-bold text-xl">{resultado.descartados}</p>
                       <p className="text-slate-500 text-xs">descartados</p>
                     </div>
                   </div>
+                  <p className="text-slate-400 text-xs mb-4">
+                    {resultado.procesados_contacto} candidatos revisados en la búsqueda de contacto ·{' '}
+                    {resultado.procesados_scrape} sitios scrapeados
+                  </p>
                   <button
                     onClick={cerrar}
                     className="bg-brand hover:bg-brand-hover text-white font-semibold px-6 py-2 rounded-xl text-sm transition"

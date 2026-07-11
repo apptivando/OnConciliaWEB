@@ -9,6 +9,26 @@ const supabase = createClient(
 
 const DIRECTORIOS = ['linkedin.com', 'facebook.com', 'instagram.com', 'paginasamarillas', 'guiatelefonica', 'cylex', 'maps.google', 'yelp.com']
 
+const STOPWORDS = new Set([
+  'estudio', 'estudios', 'contable', 'contables', 'contador', 'contadores', 'publico', 'publica',
+  'asociados', 'asociado', 'asesoria', 'asesoramiento', 'impositiva', 'impositivo', 'auditoria',
+  'auditor', 'auditores', 'sociedad', 'anonima', 'compania', 'consultora', 'profesional',
+  'ciencias', 'economicas', 'consejo', 'cpce', 'sa', 'srl', 'cia', 'and', 'the',
+])
+
+function normalizar(s: string): string {
+  return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+}
+
+// Palabras que realmente identifican a ESTA empresa (típicamente apellidos),
+// descartando términos genéricos del rubro que matchean con cualquier resultado.
+function tokensDistintivos(empresa: string): string[] {
+  return normalizar(empresa)
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .split(/\s+/)
+    .filter((w) => w.length >= 4 && !STOPWORDS.has(w))
+}
+
 function esSitioValido(link: string): boolean {
   try {
     const host = new URL(link).hostname.replace(/^www\./, '')
@@ -23,6 +43,11 @@ async function buscarContacto(empresa: string): Promise<{
   linkedin_url?: string
   sitio_web?: string
 }> {
+  const tokens = tokensDistintivos(empresa)
+  // Sin apellido/nombre distintivo (ej. "Estudio Contable S.A." a secas) no hay
+  // forma confiable de verificar que un resultado sea de esta empresa puntual.
+  if (tokens.length === 0) return {}
+
   const res = await fetch('https://google.serper.dev/search', {
     method: 'POST',
     headers: { 'X-API-KEY': process.env.SERPER_API_KEY!, 'Content-Type': 'application/json' },
@@ -31,11 +56,17 @@ async function buscarContacto(empresa: string): Promise<{
   const data = await res.json()
   const organic: Array<{ title: string; snippet: string; link: string }> = data.organic ?? []
 
-  const texto = organic.map((r) => `${r.title} ${r.snippet}`).join(' ')
+  const coincide = (r: { title: string; snippet: string; link: string }) => {
+    const texto = normalizar(`${r.title} ${r.snippet} ${r.link}`)
+    return tokens.some((t) => texto.includes(t))
+  }
+  const relevantes = organic.filter(coincide)
+
+  const texto = relevantes.map((r) => `${r.title} ${r.snippet}`).join(' ')
   const emailMatch = texto.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/)
 
-  const linkedin = organic.find((r) => r.link.includes('linkedin.com'))
-  const sitio = organic.find((r) => esSitioValido(r.link))
+  const linkedin = relevantes.find((r) => r.link.includes('linkedin.com'))
+  const sitio = relevantes.find((r) => esSitioValido(r.link))
 
   return {
     email: emailMatch?.[0],
