@@ -9,6 +9,10 @@ const supabase = createClient(
 
 const DIRECTORIOS = ['linkedin.com', 'facebook.com', 'instagram.com', 'paginasamarillas', 'guiatelefonica', 'cylex', 'maps.google', 'yelp.com']
 
+// Rutas típicas de guías/directorios de negocios (hay decenas en Argentina,
+// mantener una lista de dominios es una carrera perdida — esto generaliza mejor).
+const RUTAS_DIRECTORIO = ['/pagina/', '/paginas/', '/listado/', '/directorio/', '/empresa/', '/empresas/', '/negocio/', '/negocios/', '/ficha/', '/fichas/', '/detalle/', '/local/', '/comercio/', '/comercios/', '/guia/', '/perfil/']
+
 const STOPWORDS = new Set([
   'estudio', 'estudios', 'contable', 'contables', 'contador', 'contadores', 'publico', 'publica',
   'asociados', 'asociado', 'asesoria', 'asesoramiento', 'impositiva', 'impositivo', 'auditoria',
@@ -29,10 +33,21 @@ function tokensDistintivos(empresa: string): string[] {
     .filter((w) => w.length >= 4 && !STOPWORDS.has(w))
 }
 
-function esSitioValido(link: string): boolean {
+// Un sitio "propio" es uno donde el dominio mismo lleva el nombre de la
+// empresa (fuerte), o que es la portada del sitio sin sub-rutas de listado
+// (débil pero razonable). Cualquier otra cosa suele ser una guía de negocios
+// que repite los mismos datos que ya tenemos y no aporta nada al scrapear.
+function esSitioPropio(link: string, tokens: string[]): boolean {
   try {
-    const host = new URL(link).hostname.replace(/^www\./, '')
-    return !DIRECTORIOS.some((d) => host.includes(d))
+    const u = new URL(link)
+    const host = normalizar(u.hostname.replace(/^www\./, ''))
+    if (DIRECTORIOS.some((d) => host.includes(d))) return false
+    if (RUTAS_DIRECTORIO.some((r) => u.pathname.toLowerCase().includes(r))) return false
+
+    if (tokens.some((t) => host.includes(t))) return true
+
+    const segmentos = u.pathname.split('/').filter(Boolean)
+    return segmentos.length === 0
   } catch {
     return false
   }
@@ -66,7 +81,7 @@ async function buscarContacto(empresa: string): Promise<{
   const emailMatch = texto.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/)
 
   const linkedin = relevantes.find((r) => r.link.includes('linkedin.com'))
-  const sitio = relevantes.find((r) => esSitioValido(r.link))
+  const sitio = relevantes.find((r) => esSitioPropio(r.link, tokens))
 
   return {
     email: emailMatch?.[0],
