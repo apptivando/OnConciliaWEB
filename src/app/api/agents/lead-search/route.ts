@@ -17,7 +17,7 @@ async function searchWeb(query: string): Promise<string> {
   })
   const data = await res.json()
   return JSON.stringify(
-    (data.organic ?? []).slice(0, 15).map((r: any) => ({
+    (data.organic ?? []).slice(0, 15).map((r: { title: string; snippet: string; link: string }) => ({
       title: r.title,
       snippet: r.snippet,
       link: r.link,
@@ -33,7 +33,7 @@ async function searchMaps(query: string): Promise<string> {
   })
   const data = await res.json()
   return JSON.stringify(
-    (data.places ?? []).slice(0, 20).map((r: any) => ({
+    (data.places ?? []).slice(0, 20).map((r: { title: string; address: string; phoneNumber?: string; website?: string }) => ({
       nombre: r.title,
       direccion: r.address,
       telefono: r.phoneNumber ?? null,
@@ -242,7 +242,7 @@ REGLAS:
 
     for (const toolUse of toolUses) {
       let result: string
-      const input = toolUse.input as any
+      const input = toolUse.input as Record<string, string>
 
       switch (toolUse.name) {
         case 'web_search':
@@ -252,11 +252,11 @@ REGLAS:
           result = await searchMaps(input.query)
           break
         case 'save_prospecto':
-          result = await saveProspecto(input)
+          result = await saveProspecto(input as unknown as Parameters<typeof saveProspecto>[0])
           if (result.startsWith('GUARDADO:')) guardados.push(result)
           break
         case 'update_contacto':
-          result = await updateContacto(input)
+          result = await updateContacto(input as unknown as Parameters<typeof updateContacto>[0])
           break
         default:
           result = 'Tool no reconocida'
