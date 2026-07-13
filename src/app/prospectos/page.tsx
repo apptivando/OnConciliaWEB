@@ -5,6 +5,7 @@ import ProspectosClient from './ProspectosClient'
 import BuscadorAgent from './BuscadorAgent'
 import EnriquecerAgent from './EnriquecerAgent'
 import Link from 'next/link'
+import LogoutButton from '../login/LogoutButton'
 
 function vencido(fecha: string | null) {
   if (!fecha) return false
@@ -44,7 +45,10 @@ export default async function ProspectosPage({
         <Link href="/" className="text-white font-bold text-lg tracking-tight">
           On<span className="text-accent">Concilia</span>
         </Link>
-        <span className="text-slate-400 text-sm">CRM de Prospectos</span>
+        <div className="flex items-center gap-4">
+          <span className="text-slate-400 text-sm">CRM de Prospectos</span>
+          <LogoutButton />
+        </div>
       </nav>
 
       <div className="max-w-5xl mx-auto px-4 py-8">

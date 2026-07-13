@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import Link from 'next/link'
 import LeadsClient from './LeadsClient'
+import LogoutButton from '../login/LogoutButton'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -35,6 +36,7 @@ export default async function LeadsPage() {
             CRM
           </Link>
           <span className="text-slate-300 text-sm font-medium">Leads</span>
+          <LogoutButton />
         </div>
       </nav>
 
