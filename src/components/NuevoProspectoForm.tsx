@@ -71,6 +71,7 @@ export default function NuevoProspectoForm({ onClose }: { onClose: () => void })
                 <option value="pyme">Pyme</option>
                 <option value="estudio">Estudio contable</option>
                 <option value="franquicia">Franquicia</option>
+                <option value="comercio">Comercio</option>
               </select>
             </div>
             <div>

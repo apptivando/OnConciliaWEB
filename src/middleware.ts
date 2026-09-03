@@ -2,7 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 const PROTECTED_PAGES = ['/prospectos', '/leads', '/cola']
-const PROTECTED_API = ['/api/agents', '/api/outreach']
+const PROTECTED_API = ['/api/agents', '/api/outreach', '/api/prospects']
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -70,5 +70,6 @@ export const config = {
     '/cola/:path*',
     '/api/agents/:path*',
     '/api/outreach/:path*',
+    '/api/prospects/:path*',
   ],
 }

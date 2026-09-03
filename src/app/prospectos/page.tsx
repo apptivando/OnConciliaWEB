@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { Prospecto, SECTORES } from '@/lib/types'
+import { Prospecto, SECTORES, PRIORIDAD_CONTACTO } from '@/lib/types'
 import EstadoBadge from '@/components/EstadoBadge'
 import ProspectosClient from './ProspectosClient'
 import BuscadorAgent from './BuscadorAgent'
@@ -86,7 +86,7 @@ export default async function ProspectosPage({
             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${!searchParams.sector && !searchParams.estado ? 'bg-navy text-white' : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300'}`}>
             Todos
           </Link>
-          {(['pyme', 'estudio', 'franquicia'] as const).map(s => (
+          {(['comercio', 'pyme', 'estudio', 'franquicia'] as const).map(s => (
             <Link key={s} href={`/prospectos?sector=${s}`}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${searchParams.sector === s ? 'bg-navy text-white' : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300'}`}>
               {SECTORES[s]}
@@ -126,7 +126,21 @@ export default async function ProspectosPage({
                   <tr key={p.id} className="hover:bg-slate-50 transition">
                     <td className="px-4 py-3">
                       <p className="font-medium text-navy">{p.nombre}</p>
-                      <p className="text-slate-400 text-xs">{p.empresa}</p>
+                      {p.empresa !== p.nombre && (
+                        <p className="text-slate-400 text-xs">{p.empresa}</p>
+                      )}
+                      {p.origen === 'busqueda' && (
+                        <div className="flex items-center gap-1.5 mt-1">
+                          {p.prioridad_contacto != null && (
+                            <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${PRIORIDAD_CONTACTO[p.prioridad_contacto]?.color}`}>
+                              {PRIORIDAD_CONTACTO[p.prioridad_contacto]?.label}
+                            </span>
+                          )}
+                          {p.localidad && (
+                            <span className="text-slate-400 text-[10px]">{p.localidad}</span>
+                          )}
+                        </div>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <span className="text-slate-600 text-xs">{SECTORES[p.sector]}</span>

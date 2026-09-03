@@ -11,11 +11,10 @@ export default function EnriquecerAgent() {
   const [estado, setEstado] = useState<Estado>('idle')
   const [error, setError] = useState('')
   const [resultado, setResultado] = useState<{
-    procesados_contacto: number
-    enriquecidos: number
-    descartados: number
-    procesados_scrape: number
-    con_datos_nuevos: number
+    procesados: number
+    con_email: number
+    con_whatsapp: number
+    con_telefono: number
   } | null>(null)
 
   function cerrar() {
@@ -30,29 +29,14 @@ export default function EnriquecerAgent() {
     setResultado(null)
     setError('')
     try {
-      const resContacto = await fetch('/api/agents/enrich-contacto', { method: 'POST' })
-      const dataContacto = await resContacto.json()
-      if (!resContacto.ok) {
-        setError(dataContacto.error ?? `Error ${resContacto.status}`)
+      const res = await fetch('/api/prospects/enrich', { method: 'POST' })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error ?? `Error ${res.status}`)
         setEstado('error')
         return
       }
-
-      const resScrape = await fetch('/api/agents/scrape-sitios', { method: 'POST' })
-      const dataScrape = await resScrape.json()
-      if (!resScrape.ok) {
-        setError(dataScrape.error ?? `Error ${resScrape.status}`)
-        setEstado('error')
-        return
-      }
-
-      setResultado({
-        procesados_contacto: dataContacto.procesados ?? 0,
-        enriquecidos: dataContacto.enriquecidos ?? 0,
-        descartados: dataContacto.descartados ?? 0,
-        procesados_scrape: dataScrape.procesados ?? 0,
-        con_datos_nuevos: dataScrape.con_datos_nuevos ?? 0,
-      })
+      setResultado(data)
       setEstado('listo')
       router.refresh()
     } catch (err) {
@@ -77,7 +61,7 @@ export default function EnriquecerAgent() {
               <div>
                 <h2 className="font-semibold text-navy text-base">Enriquecer contactos</h2>
                 <p className="text-slate-500 text-xs mt-0.5">
-                  Busca sitio web/email para prospectos con solo teléfono, y scrapea los sitios encontrados en busca de WhatsApp o email
+                  Visita el sitio web de los prospectos con teléfono solo y busca email o WhatsApp
                 </p>
               </div>
               <button onClick={cerrar} className="text-slate-400 hover:text-slate-600 text-xl leading-none">
@@ -89,8 +73,8 @@ export default function EnriquecerAgent() {
               {estado === 'idle' && (
                 <div className="py-4 text-center">
                   <p className="text-slate-500 text-xs mb-4 leading-relaxed">
-                    Procesa hasta 12 prospectos con solo teléfono y hasta 15 sitios pendientes de scrapear por corrida.
-                    Los que no tengan más datos que el teléfono quedan como &quot;Descartado&quot;.
+                    Procesa hasta 12 prospectos con sitio web pendientes de visitar por corrida.
+                    Los que no tienen sitio quedan como están — hay que resolverlos a mano.
                   </p>
                   <button
                     onClick={enriquecer}
@@ -104,7 +88,7 @@ export default function EnriquecerAgent() {
               {estado === 'buscando' && (
                 <div className="py-10 text-center">
                   <div className="w-10 h-10 border-2 border-brand border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                  <p className="text-navy font-medium text-sm">Buscando y scrapeando...</p>
+                  <p className="text-navy font-medium text-sm">Visitando sitios...</p>
                   <p className="text-slate-400 text-xs mt-1">Puede tardar hasta un minuto</p>
                 </div>
               )}
@@ -116,21 +100,20 @@ export default function EnriquecerAgent() {
                   </div>
                   <div className="grid grid-cols-3 gap-2 text-center mb-2">
                     <div>
-                      <p className="text-navy font-bold text-xl">{resultado.enriquecidos}</p>
-                      <p className="text-slate-500 text-xs">con datos nuevos</p>
+                      <p className="text-navy font-bold text-xl">{resultado.con_whatsapp}</p>
+                      <p className="text-slate-500 text-xs">con WhatsApp</p>
                     </div>
                     <div>
-                      <p className="text-navy font-bold text-xl">{resultado.con_datos_nuevos}</p>
-                      <p className="text-slate-500 text-xs">sitios con email/whatsapp</p>
+                      <p className="text-navy font-bold text-xl">{resultado.con_email}</p>
+                      <p className="text-slate-500 text-xs">con email</p>
                     </div>
                     <div>
-                      <p className="text-navy font-bold text-xl">{resultado.descartados}</p>
-                      <p className="text-slate-500 text-xs">descartados</p>
+                      <p className="text-navy font-bold text-xl">{resultado.con_telefono}</p>
+                      <p className="text-slate-500 text-xs">con teléfono nuevo</p>
                     </div>
                   </div>
                   <p className="text-slate-400 text-xs mb-4">
-                    {resultado.procesados_contacto} candidatos revisados en la búsqueda de contacto ·{' '}
-                    {resultado.procesados_scrape} sitios scrapeados
+                    {resultado.procesados} sitios visitados
                   </p>
                   <button
                     onClick={cerrar}

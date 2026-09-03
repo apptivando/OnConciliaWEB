@@ -110,6 +110,38 @@ Guillermo
 OnConcilia
 guillermo@onconcilia.com`,
   },
+
+  // Primer borrador (04/09/2026) — a diferencia de los otros tres segmentos,
+  // estos comercios salen de una búsqueda en Google Places, no de una
+  // conexión en LinkedIn: el tono es de email frío, no de seguimiento. Van a
+  // reemplazarse por el generador de copy por prompt (Bloque 4 del plan).
+  comercio: {
+    1: ({ nombre, empresa }) =>
+      `Hola${nombre ? ` ${nombre}` : ''}, te escribo de OnConcilia. Ayudamos a comercios como ${empresa} a cerrar la caja del día cruzando el banco y Mercado Pago automáticamente, en vez de hacerlo a mano en una planilla. ¿Es algo que hoy les lleva tiempo?`,
+
+    2: ({ nombre }) =>
+      `Hola${nombre ? ` ${nombre}` : ''},
+
+Te cuento un poco más sobre OnConcilia: subís el extracto del banco (y el de Mercado Pago si vendés por QR o link de pago) y el sistema cruza todo solo, categoriza los movimientos y te muestra lo que falta revisar — sin recorrer fila por fila.
+
+Estamos en beta y buscamos los primeros comercios para probarlo sin costo, a cambio de feedback real sobre lo que funciona y lo que no.
+
+¿Te sirve que te lo muestre en una llamada corta esta semana?`,
+
+    3: ({ nombre, empresa }) =>
+      `Hola${nombre ? ` ${nombre}` : ''},
+
+Sigo la idea de mi mensaje anterior: en ${empresa}, entre el banco y Mercado Pago, cerrar la caja del día puede llevar bastante más tiempo del necesario.
+
+OnConcilia lo hace por vos: importa los extractos, los categoriza y te deja ver solo lo que necesita tu atención. Acceso gratuito para los primeros comercios de la beta, sin compromiso.
+
+¿Tenés 15 minutos esta semana para que te lo muestre?
+
+Saludos,
+Guillermo
+OnConcilia
+guillermo@onconcilia.com`,
+  },
 }
 
 export function generarMensaje(

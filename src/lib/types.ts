@@ -1,6 +1,13 @@
-export type Sector = 'pyme' | 'estudio' | 'franquicia'
-export type Canal = 'linkedin' | 'email' | 'referido' | 'otro'
+export type Sector = 'pyme' | 'estudio' | 'franquicia' | 'comercio'
+export type Canal = 'linkedin' | 'email' | 'whatsapp' | 'referido' | 'otro'
 export type TipoInteraccion = 'mensaje' | 'email' | 'llamada' | 'demo' | 'nota' | 'cambio_estado'
+export type OrigenProspecto = 'busqueda' | 'landing' | 'manual'
+
+export interface RedesProspecto {
+  instagram: string | null
+  facebook: string | null
+  linkedin: string | null
+}
 
 export type EstadoProspecto =
   | 'por_contactar'
@@ -34,6 +41,17 @@ export interface Prospecto {
   fecha_ultimo_contacto: string | null
   created_at: string
   updated_at: string
+  // Columnas del buscador con Google Places (migrate_prospectos_places.sql)
+  google_place_id: string | null
+  direccion: string | null
+  localidad: string | null
+  rating: number | null
+  reviews_count: number | null
+  prioridad_contacto: number | null
+  origen: OrigenProspecto
+  redes: RedesProspecto | null
+  enriquecido_en: string | null
+  intentos_enriquecimiento: number
 }
 
 export interface Interaccion {
@@ -64,6 +82,15 @@ export const SECTORES: Record<Sector, string> = {
   pyme:       'Pyme',
   estudio:    'Estudio contable',
   franquicia: 'Franquicia',
+  comercio:   'Comercio',
+}
+
+/** 1=WhatsApp confirmado, 2=email, 3=solo teléfono, 4=sin contacto. */
+export const PRIORIDAD_CONTACTO: Record<number, { label: string; color: string }> = {
+  1: { label: 'WhatsApp', color: 'bg-emerald-100 text-emerald-700' },
+  2: { label: 'Email',    color: 'bg-blue-100 text-blue-700' },
+  3: { label: 'Teléfono', color: 'bg-amber-100 text-amber-700' },
+  4: { label: 'Sin contacto', color: 'bg-slate-100 text-slate-500' },
 }
 
 export const ESTADOS_ORDEN: EstadoProspecto[] = [
