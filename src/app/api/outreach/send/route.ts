@@ -70,7 +70,8 @@ export async function POST(req: Request) {
         EMPRESA: p.empresa,
         LOCALIDAD: p.localidad ?? '',
         SECTOR: p.sector,
-        PRIORIDAD: p.prioridad_contacto ?? '',
+        // PRIORIDAD es numérico en Brevo — null, no '', cuando no hay valor.
+        PRIORIDAD: p.prioridad_contacto ?? null,
       },
     })
     if (nuevoId && !brevoContactId) brevoContactId = nuevoId
