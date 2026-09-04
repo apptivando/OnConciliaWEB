@@ -2,6 +2,7 @@ export type Sector = 'pyme' | 'estudio' | 'franquicia' | 'comercio'
 export type Canal = 'linkedin' | 'email' | 'whatsapp' | 'referido' | 'otro'
 export type TipoInteraccion = 'mensaje' | 'email' | 'llamada' | 'demo' | 'nota' | 'cambio_estado'
 export type OrigenProspecto = 'busqueda' | 'landing' | 'manual'
+export type EmailEstado = 'activo' | 'rebotado' | 'baja' | 'spam'
 
 export interface RedesProspecto {
   instagram: string | null
@@ -52,6 +53,12 @@ export interface Prospecto {
   redes: RedesProspecto | null
   enriquecido_en: string | null
   intentos_enriquecimiento: number
+  // Columnas del envío 1:1 vía Brevo (migrate_prospectos_brevo.sql)
+  brevo_contact_id: string | null
+  email_estado: EmailEstado
+  ultimo_envio_en: string | null
+  baja_en: string | null
+  baja_motivo: string | null
 }
 
 export interface Interaccion {

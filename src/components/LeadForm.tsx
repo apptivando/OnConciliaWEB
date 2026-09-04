@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 
 type Estado = "idle" | "loading" | "success" | "error";
 
@@ -17,23 +16,25 @@ export default function LeadForm({ variant = "hero" }: { variant?: "hero" | "cta
     setEstado("loading");
     setErrorMsg("");
 
-    const supabase = createClient();
-    const { error } = await supabase.from("leads").insert({
-      email: email.toLowerCase().trim(),
-      fuente: variant === "hero" ? "landing_hero" : "landing_cta",
-    });
-
-    if (error) {
-      if (error.code === "23505") {
-        // Email duplicado — lo tratamos como éxito
+    try {
+      const res = await fetch("/api/leads/capture", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          fuente: variant === "hero" ? "landing_hero" : "landing_cta",
+        }),
+      });
+      if (res.ok) {
         setEstado("success");
+        setEmail("");
       } else {
         setErrorMsg("Algo salió mal. Intentá de nuevo.");
         setEstado("error");
       }
-    } else {
-      setEstado("success");
-      setEmail("");
+    } catch {
+      setErrorMsg("Algo salió mal. Intentá de nuevo.");
+      setEstado("error");
     }
   }
 
