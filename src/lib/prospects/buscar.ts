@@ -64,6 +64,7 @@ function placeToRow(place: PlaceResult, ciudad: string): Record<string, unknown>
     origen: "busqueda",
     google_place_id: place.id,
     direccion: place.address,
+    maps_url: place.mapsUrl,
     localidad: ciudad,
     rating: place.rating,
     reviews_count: place.reviewsCount,

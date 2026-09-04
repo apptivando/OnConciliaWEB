@@ -164,7 +164,7 @@ export default function ColaClient({ prospecto: p, mensajeInicial, canal }: Prop
             Buscar en LinkedIn
           </a>
           <a
-            href={`/prospectos/${p.id}`}
+            href={`/prospectos?cliente=${p.id}`}
             className="text-slate-400 hover:text-slate-600 text-xs px-2 py-2 rounded-lg transition"
           >
             Editar ficha →
