@@ -9,10 +9,12 @@ type Canal = 'email' | 'linkedin' | 'sin_contacto'
 interface Props {
   prospecto: Prospecto
   mensajeInicial: string
+  /** Asunto que se va a mandar (solo aplica a canal 'email'). */
+  asunto?: string
   canal: Canal
 }
 
-export default function ColaClient({ prospecto: p, mensajeInicial, canal }: Props) {
+export default function ColaClient({ prospecto: p, mensajeInicial, asunto, canal }: Props) {
   const router = useRouter()
   const [mensaje, setMensaje] = useState(mensajeInicial)
   const [estado, setEstado] = useState<'idle' | 'enviando' | 'enviado' | 'error'>('idle')
@@ -23,7 +25,7 @@ export default function ColaClient({ prospecto: p, mensajeInicial, canal }: Prop
     const res = await fetch('/api/outreach/send', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prospecto_id: p.id, canal, mensaje }),
+      body: JSON.stringify({ prospecto_id: p.id, canal, mensaje, asunto }),
     })
     if (res.ok) {
       setEstado('enviado')
@@ -83,6 +85,14 @@ export default function ColaClient({ prospecto: p, mensajeInicial, canal }: Prop
           )}
         </div>
       </div>
+
+      {/* Asunto (solo email, no editable acá — lo decide la variante A/B/C) */}
+      {canal === 'email' && asunto && (
+        <div className="mb-2">
+          <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Asunto</p>
+          <p className="text-xs text-slate-600 bg-slate-50 border border-slate-100 rounded-lg px-3 py-1.5">{asunto}</p>
+        </div>
+      )}
 
       {/* Mensaje editable (solo para email y LinkedIn) */}
       {canal !== 'sin_contacto' && (

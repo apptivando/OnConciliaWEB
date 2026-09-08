@@ -3,6 +3,7 @@ export type Canal = 'linkedin' | 'email' | 'whatsapp' | 'referido' | 'otro'
 export type TipoInteraccion = 'mensaje' | 'email' | 'llamada' | 'demo' | 'nota' | 'cambio_estado'
 export type OrigenProspecto = 'busqueda' | 'landing' | 'manual'
 export type EmailEstado = 'activo' | 'rebotado' | 'baja' | 'spam'
+export type VarianteAsunto = 'A' | 'B' | 'C'
 
 export interface RedesProspecto {
   instagram: string | null
@@ -60,6 +61,8 @@ export interface Prospecto {
   ultimo_envio_en: string | null
   baja_en: string | null
   baja_motivo: string | null
+  // A/B/C del asunto de email frío (migrate_prospectos_variante_asunto.sql)
+  variante_asunto: VarianteAsunto | null
 }
 
 export interface Interaccion {

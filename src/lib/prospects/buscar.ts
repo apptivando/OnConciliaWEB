@@ -28,7 +28,9 @@ export interface BuscarResultado {
   resumen: string;
 }
 
-function placeToRow(place: PlaceResult, ciudad: string): Record<string, unknown> | null {
+const VARIANTES_ASUNTO = ["A", "B", "C"] as const;
+
+function placeToRow(place: PlaceResult, ciudad: string, index: number): Record<string, unknown> | null {
   // Local cerrado permanentemente: no vale la pena trabajarlo.
   if (place.businessStatus === "CLOSED_PERMANENTLY") return null;
 
@@ -72,6 +74,9 @@ function placeToRow(place: PlaceResult, ciudad: string): Record<string, unknown>
     redes: tieneRedes ? redes : null,
     enriquecido_en: enriquecidoYa ? new Date().toISOString() : null,
     intentos_enriquecimiento: 0,
+    // A/B/C del email frío, rotando dentro de la tanda — reparte parejo sin
+    // necesitar un contador persistido entre búsquedas distintas.
+    variante_asunto: VARIANTES_ASUNTO[index % 3],
   };
 }
 
@@ -93,7 +98,9 @@ export async function buscarProspectos(
     throw new Error(`${err instanceof Error ? err.message : "búsqueda fallida"}${hint}`);
   }
 
-  const rows = results.map((p) => placeToRow(p, opts.ciudad)).filter((r): r is Record<string, unknown> => r !== null);
+  const rows = results
+    .map((p, i) => placeToRow(p, opts.ciudad, i))
+    .filter((r): r is Record<string, unknown> => r !== null);
   const descartados = results.length - rows.length;
 
   // Log de la búsqueda — control de gasto, no afecta el resultado si falla.

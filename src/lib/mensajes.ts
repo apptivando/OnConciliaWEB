@@ -1,10 +1,33 @@
-import { Sector } from './types'
+import { Sector, VarianteAsunto } from './types'
 
 interface TemplateVars {
   nombre: string
   empresa: string
   cargo?: string
+  localidad?: string
 }
+
+/** Nombres de comercio largos ("Gitana Plus Size - Peatonal Paraná") rompen
+ *  un asunto corto — se recorta antes de interpolar. */
+function acortarEmpresa(empresa: string): string {
+  return empresa.length > 28 ? `${empresa.slice(0, 28).trim()}…` : empresa
+}
+
+/**
+ * A/B/C del asunto de email frío a comercios. Tres ángulos distintos a
+ * propósito (no tres formas de decir lo mismo), para que el test compare algo
+ * real: dolor/pregunta, beneficio directo, curiosidad sin nombrar el problema.
+ * La variante la asigna `buscarProspectos` al momento de la búsqueda,
+ * rotando parejo entre las 3 — ver `prospectos.variante_asunto`.
+ */
+export const ASUNTOS_COMERCIO: Record<VarianteAsunto, (empresa: string) => string> = {
+  A: (empresa) => `${acortarEmpresa(empresa)}, ¿seguís cerrando la caja a mano?`,
+  B: (empresa) => `${acortarEmpresa(empresa)}: menos tiempo cerrando caja cada día`,
+  C: (empresa) => `Una idea rápida para ${acortarEmpresa(empresa)}`,
+}
+
+/** Asunto genérico para prospectos sin variante asignada (no vinieron de búsqueda). */
+export const ASUNTO_GENERICO = (nombre: string) => `${nombre}, ¿conversamos sobre OnConcilia?`
 
 type Templates = Record<Sector, Record<1 | 2 | 3, (v: TemplateVars) => string>>
 
@@ -111,13 +134,27 @@ OnConcilia
 guillermo@onconcilia.com`,
   },
 
-  // Primer borrador (04/09/2026) — a diferencia de los otros tres segmentos,
-  // estos comercios salen de una búsqueda en Google Places, no de una
-  // conexión en LinkedIn: el tono es de email frío, no de seguimiento. Van a
-  // reemplazarse por el generador de copy por prompt (Bloque 4 del plan).
+  // A diferencia de los otros tres segmentos, estos comercios salen de una
+  // búsqueda en Google Places, no de una conexión en LinkedIn: el tono es de
+  // email frío, no de seguimiento. El paso 1 es el único que usa /cola hoy —
+  // el asunto NO va acá, sale de `ASUNTOS_COMERCIO` según
+  // `prospecto.variante_asunto` (A/B/C, test en curso desde el 08/09/2026).
   comercio: {
-    1: ({ nombre, empresa }) =>
-      `Hola${nombre ? ` ${nombre}` : ''}, te escribo de OnConcilia. Ayudamos a comercios como ${empresa} a cerrar la caja del día cruzando el banco y Mercado Pago automáticamente, en vez de hacerlo a mano en una planilla. ¿Es algo que hoy les lleva tiempo?`,
+    1: ({ nombre, empresa, localidad }) =>
+      `Hola${nombre ? ` ${nombre}` : ''},
+
+Te escribo de OnConcilia. Vi que ${empresa} está en${localidad ? ` ${localidad}` : ' la zona'} y quería comentarte algo puntual: armamos una herramienta que cruza automáticamente el extracto de tu banco (y el de Mercado Pago, si cobrás por QR o link de pago) para que el cierre de caja no dependa de revisar todo a mano en una planilla.
+
+Categoriza los movimientos solo, y te deja ver únicamente lo que necesita tu atención.
+
+Estamos en beta — buscamos los primeros comercios para probarlo sin costo durante 60 días, a cambio de que nos cuentes qué te sirve y qué no.
+
+Si te interesa sumarte, respondé este mail y coordinamos 15 minutos para mostrártelo. Si no es el momento, avisame y no te vuelvo a escribir.
+
+Saludos,
+Guillermo
+OnConcilia
+guillermo@onconcilia.com`,
 
     2: ({ nombre }) =>
       `Hola${nombre ? ` ${nombre}` : ''},

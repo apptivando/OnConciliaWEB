@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { upsertContacto, enviarTransaccional } from '@/lib/brevo'
+import { ASUNTOS_COMERCIO, ASUNTO_GENERICO } from '@/lib/mensajes'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -80,14 +81,22 @@ export async function POST(req: Request) {
     })
     if (nuevoId && !brevoContactId) brevoContactId = nuevoId
 
+    // Autoritativo del lado del servidor — no se confía en un asunto que
+    // mande el cliente, aunque /cola ya lo muestre calculado igual para
+    // revisión. Único origen de verdad: prospecto.variante_asunto.
+    const subject =
+      p.sector === 'comercio' && p.variante_asunto
+        ? ASUNTOS_COMERCIO[p.variante_asunto as 'A' | 'B' | 'C'](p.empresa)
+        : ASUNTO_GENERICO(p.nombre.split(' ')[0])
+
     try {
       await enviarTransaccional({
         to: { email: p.email, name: p.nombre },
         sender: REMITENTE,
-        subject: `${p.nombre.split(' ')[0]}, ¿conversamos sobre OnConcilia?`,
+        subject,
         htmlContent: `<div style="font-family:system-ui,sans-serif;font-size:15px;line-height:1.7;color:#1e293b;white-space:pre-wrap">${mensaje.replace(/</g, '&lt;')}</div>`,
         textContent: mensaje,
-        tags: ['outreach-frio'],
+        tags: p.variante_asunto ? ['outreach-frio', `variante-${p.variante_asunto}`] : ['outreach-frio'],
       })
     } catch (err) {
       return Response.json({ error: err instanceof Error ? err.message : 'Error al enviar' }, { status: 500 })

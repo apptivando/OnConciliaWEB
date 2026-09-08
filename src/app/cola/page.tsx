@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { Prospecto, Sector } from '@/lib/types'
-import { generarMensaje } from '@/lib/mensajes'
+import { generarMensaje, ASUNTOS_COMERCIO, ASUNTO_GENERICO } from '@/lib/mensajes'
 import Link from 'next/link'
 import ColaClient from './ColaClient'
 
@@ -11,14 +11,32 @@ const supabase = createClient(
 
 export const revalidate = 0
 
+/** Vars del template. Para comercios `nombre` === `empresa` (Places no da el
+ *  nombre de una persona) — pasarlo igual generaría un saludo roto ("Hola
+ *  La," para "La Tienda"). Sin nombre de persona real, el saludo va genérico. */
+function templateVars(p: Prospecto) {
+  const esComercio = p.sector === 'comercio'
+  return {
+    nombre: esComercio ? '' : p.nombre.split(' ')[0],
+    empresa: p.empresa,
+    cargo: p.cargo ?? undefined,
+    localidad: p.localidad ?? undefined,
+  }
+}
+
 function mensajeEmail(p: Prospecto) {
-  const vars = { nombre: p.nombre.split(' ')[0], empresa: p.empresa, cargo: p.cargo ?? undefined }
-  return generarMensaje(p.sector as Sector, 1, vars)
+  return generarMensaje(p.sector as Sector, 1, templateVars(p))
 }
 
 function mensajeLinkedIn(p: Prospecto) {
-  const vars = { nombre: p.nombre.split(' ')[0], empresa: p.empresa, cargo: p.cargo ?? undefined }
-  return generarMensaje(p.sector as Sector, 1, vars)
+  return generarMensaje(p.sector as Sector, 1, templateVars(p))
+}
+
+function asuntoEmail(p: Prospecto): string {
+  if (p.sector === 'comercio' && p.variante_asunto) {
+    return ASUNTOS_COMERCIO[p.variante_asunto](p.empresa)
+  }
+  return ASUNTO_GENERICO(p.nombre.split(' ')[0])
 }
 
 export default async function ColaPage() {
@@ -79,7 +97,7 @@ export default async function ColaPage() {
             badgeColor="emerald"
           >
             {conEmail.map((p) => (
-              <ColaClient key={p.id} prospecto={p} mensajeInicial={mensajeEmail(p)} canal="email" />
+              <ColaClient key={p.id} prospecto={p} mensajeInicial={mensajeEmail(p)} asunto={asuntoEmail(p)} canal="email" />
             ))}
           </Section>
         )}
