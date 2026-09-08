@@ -6,8 +6,12 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-const REMITENTE = { email: 'guillermo@mkt.onconcilia.com', name: 'Guillermo de OnConcilia' }
-const REPLY_TO = { email: 'guillermo@onconcilia.com' }
+// El dominio autenticado en Brevo es onconcilia.com (la raíz), no
+// mkt.onconcilia.com — autenticar uno no autentica el otro. Se resignó el
+// aislamiento de reputación entre marketing y producto (opción B, intentada
+// y descartada el 04/09/2026: autenticar el subdominio aparte no terminó de
+// validar en Brevo).
+const REMITENTE = { email: 'guillermo@onconcilia.com', name: 'Guillermo de OnConcilia' }
 
 function inicioDeHoyAR(): string {
   // Mismo criterio que /saldos en el proyecto de la app: evita el bug UTC
@@ -80,7 +84,6 @@ export async function POST(req: Request) {
       await enviarTransaccional({
         to: { email: p.email, name: p.nombre },
         sender: REMITENTE,
-        replyTo: REPLY_TO,
         subject: `${p.nombre.split(' ')[0]}, ¿conversamos sobre OnConcilia?`,
         htmlContent: `<div style="font-family:system-ui,sans-serif;font-size:15px;line-height:1.7;color:#1e293b;white-space:pre-wrap">${mensaje.replace(/</g, '&lt;')}</div>`,
         textContent: mensaje,
