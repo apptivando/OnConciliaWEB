@@ -4,11 +4,12 @@ interface TemplateVars {
   nombre: string
   empresa: string
   cargo?: string
-  localidad?: string
 }
 
-/** Nombres de comercio largos ("Gitana Plus Size - Peatonal Paraná") rompen
- *  un asunto corto — se recorta antes de interpolar. */
+/** Nombres de comercio largos rompen un asunto corto — se recorta antes de
+ *  interpolar. `buscarProspectos` ya limpia el nombre al guardar (saca
+ *  calificadores de sucursal tipo "- Peatonal Paraná"), esto es una red de
+ *  seguridad extra, no la limpieza principal. */
 function acortarEmpresa(empresa: string): string {
   return empresa.length > 28 ? `${empresa.slice(0, 28).trim()}…` : empresa
 }
@@ -16,13 +17,18 @@ function acortarEmpresa(empresa: string): string {
 /**
  * A/B/C del asunto de email frío a comercios. Tres ángulos distintos a
  * propósito (no tres formas de decir lo mismo), para que el test compare algo
- * real: dolor/pregunta, beneficio directo, curiosidad sin nombrar el problema.
- * La variante la asigna `buscarProspectos` al momento de la búsqueda,
- * rotando parejo entre las 3 — ver `prospectos.variante_asunto`.
+ * real: dolor/pérdida concreta, beneficio directo, curiosidad sin nombrar el
+ * problema. La variante la asigna `buscarProspectos` al momento de la
+ * búsqueda, rotando parejo entre las 3 — ver `prospectos.variante_asunto`.
+ *
+ * Corregido 09/09/2026: la primera versión hablaba de "cerrar la caja", que
+ * es un problema de POS/retail — OnConcilia no hace eso, hace conciliación
+ * bancaria (cruzar el extracto del banco contra los registros propios). El
+ * gancho tiene que ser sobre el banco, no sobre la caja.
  */
 export const ASUNTOS_COMERCIO: Record<VarianteAsunto, (empresa: string) => string> = {
-  A: (empresa) => `${acortarEmpresa(empresa)}, ¿seguís cerrando la caja a mano?`,
-  B: (empresa) => `${acortarEmpresa(empresa)}: menos tiempo cerrando caja cada día`,
+  A: (empresa) => `${acortarEmpresa(empresa)}, ¿cuánto perdés con los movimientos del banco?`,
+  B: (empresa) => `${acortarEmpresa(empresa)}: conciliá el banco en minutos, no en horas`,
   C: (empresa) => `Una idea rápida para ${acortarEmpresa(empresa)}`,
 }
 
@@ -140,16 +146,16 @@ guillermo@onconcilia.com`,
   // el asunto NO va acá, sale de `ASUNTOS_COMERCIO` según
   // `prospecto.variante_asunto` (A/B/C, test en curso desde el 08/09/2026).
   comercio: {
-    1: ({ nombre, empresa, localidad }) =>
+    1: ({ nombre, empresa }) =>
       `Hola${nombre ? ` ${nombre}` : ''},
 
-Te escribo de OnConcilia. Vi que ${empresa} está en${localidad ? ` ${localidad}` : ' la zona'} y quería comentarte algo puntual: armamos una herramienta que cruza automáticamente el extracto de tu banco (y el de Mercado Pago, si cobrás por QR o link de pago) para que el cierre de caja no dependa de revisar todo a mano en una planilla.
+¿Cuánto perdés por no revisar bien los movimientos del banco? Entre comisiones que pasan sin que nadie las mire, movimientos que no cuadran con lo que tenés anotado y errores que se descubren semanas después, conciliar el banco a mano es un problema que crece con cada cuenta que sumás.
 
-Categoriza los movimientos solo, y te deja ver únicamente lo que necesita tu atención.
+Armamos OnConcilia para resolver justo eso: cruza automáticamente el extracto de ${empresa} (y el de Mercado Pago, si cobrás por QR o link de pago) contra tus movimientos, categoriza todo solo, y te deja ver únicamente lo que necesita tu atención.
 
 Estamos en beta — buscamos los primeros comercios para probarlo sin costo durante 60 días, a cambio de que nos cuentes qué te sirve y qué no.
 
-Si te interesa sumarte, respondé este mail y coordinamos 15 minutos para mostrártelo. Si no es el momento, avisame y no te vuelvo a escribir.
+¿Te interesa sumarte? Respondé este mail y coordinamos 15 minutos esta semana para mostrártelo. Si no es el momento, avisame y no te vuelvo a escribir.
 
 Saludos,
 Guillermo

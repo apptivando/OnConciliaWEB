@@ -30,6 +30,23 @@ export interface BuscarResultado {
 
 const VARIANTES_ASUNTO = ["A", "B", "C"] as const;
 
+/**
+ * Nombre comercial limpio. Google Places suele agregar un calificador de
+ * sucursal después de un separador — "Gitana Plus Size - Peatonal Paraná",
+ * "Ferretería Vial (Sucursal Centro)" — para distinguir locales de una misma
+ * cadena. Se corta ahí: mismo criterio que los extractores de concepto
+ * bancario del otro proyecto (cortar en " - ", quedarse con la primera
+ * parte) — la dirección (`direccion`) ya diferencia el local, no hace falta
+ * repetirlo en el nombre. Heurística, no perfecta: un nombre real con guión
+ * ("Todo-Hogar") no tiene espacios alrededor y no matchea, pero uno como
+ * "Open 25 - Av. San Martín" sí se recorta, que es el caso que se quiere.
+ */
+export function nombreComercial(raw: string): string {
+  const sinParentesis = raw.replace(/\s*\([^)]*\)\s*$/, "").trim();
+  const cortado = sinParentesis.split(/\s+[-–—]\s+/)[0].trim();
+  return cortado.length >= 3 ? cortado : sinParentesis;
+}
+
 function placeToRow(place: PlaceResult, ciudad: string, index: number): Record<string, unknown> | null {
   // Local cerrado permanentemente: no vale la pena trabajarlo.
   if (place.businessStatus === "CLOSED_PERMANENTLY") return null;
@@ -55,9 +72,11 @@ function placeToRow(place: PlaceResult, ciudad: string, index: number): Record<s
   // enriquecido de una para no quedar en la cola para siempre.
   const enriquecidoYa = !sitioWeb;
 
+  const nombreLimpio = place.name ? nombreComercial(place.name) : "Sin nombre";
+
   return {
-    nombre: place.name ?? "Sin nombre",
-    empresa: place.name ?? "Sin nombre",
+    nombre: nombreLimpio,
+    empresa: nombreLimpio,
     sector: "comercio",
     canal: "otro",
     telefono,

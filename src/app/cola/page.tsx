@@ -20,7 +20,6 @@ function templateVars(p: Prospecto) {
     nombre: esComercio ? '' : p.nombre.split(' ')[0],
     empresa: p.empresa,
     cargo: p.cargo ?? undefined,
-    localidad: p.localidad ?? undefined,
   }
 }
 
