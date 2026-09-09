@@ -1,17 +1,30 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import Cal, { getCalApi } from '@calcom/embed-react'
 
-const HORARIOS = [
-  { value: 'manana', label: 'Mañana (9 a 13)' },
-  { value: 'tarde', label: 'Tarde (13 a 18)' },
-  { value: 'cualquiera', label: 'Cualquier horario' },
-]
+/**
+ * `guillermo-onconcilia/15min` es un placeholder — reemplazar por
+ * NEXT_PUBLIC_CAL_LINK una vez creada la cuenta en cal.com (el servicio
+ * hosteado, no el repo self-hosted: eso es una app entera aparte).
+ * Formato del link: "tu-usuario/tu-tipo-de-evento".
+ */
+const CAL_LINK = process.env.NEXT_PUBLIC_CAL_LINK ?? 'guillermo-onconcilia/15min'
+const CAL_NAMESPACE = '15min'
 
 export default function CoordinarForm({ prospectoId }: { prospectoId: string }) {
-  const [form, setForm] = useState({ nombre: '', telefono: '', horario: 'cualquiera', nota: '' })
-  const [estado, setEstado] = useState<'idle' | 'enviando' | 'enviado' | 'error'>('idle')
+  const [form, setForm] = useState({ nombre: '', telefono: '', nota: '' })
+  const [estado, setEstado] = useState<'idle' | 'enviando' | 'agendar' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
+
+  // Boilerplate oficial de @calcom/embed-react: hay que inicializar la API
+  // antes de que el <Cal> embebido pueda pintar el calendario.
+  useEffect(() => {
+    ;(async function () {
+      const cal = await getCalApi({ namespace: CAL_NAMESPACE })
+      cal('ui', { styles: { branding: { brandColor: '#2563EB' } }, hideEventTypeDetails: false, layout: 'month_view' })
+    })()
+  }, [])
 
   function set(field: string, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -22,6 +35,8 @@ export default function CoordinarForm({ prospectoId }: { prospectoId: string }) 
     setEstado('enviando')
     setErrorMsg('')
 
+    // Guarda el contacto en el CRM primero — que Cal.com no tenga el turno
+    // todavía no debería perder el teléfono/nota si algo falla después.
     const res = await fetch('/api/coordinar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -29,7 +44,7 @@ export default function CoordinarForm({ prospectoId }: { prospectoId: string }) 
     })
 
     if (res.ok) {
-      setEstado('enviado')
+      setEstado('agendar')
     } else {
       const data = await res.json()
       setErrorMsg(data.error ?? 'Algo salió mal. Intentá de nuevo.')
@@ -37,16 +52,17 @@ export default function CoordinarForm({ prospectoId }: { prospectoId: string }) 
     }
   }
 
-  if (estado === 'enviado') {
+  if (estado === 'agendar') {
     return (
-      <div className="text-center py-4">
-        <div className="w-14 h-14 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center text-2xl mx-auto mb-4">
-          ✓
-        </div>
-        <p className="text-navy font-semibold text-sm mb-1">¡Listo!</p>
-        <p className="text-slate-500 text-sm">
-          Te llamamos a {form.telefono} {form.horario !== 'cualquiera' ? `por la ${form.horario === 'manana' ? 'mañana' : 'tarde'}` : 'cuando mejor te quede'}.
-        </p>
+      <div>
+        <p className="text-navy font-semibold text-sm mb-1">¡Gracias, {form.nombre.split(' ')[0]}!</p>
+        <p className="text-slate-500 text-sm mb-4">Elegí el horario que más te convenga:</p>
+        <Cal
+          namespace={CAL_NAMESPACE}
+          calLink={CAL_LINK}
+          style={{ width: '100%', height: '480px', overflow: 'scroll' }}
+          config={{ layout: 'month_view', name: form.nombre, notes: form.nota }}
+        />
       </div>
     )
   }
@@ -77,30 +93,6 @@ export default function CoordinarForm({ prospectoId }: { prospectoId: string }) 
       </div>
 
       <div>
-        <label className="text-xs font-medium text-slate-600 mb-1 block">¿Cuándo te queda mejor? *</label>
-        <div className="flex flex-col gap-2">
-          {HORARIOS.map((h) => (
-            <label
-              key={h.value}
-              className={`flex items-center gap-2 border rounded-lg px-3 py-2 text-sm cursor-pointer transition ${
-                form.horario === h.value ? 'border-brand bg-blue-50 text-navy' : 'border-slate-200 text-slate-600'
-              }`}
-            >
-              <input
-                type="radio"
-                name="horario"
-                value={h.value}
-                checked={form.horario === h.value}
-                onChange={(e) => set('horario', e.target.value)}
-                className="accent-brand"
-              />
-              {h.label}
-            </label>
-          ))}
-        </div>
-      </div>
-
-      <div>
         <label className="text-xs font-medium text-slate-600 mb-1 block">Algo más que quieras contarnos (opcional)</label>
         <textarea
           value={form.nota}
@@ -118,7 +110,7 @@ export default function CoordinarForm({ prospectoId }: { prospectoId: string }) 
         disabled={estado === 'enviando'}
         className="bg-brand hover:bg-brand-hover text-white font-semibold py-3 rounded-xl transition disabled:opacity-50 mt-1"
       >
-        {estado === 'enviando' ? 'Enviando...' : 'Coordinar llamada →'}
+        {estado === 'enviando' ? 'Enviando...' : 'Elegir horario →'}
       </button>
     </form>
   )

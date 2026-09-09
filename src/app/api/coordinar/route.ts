@@ -5,19 +5,17 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-const HORARIO_LABEL: Record<string, string> = {
-  manana: 'Mañana (9 a 13)',
-  tarde: 'Tarde (13 a 18)',
-  cualquiera: 'Cualquier horario',
-}
-
 /**
  * Público — sin login. Lo llama /coordinar/[id], el link del email frío a
  * comercios. Actualiza el prospecto existente, no crea uno nuevo (a
  * diferencia de /api/leads/qualify, que sí es alta nueva).
+ *
+ * Guarda el contacto acá y recién después se muestra el embed de Cal.com
+ * para elegir el turno — así el teléfono/nota quedan en el CRM aunque la
+ * persona cierre la pestaña antes de terminar de agendar.
  */
 export async function POST(req: Request) {
-  const { prospecto_id, nombre, telefono, horario, nota } = await req.json()
+  const { prospecto_id, nombre, telefono, nota } = await req.json()
 
   if (!prospecto_id || !nombre || !telefono) {
     return Response.json({ error: 'Faltan campos' }, { status: 400 })
@@ -33,7 +31,6 @@ export async function POST(req: Request) {
     return Response.json({ error: 'Prospecto no encontrado' }, { status: 404 })
   }
 
-  const horarioLabel = HORARIO_LABEL[horario] ?? horario ?? 'sin especificar'
   const hoy = new Date().toISOString().split('T')[0]
 
   await supabase
@@ -43,7 +40,7 @@ export async function POST(req: Request) {
       // el que deja la persona en el formulario es el que vale.
       telefono: telefono || p.telefono,
       estado: 'respondio_positivo',
-      proxima_accion: `Llamar a ${nombre} — prefiere ${horarioLabel}`,
+      proxima_accion: `Llamar a ${nombre} — turno a coordinar por Cal.com`,
       fecha_ultimo_contacto: hoy,
       fecha_primer_contacto: p.fecha_primer_contacto ?? hoy,
     })
@@ -62,7 +59,7 @@ export async function POST(req: Request) {
     prospecto_id,
     tipo: 'nota',
     canal: 'formulario',
-    contenido: `Coordinó llamada desde el email — nombre: ${nombre}, teléfono: ${telefono}, horario: ${horarioLabel}${nota ? `, nota: ${nota}` : ''}`,
+    contenido: `Dejó sus datos para coordinar llamada — nombre: ${nombre}, teléfono: ${telefono}${nota ? `, nota: ${nota}` : ''}. Turno a confirmar por Cal.com.`,
   })
 
   return Response.json({ ok: true })
