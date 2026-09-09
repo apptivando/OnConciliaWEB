@@ -163,7 +163,7 @@ guillermo@onconcilia.com`,
   // el asunto NO va acá, sale de `ASUNTOS_COMERCIO` según
   // `prospecto.variante_asunto` (A/B/C, test en curso desde el 08/09/2026).
   comercio: {
-    1: ({ nombre, empresa, id, cupoLleno }) => {
+    1: ({ nombre, id, cupoLleno }) => {
       // Con los 20 lugares de la beta llenos ("estamos en beta, buscamos
       // los primeros comercios" ya no es cierto), la oferta pasa a un
       // trial estándar — no solo cambia el número de días, cambia el
@@ -176,11 +176,11 @@ guillermo@onconcilia.com`,
 
 ¿Cuánto perdés por no revisar bien los movimientos del banco? Entre comisiones que pasan sin que nadie las mire, movimientos que no cuadran con lo que tenés anotado y errores que se descubren semanas después, conciliar el banco a mano es un problema que crece con cada cuenta que sumás.
 
-Armamos OnConcilia para resolver justo eso: cruza automáticamente el extracto de ${empresa} (y el de Mercado Pago, si cobrás por QR o link de pago) contra tus movimientos, categoriza todo solo, y te deja ver únicamente lo que necesita tu atención.
+Armamos OnConcilia para resolver justo eso: cruza automáticamente el extracto de tu banco o billetera virtual (de momento Mercado Pago) contra tus movimientos, categoriza todo solo, y te deja ver únicamente lo que necesita tu atención.
 
 ${oferta}
 
-Si te interesa, dejame tu teléfono y un horario que te quede bien acá: ${appUrl()}/coordinar/${id} — te llamo para coordinar en 15 minutos. Si no es el momento, avisame y no te vuelvo a escribir.
+Si te interesa, dejame tu teléfono y un horario para hablar 15 minutos: ${appUrl()}/coordinar/${id}. Si no es el momento, gracias por leer este correo.
 
 Saludos,
 Guillermo
