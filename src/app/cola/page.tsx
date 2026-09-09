@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { Prospecto, Sector } from '@/lib/types'
-import { generarMensaje, ASUNTOS_COMERCIO, ASUNTO_GENERICO } from '@/lib/mensajes'
+import { generarMensaje, ASUNTOS_COMERCIO, ASUNTO_GENERICO, CUPO_BETA } from '@/lib/mensajes'
 import Link from 'next/link'
 import ColaClient from './ColaClient'
 
@@ -14,22 +14,23 @@ export const revalidate = 0
 /** Vars del template. Para comercios `nombre` === `empresa` (Places no da el
  *  nombre de una persona) — pasarlo igual generaría un saludo roto ("Hola
  *  La," para "La Tienda"). Sin nombre de persona real, el saludo va genérico. */
-function templateVars(p: Prospecto) {
+function templateVars(p: Prospecto, cupoLleno: boolean) {
   const esComercio = p.sector === 'comercio'
   return {
     nombre: esComercio ? '' : p.nombre.split(' ')[0],
     empresa: p.empresa,
     cargo: p.cargo ?? undefined,
     id: p.id,
+    cupoLleno,
   }
 }
 
-function mensajeEmail(p: Prospecto) {
-  return generarMensaje(p.sector as Sector, 1, templateVars(p))
+function mensajeEmail(p: Prospecto, cupoLleno: boolean) {
+  return generarMensaje(p.sector as Sector, 1, templateVars(p, cupoLleno))
 }
 
-function mensajeLinkedIn(p: Prospecto) {
-  return generarMensaje(p.sector as Sector, 1, templateVars(p))
+function mensajeLinkedIn(p: Prospecto, cupoLleno: boolean) {
+  return generarMensaje(p.sector as Sector, 1, templateVars(p, cupoLleno))
 }
 
 function asuntoEmail(p: Prospecto): string {
@@ -40,12 +41,12 @@ function asuntoEmail(p: Prospecto): string {
 }
 
 export default async function ColaPage() {
-  const { data: todos } = await supabase
-    .from('prospectos')
-    .select('*')
-    .eq('estado', 'por_contactar')
-    .order('created_at', { ascending: true })
+  const [{ data: todos }, { count: betasActivos }] = await Promise.all([
+    supabase.from('prospectos').select('*').eq('estado', 'por_contactar').order('created_at', { ascending: true }),
+    supabase.from('prospectos').select('id', { count: 'exact', head: true }).eq('estado', 'beta_activo'),
+  ])
 
+  const cupoLleno = (betasActivos ?? 0) >= CUPO_BETA
   const lista = (todos ?? []) as Prospecto[]
 
   const conEmail = lista.filter((p) => p.email)
@@ -97,7 +98,7 @@ export default async function ColaPage() {
             badgeColor="emerald"
           >
             {conEmail.map((p) => (
-              <ColaClient key={p.id} prospecto={p} mensajeInicial={mensajeEmail(p)} asunto={asuntoEmail(p)} canal="email" />
+              <ColaClient key={p.id} prospecto={p} mensajeInicial={mensajeEmail(p, cupoLleno)} asunto={asuntoEmail(p)} canal="email" />
             ))}
           </Section>
         )}
@@ -111,7 +112,7 @@ export default async function ColaPage() {
             badgeColor="blue"
           >
             {sinEmailConLinkedIn.map((p) => (
-              <ColaClient key={p.id} prospecto={p} mensajeInicial={mensajeLinkedIn(p)} canal="linkedin" />
+              <ColaClient key={p.id} prospecto={p} mensajeInicial={mensajeLinkedIn(p, cupoLleno)} canal="linkedin" />
             ))}
           </Section>
         )}

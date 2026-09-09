@@ -40,12 +40,14 @@ export default function ProspectoDrawer({
   onPrev,
   onNext,
   position,
+  cupoLleno,
 }: {
   prospecto: Prospecto | null
   onClose: () => void
   onPrev?: () => void
   onNext?: () => void
   position?: { index: number; total: number }
+  cupoLleno: boolean
 }) {
   const router = useRouter()
   const [tab, setTab] = useState<Tab>('resumen')
@@ -134,7 +136,7 @@ export default function ProspectoDrawer({
       </div>
 
       {tab === 'resumen' && <TabResumen p={shown} />}
-      {tab === 'mensajes' && <TabMensajes p={shown} onRegistrado={() => router.refresh()} />}
+      {tab === 'mensajes' && <TabMensajes p={shown} cupoLleno={cupoLleno} onRegistrado={() => router.refresh()} />}
       {tab === 'acciones' && <TabAcciones p={shown} onGuardado={() => router.refresh()} />}
       {tab === 'timeline' && <TabTimeline prospectoId={shown.id} />}
     </Drawer>
@@ -188,7 +190,7 @@ function TabResumen({ p }: { p: Prospecto }) {
   )
 }
 
-function TabMensajes({ p, onRegistrado }: { p: Prospecto; onRegistrado: () => void }) {
+function TabMensajes({ p, cupoLleno, onRegistrado }: { p: Prospecto; cupoLleno: boolean; onRegistrado: () => void }) {
   const [paso, setPaso] = useState<1 | 2 | 3>(1)
   const [copiado, setCopiado] = useState(false)
 
@@ -200,6 +202,7 @@ function TabMensajes({ p, onRegistrado }: { p: Prospecto; onRegistrado: () => vo
     empresa: p.empresa,
     cargo: p.cargo ?? undefined,
     id: p.id,
+    cupoLleno,
   })
 
   async function copiar() {

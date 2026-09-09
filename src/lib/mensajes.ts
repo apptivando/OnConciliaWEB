@@ -6,7 +6,16 @@ interface TemplateVars {
   cargo?: string
   /** Solo lo usa `comercio[1]` — arma el link a /coordinar/[id]. */
   id?: string
+  /** Solo lo usa `comercio[1]` — si ya se llenaron los CUPO_BETA lugares,
+   *  la oferta pasa de "60 días de beta" a "prueba de 15 días". Lo calcula
+   *  quien llama (cuenta prospectos en estado beta_activo), no esta función. */
+  cupoLleno?: boolean
 }
+
+/** Beta cerrada, mismo número que dice la landing ("Beta cerrada — 20
+ *  lugares"). Cuando se llenan los `beta_activo`, el email frío deja de
+ *  ofrecer la beta y pasa a un trial estándar de 15 días. */
+export const CUPO_BETA = 20
 
 /** Base pública del sitio. Server y cliente leen la misma var — `mensajes.ts`
  *  se importa desde los dos lados (ProspectoDrawer es cliente). */
@@ -154,21 +163,30 @@ guillermo@onconcilia.com`,
   // el asunto NO va acá, sale de `ASUNTOS_COMERCIO` según
   // `prospecto.variante_asunto` (A/B/C, test en curso desde el 08/09/2026).
   comercio: {
-    1: ({ nombre, empresa, id }) =>
-      `Hola${nombre ? ` ${nombre}` : ''},
+    1: ({ nombre, empresa, id, cupoLleno }) => {
+      // Con los 20 lugares de la beta llenos ("estamos en beta, buscamos
+      // los primeros comercios" ya no es cierto), la oferta pasa a un
+      // trial estándar — no solo cambia el número de días, cambia el
+      // marco: ya no es "sumate a la beta", es "probalo gratis".
+      const oferta = cupoLleno
+        ? `Podés probarlo gratis durante 15 días, sin tarjeta ni compromiso.`
+        : `Estamos en beta — buscamos los primeros comercios para probarlo sin costo durante 60 días, a cambio de que nos cuentes qué te sirve y qué no.`
+
+      return `Hola${nombre ? ` ${nombre}` : ''},
 
 ¿Cuánto perdés por no revisar bien los movimientos del banco? Entre comisiones que pasan sin que nadie las mire, movimientos que no cuadran con lo que tenés anotado y errores que se descubren semanas después, conciliar el banco a mano es un problema que crece con cada cuenta que sumás.
 
 Armamos OnConcilia para resolver justo eso: cruza automáticamente el extracto de ${empresa} (y el de Mercado Pago, si cobrás por QR o link de pago) contra tus movimientos, categoriza todo solo, y te deja ver únicamente lo que necesita tu atención.
 
-Estamos en beta — buscamos los primeros comercios para probarlo sin costo durante 60 días, a cambio de que nos cuentes qué te sirve y qué no.
+${oferta}
 
 Si te interesa, dejame tu teléfono y un horario que te quede bien acá: ${appUrl()}/coordinar/${id} — te llamo para coordinar en 15 minutos. Si no es el momento, avisame y no te vuelvo a escribir.
 
 Saludos,
 Guillermo
 OnConcilia
-guillermo@onconcilia.com`,
+guillermo@onconcilia.com`
+    },
 
     2: ({ nombre }) =>
       `Hola${nombre ? ` ${nombre}` : ''},

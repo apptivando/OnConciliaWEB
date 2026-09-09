@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { Prospecto } from '@/lib/types'
+import { CUPO_BETA } from '@/lib/mensajes'
 import ProspectosToolbar from './ProspectosToolbar'
 import ProspectosTable from './ProspectosTable'
 import BuscadorAgent from './BuscadorAgent'
@@ -132,7 +133,12 @@ export default async function ProspectosPage({
           <ProspectosToolbar localidades={localidades} />
         </div>
 
-        <ProspectosTable prospectos={lista} filtered={isFiltered} initialClientId={searchParams.cliente ?? null} />
+        <ProspectosTable
+          prospectos={lista}
+          filtered={isFiltered}
+          initialClientId={searchParams.cliente ?? null}
+          cupoLleno={stats.betas >= CUPO_BETA}
+        />
 
         {totalPages > 1 && (
           <div className="flex items-center justify-between mt-4 text-xs text-slate-400">
