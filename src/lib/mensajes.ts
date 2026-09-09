@@ -4,6 +4,14 @@ interface TemplateVars {
   nombre: string
   empresa: string
   cargo?: string
+  /** Solo lo usa `comercio[1]` — arma el link a /coordinar/[id]. */
+  id?: string
+}
+
+/** Base pública del sitio. Server y cliente leen la misma var — `mensajes.ts`
+ *  se importa desde los dos lados (ProspectoDrawer es cliente). */
+function appUrl(): string {
+  return process.env.NEXT_PUBLIC_APP_URL ?? 'https://onconcilia.com'
 }
 
 /** Nombres de comercio largos rompen un asunto corto — se recorta antes de
@@ -146,7 +154,7 @@ guillermo@onconcilia.com`,
   // el asunto NO va acá, sale de `ASUNTOS_COMERCIO` según
   // `prospecto.variante_asunto` (A/B/C, test en curso desde el 08/09/2026).
   comercio: {
-    1: ({ nombre, empresa }) =>
+    1: ({ nombre, empresa, id }) =>
       `Hola${nombre ? ` ${nombre}` : ''},
 
 ¿Cuánto perdés por no revisar bien los movimientos del banco? Entre comisiones que pasan sin que nadie las mire, movimientos que no cuadran con lo que tenés anotado y errores que se descubren semanas después, conciliar el banco a mano es un problema que crece con cada cuenta que sumás.
@@ -155,7 +163,7 @@ Armamos OnConcilia para resolver justo eso: cruza automáticamente el extracto d
 
 Estamos en beta — buscamos los primeros comercios para probarlo sin costo durante 60 días, a cambio de que nos cuentes qué te sirve y qué no.
 
-¿Te interesa sumarte? Respondé este mail y coordinamos 15 minutos esta semana para mostrártelo. Si no es el momento, avisame y no te vuelvo a escribir.
+Si te interesa, dejame tu teléfono y un horario que te quede bien acá: ${appUrl()}/coordinar/${id} — te llamo para coordinar en 15 minutos. Si no es el momento, avisame y no te vuelvo a escribir.
 
 Saludos,
 Guillermo

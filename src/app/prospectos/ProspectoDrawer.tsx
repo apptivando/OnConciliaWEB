@@ -192,10 +192,14 @@ function TabMensajes({ p, onRegistrado }: { p: Prospecto; onRegistrado: () => vo
   const [paso, setPaso] = useState<1 | 2 | 3>(1)
   const [copiado, setCopiado] = useState(false)
 
+  // Para comercios nombre === empresa (Places no da nombre de una persona) —
+  // pasarlo igual rompería el saludo ("Hola La," para "La Tienda"). Mismo
+  // fix que ya tiene /cola.
   const mensaje = generarMensaje(p.sector, paso, {
-    nombre: p.nombre.split(' ')[0],
+    nombre: p.sector === 'comercio' ? '' : p.nombre.split(' ')[0],
     empresa: p.empresa,
     cargo: p.cargo ?? undefined,
+    id: p.id,
   })
 
   async function copiar() {
