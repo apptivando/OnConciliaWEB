@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { upsertContacto, enviarTransaccional } from '@/lib/brevo'
-import { ASUNTOS_COMERCIO, ASUNTO_GENERICO } from '@/lib/mensajes'
+import { ASUNTOS_COMERCIO, ASUNTO_GENERICO, appUrl } from '@/lib/mensajes'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -52,7 +52,9 @@ function mensajeAHtml(mensaje: string): string {
     </tr>
     <tr>
       <td style="background:#F8FAFC;padding:16px 32px;border-top:1px solid #E2E8F0;">
-        <p style="margin:0;font-size:12px;color:#94A3B8;">OnConcilia · Paraná, Entre Ríos, Argentina</p>
+        <p style="margin:0;font-size:12px;color:#94A3B8;">
+          <a href="${appUrl()}" style="color:#94A3B8;text-decoration:underline;">${appUrl().replace(/^https?:\/\//, '')}</a>
+        </p>
       </td>
     </tr>
   </table>

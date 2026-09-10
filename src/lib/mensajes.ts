@@ -18,8 +18,9 @@ interface TemplateVars {
 export const CUPO_BETA = 20
 
 /** Base pública del sitio. Server y cliente leen la misma var — `mensajes.ts`
- *  se importa desde los dos lados (ProspectoDrawer es cliente). */
-function appUrl(): string {
+ *  se importa desde los dos lados (ProspectoDrawer es cliente). Exportada:
+ *  también arma el link del footer en el email frío (outreach/send). */
+export function appUrl(): string {
   return process.env.NEXT_PUBLIC_APP_URL ?? 'https://onconcilia.com'
 }
 
