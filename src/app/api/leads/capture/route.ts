@@ -1,5 +1,4 @@
 import { createClient } from '@supabase/supabase-js'
-import { upsertContacto } from '@/lib/brevo'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -34,9 +33,25 @@ export async function POST(req: Request) {
   }
 
   const listId = Number(process.env.BREVO_LIST_ID_LEADS)
+  // DEBUG TEMPORAL — diagnosticando por qué el contacto no llega a Brevo en
+  // dev. Saca esto en cuanto se confirme la causa (ver historial.md).
+  const debug: Record<string, unknown> = { hasApiKey: !!process.env.BREVO_API_KEY, listId }
   if (listId) {
-    await upsertContacto({ email: limpio, listIds: [listId] })
+    try {
+      const res = await fetch('https://api.brevo.com/v3/contacts', {
+        method: 'POST',
+        headers: {
+          'api-key': process.env.BREVO_API_KEY ?? '',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: limpio, listIds: [listId], updateEnabled: true }),
+      })
+      debug.status = res.status
+      debug.body = await res.text()
+    } catch (err) {
+      debug.err = String(err)
+    }
   }
 
-  return Response.json({ ok: true })
+  return Response.json({ ok: true, debug })
 }
