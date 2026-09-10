@@ -14,6 +14,51 @@ const supabase = createClient(
 // validar en Brevo).
 const REMITENTE = { email: 'guillermo@onconcilia.com', name: 'Guillermo de OnConcilia' }
 
+/**
+ * Envuelve el mensaje (texto plano, el mismo que se manda en `textContent`)
+ * en una versión HTML con identidad de marca — misma barra de header que
+ * los templates de la secuencia opt-in (`emails-automation-optin/paso-*.html`
+ * en el repo del plan), pero sin CTA de botón grande: sigue siendo un email
+ * 1:1 personal, no una pieza de marketing. Cualquier URL del texto se
+ * convierte en un link con texto fijo — evita mostrar la URL cruda (fea y,
+ * en clientes que no renderizan HTML, la sola URL rompe el tono personal).
+ */
+function mensajeAHtml(mensaje: string): string {
+  const textoLink = 'coordinemos acá'
+  const escapado = mensaje.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  const conLinks = escapado.replace(/(https?:\/\/\S+)/g, (match) => {
+    // La URL puede venir seguida de puntuación de la oración ("...id.") —
+    // eso no es parte del link.
+    const cola = match.match(/[).,;:!?]+$/)?.[0] ?? ''
+    const url = cola ? match.slice(0, -cola.length) : match
+    return `<a href="${url}" style="color:#2563EB;font-weight:600;text-decoration:underline;">${textoLink}</a>${cola}`
+  })
+  const parrafos = conLinks
+    .split(/\n\n+/)
+    .map((p) => `<p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#334155;">${p.replace(/\n/g, '<br>')}</p>`)
+    .join('')
+
+  return `<div style="background:#F5F6F8;padding:32px 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #E2E8F0;">
+    <tr>
+      <td style="background:#0F1F3D;padding:18px 32px;">
+        <span style="color:#ffffff;font-size:16px;font-weight:800;letter-spacing:-0.3px;">On<span style="color:#34D399;">Concilia</span></span>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:32px;">
+        ${parrafos}
+      </td>
+    </tr>
+    <tr>
+      <td style="background:#F8FAFC;padding:16px 32px;border-top:1px solid #E2E8F0;">
+        <p style="margin:0;font-size:12px;color:#94A3B8;">OnConcilia · Paraná, Entre Ríos, Argentina</p>
+      </td>
+    </tr>
+  </table>
+</div>`
+}
+
 function inicioDeHoyAR(): string {
   // Mismo criterio que /saldos en el proyecto de la app: evita el bug UTC
   // de "hoy" cruzando la medianoche en Argentina (UTC-3).
@@ -100,7 +145,7 @@ export async function POST(req: Request) {
         to: { email: p.email, name: p.nombre },
         sender: REMITENTE,
         subject,
-        htmlContent: `<div style="font-family:system-ui,sans-serif;font-size:15px;line-height:1.7;color:#1e293b;white-space:pre-wrap">${mensaje.replace(/</g, '&lt;')}</div>`,
+        htmlContent: mensajeAHtml(mensaje),
         textContent: mensaje,
         tags: p.variante_asunto ? ['outreach-frio', `variante-${p.variante_asunto}`] : ['outreach-frio'],
       })
