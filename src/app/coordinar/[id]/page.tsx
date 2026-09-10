@@ -42,25 +42,23 @@ export default async function CoordinarPage({ params }: { params: { id: string }
 
   return (
     <main className="min-h-screen bg-navy flex flex-col items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="text-white font-bold text-2xl tracking-tight mb-4">
-            On<span className="text-accent">Concilia</span>
-          </div>
-          <h1 className="text-white text-xl font-bold mb-2">Coordinemos tu acceso</h1>
-          <p className="text-slate-400 text-sm">
-            Para {prospecto.empresa} · dejanos tu teléfono y un horario que te quede bien
-          </p>
+      <div className="w-full max-w-md text-center mb-8">
+        <div className="text-white font-bold text-2xl tracking-tight mb-4">
+          On<span className="text-accent">Concilia</span>
         </div>
-
-        <div className="bg-white rounded-2xl p-6 shadow-xl">
-          <CoordinarForm prospectoId={prospecto.id} />
-        </div>
-
-        <p className="text-slate-600 text-xs text-center mt-4">
-          Te llamamos para coordinar en 15 minutos · sin compromiso
+        <h1 className="text-white text-xl font-bold mb-2">Coordinemos tu acceso</h1>
+        <p className="text-slate-400 text-sm">
+          Para {prospecto.empresa} · dejanos tu teléfono y un horario que te quede bien
         </p>
       </div>
+
+      {/* Sin envoltorio de ancho fijo acá — CoordinarForm controla su propio
+          ancho (se ensancha solo en el paso de Cal.com). */}
+      <CoordinarForm prospectoId={prospecto.id} />
+
+      <p className="w-full max-w-md text-slate-600 text-xs text-center mt-4">
+        Te llamamos para coordinar en 15 minutos · sin compromiso
+      </p>
     </main>
   )
 }

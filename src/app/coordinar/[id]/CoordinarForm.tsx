@@ -18,11 +18,18 @@ export default function CoordinarForm({ prospectoId }: { prospectoId: string }) 
   const [errorMsg, setErrorMsg] = useState('')
 
   // Boilerplate oficial de @calcom/embed-react: hay que inicializar la API
-  // antes de que el <Cal> embebido pueda pintar el calendario.
+  // antes de que el <Cal> embebido pueda pintar el calendario. theme:'light'
+  // fuerza el tema claro — sin esto Cal.com usa el tema del sistema/navegador
+  // del visitante, y en modo oscuro rompe contra la tarjeta blanca de acá.
   useEffect(() => {
     ;(async function () {
       const cal = await getCalApi({ namespace: CAL_NAMESPACE })
-      cal('ui', { styles: { branding: { brandColor: '#2563EB' } }, hideEventTypeDetails: false, layout: 'month_view' })
+      cal('ui', {
+        theme: 'light',
+        styles: { branding: { brandColor: '#2563EB' } },
+        hideEventTypeDetails: false,
+        layout: 'month_view',
+      })
     })()
   }, [])
 
@@ -52,66 +59,72 @@ export default function CoordinarForm({ prospectoId }: { prospectoId: string }) 
     }
   }
 
-  if (estado === 'agendar') {
-    return (
-      <div>
-        <p className="text-navy font-semibold text-sm mb-1">¡Gracias, {form.nombre.split(' ')[0]}!</p>
-        <p className="text-slate-500 text-sm mb-4">Elegí el horario que más te convenga:</p>
-        <Cal
-          namespace={CAL_NAMESPACE}
-          calLink={CAL_LINK}
-          style={{ width: '100%', height: '480px', overflow: 'scroll' }}
-          config={{ layout: 'month_view', name: form.nombre, notes: form.nota }}
-        />
-      </div>
-    )
-  }
+  // La tarjeta vive acá (no en page.tsx) para poder ensancharla solo en el
+  // paso de Cal.com — el calendario mensual + la lista de horarios lado a
+  // lado necesitan más aire que el form de 3 campos; si no, el visitante
+  // termina con scroll doble (de la página y del iframe apretado adentro).
+  const ancho = estado === 'agendar' ? 'max-w-2xl' : 'max-w-md'
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <div>
-        <label className="text-xs font-medium text-slate-600 mb-1 block">Tu nombre *</label>
-        <input
-          value={form.nombre}
-          onChange={(e) => set('nombre', e.target.value)}
-          required
-          placeholder="Juan García"
-          className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand"
-        />
-      </div>
+    <div className={`w-full ${ancho} bg-white rounded-2xl p-6 shadow-xl mx-auto`}>
+      {estado === 'agendar' ? (
+        <>
+          <p className="text-navy font-semibold text-sm mb-1">¡Gracias, {form.nombre.split(' ')[0]}!</p>
+          <p className="text-slate-500 text-sm mb-4">Elegí el horario que más te convenga:</p>
+          <Cal
+            namespace={CAL_NAMESPACE}
+            calLink={CAL_LINK}
+            style={{ width: '100%', height: '680px', overflow: 'auto' }}
+            config={{ theme: 'light', layout: 'month_view', name: form.nombre, notes: form.nota }}
+          />
+        </>
+      ) : (
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div>
+            <label className="text-xs font-medium text-slate-600 mb-1 block">Tu nombre *</label>
+            <input
+              value={form.nombre}
+              onChange={(e) => set('nombre', e.target.value)}
+              required
+              placeholder="Juan García"
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand"
+            />
+          </div>
 
-      <div>
-        <label className="text-xs font-medium text-slate-600 mb-1 block">Tu teléfono *</label>
-        <input
-          type="tel"
-          value={form.telefono}
-          onChange={(e) => set('telefono', e.target.value)}
-          required
-          placeholder="341 555-1234"
-          className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand"
-        />
-      </div>
+          <div>
+            <label className="text-xs font-medium text-slate-600 mb-1 block">Tu teléfono *</label>
+            <input
+              type="tel"
+              value={form.telefono}
+              onChange={(e) => set('telefono', e.target.value)}
+              required
+              placeholder="341 555-1234"
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand"
+            />
+          </div>
 
-      <div>
-        <label className="text-xs font-medium text-slate-600 mb-1 block">Algo más que quieras contarnos (opcional)</label>
-        <textarea
-          value={form.nota}
-          onChange={(e) => set('nota', e.target.value)}
-          rows={2}
-          placeholder="Ej: manejamos 3 cuentas bancarias distintas..."
-          className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand resize-none"
-        />
-      </div>
+          <div>
+            <label className="text-xs font-medium text-slate-600 mb-1 block">Algo más que quieras contarnos (opcional)</label>
+            <textarea
+              value={form.nota}
+              onChange={(e) => set('nota', e.target.value)}
+              rows={2}
+              placeholder="Ej: manejamos 3 cuentas bancarias distintas..."
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand resize-none"
+            />
+          </div>
 
-      {errorMsg && <p className="text-red-500 text-xs">{errorMsg}</p>}
+          {errorMsg && <p className="text-red-500 text-xs">{errorMsg}</p>}
 
-      <button
-        type="submit"
-        disabled={estado === 'enviando'}
-        className="bg-brand hover:bg-brand-hover text-white font-semibold py-3 rounded-xl transition disabled:opacity-50 mt-1"
-      >
-        {estado === 'enviando' ? 'Enviando...' : 'Elegir horario →'}
-      </button>
-    </form>
+          <button
+            type="submit"
+            disabled={estado === 'enviando'}
+            className="bg-brand hover:bg-brand-hover text-white font-semibold py-3 rounded-xl transition disabled:opacity-50 mt-1"
+          >
+            {estado === 'enviando' ? 'Enviando...' : 'Elegir horario →'}
+          </button>
+        </form>
+      )}
+    </div>
   )
 }
