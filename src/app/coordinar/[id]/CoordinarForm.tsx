@@ -60,13 +60,16 @@ export default function CoordinarForm({ prospectoId }: { prospectoId: string }) 
   }
 
   // La tarjeta vive acá (no en page.tsx) para poder ensancharla solo en el
-  // paso de Cal.com — el calendario mensual + la lista de horarios lado a
-  // lado necesitan más aire que el form de 3 campos; si no, el visitante
-  // termina con scroll doble (de la página y del iframe apretado adentro).
-  const ancho = estado === 'agendar' ? 'max-w-2xl' : 'max-w-md'
+  // paso de Cal.com. month_view de Cal.com recién pone el calendario y los
+  // horarios lado a lado (en vez de apilados, que obliga a scrollear) a
+  // partir de un ancho de iframe bastante generoso — max-w-2xl (672px) se
+  // quedaba corto y seguía apilando. max-w-5xl con menos padding le da
+  // ~960px reales al iframe.
+  const ancho = estado === 'agendar' ? 'max-w-5xl' : 'max-w-md'
+  const padding = estado === 'agendar' ? 'p-4' : 'p-6'
 
   return (
-    <div className={`w-full ${ancho} bg-white rounded-2xl p-6 shadow-xl mx-auto`}>
+    <div className={`w-full ${ancho} bg-white rounded-2xl ${padding} shadow-xl mx-auto`}>
       {estado === 'agendar' ? (
         <>
           <p className="text-navy font-semibold text-sm mb-1">¡Gracias, {form.nombre.split(' ')[0]}!</p>
