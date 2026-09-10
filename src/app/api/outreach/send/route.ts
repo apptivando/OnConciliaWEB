@@ -69,6 +69,11 @@ export async function POST(req: Request) {
       )
     }
 
+    // Solo los prospectos que salieron de una búsqueda de Places entran a
+    // "OnConcilia - Leads Search" — los de LinkedIn (pyme/estudio/franquicia)
+    // no pasan por acá, ese carril no tiene lista propia en Brevo todavía.
+    const listIdSearch = Number(process.env.BREVO_LIST_ID_SEARCH) || undefined
+
     const nuevoId = await upsertContacto({
       email: p.email,
       attributes: {
@@ -78,6 +83,7 @@ export async function POST(req: Request) {
         // PRIORIDAD es numérico en Brevo — null, no '', cuando no hay valor.
         PRIORIDAD: p.prioridad_contacto ?? null,
       },
+      listIds: p.origen === 'busqueda' && listIdSearch ? [listIdSearch] : undefined,
     })
     if (nuevoId && !brevoContactId) brevoContactId = nuevoId
 
