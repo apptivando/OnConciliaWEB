@@ -93,12 +93,6 @@ export default async function ProspectosPage({
         <div className="flex items-center gap-4">
           <span className="text-slate-400 text-sm">CRM de Prospectos</span>
           <Link
-            href="/cola"
-            className="text-slate-400 hover:text-white text-sm transition"
-          >
-            Cola de aprobación
-          </Link>
-          <Link
             href="/documentos"
             className="text-slate-400 hover:text-white text-sm transition"
           >

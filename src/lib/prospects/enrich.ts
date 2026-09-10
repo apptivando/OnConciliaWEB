@@ -32,6 +32,8 @@ import {
   inlineJsonScripts,
 } from "./extract";
 import { toWhatsappNumber } from "@/lib/phone";
+import { upsertContacto } from "@/lib/brevo";
+import { ASUNTOS_COMERCIO, appUrl, CUPO_BETA } from "@/lib/mensajes";
 import type { Prospecto, RedesProspecto } from "@/lib/types";
 
 /** Páginas máximas por sitio (la home cuenta como una). */
@@ -236,6 +238,49 @@ async function runLevel1(prospecto: Prospecto, f: Findings): Promise<{ error: st
   return { error: pagesRead === 0 ? firstError : null };
 }
 
+// ─── Sincronización a Brevo (dispara la Automation "Leads Search") ─────────
+
+const OFERTA_BETA =
+  "Estamos en beta — buscamos los primeros comercios para probarlo sin costo durante 60 días, a cambio de que nos cuentes qué te sirve y qué no.";
+const OFERTA_TRIAL = "Podés probarlo gratis durante 15 días, sin tarjeta ni compromiso.";
+
+/**
+ * Solo comercios de búsqueda: son los únicos con `variante_asunto` (A/B/C) y
+ * los únicos que este carril de outreach frío por email cubre hoy — LinkedIn,
+ * WhatsApp y teléfono quedan como dato manual en la ficha, sin automatizar.
+ *
+ * Entrar a la lista `BREVO_LIST_ID_SEARCH` dispara la Automation configurada
+ * en el dashboard de Brevo — el envío en sí no lo hace este código. ASUNTO,
+ * OFERTA y COORDINAR_URL van como atributos del contacto porque el template
+ * de Brevo no tiene la lógica de variantes ni de cupo: la resuelve acá,
+ * reusando exactamente lo que ya calcula `mensajes.ts`.
+ */
+async function sincronizarBrevo(
+  prospecto: Prospecto,
+  email: string,
+  cupoLleno: boolean
+): Promise<string | null> {
+  if (prospecto.sector !== "comercio" || prospecto.origen !== "busqueda" || !prospecto.variante_asunto) {
+    return null;
+  }
+
+  const listId = Number(process.env.BREVO_LIST_ID_SEARCH) || undefined;
+
+  return upsertContacto({
+    email,
+    attributes: {
+      EMPRESA: prospecto.empresa,
+      LOCALIDAD: prospecto.localidad ?? "",
+      SECTOR: prospecto.sector,
+      PRIORIDAD: prospecto.prioridad_contacto ?? null,
+      ASUNTO: ASUNTOS_COMERCIO[prospecto.variante_asunto](prospecto.empresa),
+      OFERTA: cupoLleno ? OFERTA_TRIAL : OFERTA_BETA,
+      COORDINAR_URL: `${appUrl()}/coordinar/${prospecto.id}`,
+    },
+    listIds: listId ? [listId] : undefined,
+  });
+}
+
 // ─── Orquestador ─────────────────────────────────────────────────────────────
 
 export interface EnrichOutcome {
@@ -262,7 +307,8 @@ function calcularPrioridad(f: Findings, prospecto: Prospecto): number {
 /** Enriquece un prospecto y guarda el resultado. Nunca tira. */
 export async function enrichProspecto(
   supabase: SupabaseClient,
-  prospecto: Prospecto
+  prospecto: Prospecto,
+  cupoLleno: boolean
 ): Promise<EnrichOutcome> {
   const f = emptyFindings();
   let error: string | null = null;
@@ -308,6 +354,12 @@ export async function enrichProspecto(
     patch.notas = [prospecto.notas, ...notasExtra].filter(Boolean).join("\n").slice(0, 2000);
   }
 
+  const emailFinal = f.email ?? prospecto.email;
+  if (emailFinal && !prospecto.brevo_contact_id) {
+    const brevoId = await sincronizarBrevo(prospecto, emailFinal, cupoLleno);
+    if (brevoId) patch.brevo_contact_id = brevoId;
+  }
+
   const { error: dbError } = await supabase.from("prospectos").update(patch).eq("id", prospecto.id);
 
   return {
@@ -342,20 +394,24 @@ export async function enrichBatch(
 ): Promise<BatchResult> {
   const limit = opts.limit ?? 12;
 
-  const { data } = await supabase
-    .from("prospectos")
-    .select("*")
-    .not("sitio_web", "is", null)
-    .is("enriquecido_en", null)
-    .neq("estado", "descartado")
-    .order("created_at", { ascending: true })
-    .limit(limit);
+  const [{ data }, { count: betasActivos }] = await Promise.all([
+    supabase
+      .from("prospectos")
+      .select("*")
+      .not("sitio_web", "is", null)
+      .is("enriquecido_en", null)
+      .neq("estado", "descartado")
+      .order("created_at", { ascending: true })
+      .limit(limit),
+    supabase.from("prospectos").select("id", { count: "exact", head: true }).eq("estado", "beta_activo"),
+  ]);
 
+  const cupoLleno = (betasActivos ?? 0) >= CUPO_BETA;
   const prospectos = (data ?? []) as Prospecto[];
   const outcomes: EnrichOutcome[] = [];
 
   for (const prospecto of prospectos) {
-    outcomes.push(await enrichProspecto(supabase, prospecto));
+    outcomes.push(await enrichProspecto(supabase, prospecto, cupoLleno));
   }
 
   return {
