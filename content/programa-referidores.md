@@ -47,7 +47,7 @@ Lo que hace es la capa que ningún sistema de gestión resuelve bien:
 - **Comisiones bancarias con el IVA discriminado por alícuota** y el comprobante fiscal armado. Una empresa que paga cien mil pesos mensuales de comisiones tiene ahí más de veinte mil de crédito fiscal que muchas veces se pierde.
 - **Impuestos por período, con cierre.** Deja de ser una planilla que alguien rehace todos los meses.
 - **Plazos fijos, fondos y préstamos** con su seguimiento de cuotas y vencimientos.
-- **Liquidaciones de tarjeta y Mercado Pago** cruzadas contra lo que efectivamente entró a la cuenta.
+- **Liquidaciones de tarjeta y Mercado Pago** cruzadas contra lo que efectivamente entró a la cuenta. Mercado Pago viene incluido en todos los planes.
 - **Comprobantes por WhatsApp:** el vendedor manda la foto del comprobante y entra solo al sistema, ya leído y buscando contra qué movimiento cruzarlo.
 
 > **Un argumento que casi siempre destraba.** Si el prospecto opera con un banco que
@@ -170,22 +170,23 @@ finales, sin IVA adicional.**
 |---|---|---|---|
 | **Para** | Empresa de uno a tres bancos | Empresa multi-banco con equipo administrativo | Seis bancos o más, o todos los módulos |
 | **Suscripción** | **$65.000 / mes** | **$130.000 / mes** | **$245.000 / mes** |
-| Cuentas | 3, billetera incluida | 5 bancos + 1 billetera | 10 bancos + 1 billetera |
+| Cuentas | 3 bancos + 1 billetera | 5 bancos + 1 billetera | 10 bancos + 1 billetera |
 | Usuarios | 3 | 8 | 15 |
-| Módulos | — | Opcionales | Los tres incluidos |
+| Módulos | Mercado Pago | Mercado Pago + opcionales | Todos incluidos |
 | Puesta en marcha | Sin cargo, se da de alta solo | $220.000, arranque asistido | $890.000, completa |
 
 ### Módulos que se suman al plan Pro
 
+Mercado Pago está incluido en todos los planes, sin costo adicional.
+
 | Módulo | Para qué | Por mes |
 |---|---|---|
 | Liquidaciones | Liquidaciones de tarjeta con aranceles, IVA y retenciones desglosados | $20.000 |
-| Mercado Pago | Movimientos de la billetera cruzados contra la cuenta | $20.000 |
 | Comprobantes | Lectura automática y cruce contra el extracto | $20.000 |
 | ↳ con canal de WhatsApp | El vendedor manda la foto y el comprobante entra solo | $45.000 |
 
-Si el cliente quiere los tres módulos, Enterprise ya los incluye: por $30.000 más que
-Pro con los tres módulos sueltos, tiene el doble de bancos y siete usuarios más.
+Si el cliente quiere los dos módulos, Enterprise ya los incluye: por $50.000 más que
+Pro con los dos sueltos, tiene el doble de bancos y siete usuarios más.
 
 ### Formas de pago
 
