@@ -107,6 +107,33 @@ export const OBJECIONES: Objecion[] = [
       'Perfecto, y le va a seguir llegando todo: tenemos envío directo al contador por email con el Excel y el PDF del período. La diferencia es que hoy le mandás el extracto crudo y él arma todo; con esto le llega ya categorizado y con el IVA separado. Le ahorra tiempo a él y te lo cobra menos a vos.',
     tags: ['contador', 'estudio', 'externo'],
   },
+  {
+    id: 'excel-funciona',
+    objecion: 'Hoy lo hacemos en Excel y funciona.',
+    respuesta:
+      'Funciona porque alguien le dedica una hora por día. La planilla no se equivoca: se equivoca quien copia, pega y rehace las fórmulas cada mes. OnConcilia hace el mismo trabajo sin esa hora de ordenamiento, y con el saldo validado contra el extracto. Y no hace falta tirar la planilla: exportás a Excel cuando quieras.',
+    siInsiste:
+      'Proponer la comparación con sus propios datos: «Traé el extracto del mes pasado y la planilla que armaste. Medimos cuánto tardaste vos y cuánto tarda esto».',
+    tags: ['excel', 'planilla', 'manual', 'ya funciona', 'hoja de calculo'],
+  },
+  {
+    id: 'ia-entrena-datos',
+    objecion: '¿Usan mis datos para entrenar la inteligencia artificial?',
+    respuesta:
+      'No. Los proveedores de procesamiento con IA que usamos trabajan bajo nuestras instrucciones y con acuerdos de confidencialidad: no usan tus datos para entrenar modelos y no los conservan más allá de lo necesario para prestar el servicio.',
+    siInsiste:
+      'Si es un cliente Enterprise que necesita el detalle de proveedores para una auditoría, se le informa bajo acuerdo de confidencialidad. En público no se nombran proveedores.',
+    tags: ['ia', 'inteligencia artificial', 'entrenamiento', 'privacidad', 'datos', 'modelo'],
+  },
+  {
+    id: 'donde-estan-los-datos',
+    objecion: '¿Dónde quedan guardados mis datos?',
+    respuesta:
+      'En infraestructura de nivel empresarial, alojada en Sudamérica, y cada organización está aislada: sólo ve sus propios datos. Además, nunca tenemos tus claves del banco: lo que está guardado es información de lo que ya pasó, que no permite operar ni transferir desde tus cuentas.',
+    siInsiste:
+      'Si pregunta el país: Brasil. No prometer la migración a servidores en Argentina: es una idea para cuando crezca el volumen, no un compromiso.',
+    tags: ['datos', 'servidor', 'alojamiento', 'hosting', 'nube', 'pais', 'privacidad'],
+  },
 ]
 
 export type Argumento = {
@@ -197,6 +224,15 @@ export const ARGUMENTOS: Argumento[] = [
     cuerpo:
       'El valor del sistema está en el motor de categorización, las reglas, el tratamiento de IVA y los reportes. El transporte del dato es intercambiable. Ya tenemos las dos vías: API oficial (Mercado Pago) y archivo (bancos). Elegimos por caso cuál da mejor dato.',
     tags: ['arquitectura', 'ingesta', 'api', 'archivo'],
+  },
+  {
+    id: 'categoria-por-archivo',
+    titulo: 'No somos los únicos: la categoría trabaja por archivo',
+    cuerpo:
+      'Conciliac, uno de los especialistas regionales, se integra por API con los bancos principales y por Interbanking, y aun así lista la ingesta de archivos como vía de primera clase: «APIs, file ingestion, database connections». Asentia, argentina y competidora directa, dice que su mayor impacto es justamente «cuando la conciliación depende de extractos, ERP y varias planillas manuales».\n\nNinguno promete conexión directa con todos los bancos, porque en Argentina no hay con qué. El archivo no es una carencia nuestra: es la única vía que cubre a todos los bancos, incluidos los regionales.\n\nLos nombres son para vos. Frente al cliente no hace falta citarlos: alcanza con el argumento.',
+    frase:
+      'Fijate que nadie que haga esto en serio promete conectarse directo a todos los bancos. No es que no sepan: es que acá no se puede. Por eso trabajamos con el extracto, que es lo que cubre a todos.',
+    tags: ['competencia', 'conciliac', 'asentia', 'archivo', 'categoria', 'mercado', 'api'],
   },
 ]
 

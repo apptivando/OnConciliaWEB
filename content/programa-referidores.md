@@ -62,8 +62,8 @@ Comisión durante doce meses por cada cliente.
 
 | | |
 |---|---|
-| **$267.000** | Por cada implementación grande cerrada, de una sola vez |
-| **$333.000** | Por mes con diez clientes activos en cartera |
+| **$267.000** | Por cada puesta en marcha Enterprise cerrada, de una sola vez |
+| **$327.000** | Por mes con diez clientes activos en cartera |
 | **30%** | Comisión máxima, sobre suscripción y sobre servicios |
 
 La comisión sube con tu cartera y aplica a todos tus clientes, no sólo a los nuevos.
@@ -78,18 +78,23 @@ La comisión sube con tu cartera y aplica a todos tus clientes, no sólo a los n
 
 | Cartera | Facturación mensual | Tu comisión | Por mes |
 |---|---|---|---|
-| 1 cliente grande | $180.000 | 20% | $36.000 |
-| 3 chicos + 2 grandes | $555.000 | 25% | $138.750 |
-| **6 chicos + 4 grandes** | $1.110.000 | 30% | **$333.000** |
+| 1 cliente Pro | $130.000 | 20% | $26.000 |
+| 3 Base + 2 Pro | $455.000 | 25% | $113.750 |
+| **5 Base + 4 Pro + 1 Enterprise** | $1.090.000 | 30% | **$327.000** |
+
+Además, por cada cliente cerrado y por única vez, el 30% de la puesta en marcha:
+**$66.000 por un Pro y $267.000 por un Enterprise.** El plan Base se da de alta solo y
+no tiene costo de puesta en marcha, así que comisiona sólo sobre la suscripción.
 
 Todo se calcula sobre el precio de lista, aunque la venta se cierre con descuento por
 pago anticipado. Si conseguís que el cliente pague el año por adelantado —que es lo
 que más nos conviene a los dos— cobrás igual sobre el valor pleno.
 
-- La comisión de la suscripción se paga **durante los doce meses siguientes al alta** de cada cliente, mientras el cliente siga activo. Cumplido ese año, la cuenta pasa a ser de OnConcilia.
+- La comisión de la suscripción se paga **durante los doce meses siguientes al primer pago** de cada cliente, mientras siga activo. Cumplido ese año, la cuenta pasa a ser de OnConcilia.
 - Ese compromiso **se honra aunque dejes de trabajar con nosotros**. Lo acordado se cumple hasta completar los doce meses.
 - La comisión de la puesta en marcha se paga **cuando el cliente abona ese servicio**.
 - Se liquida **dentro de los diez días de cada mes**, contra factura, sobre lo efectivamente cobrado.
+- **Mientras dure el período de lanzamiento**, los clientes que traigas entran con 60 días sin cargo. Tu comisión empieza con su primer pago.
 
 ---
 
@@ -98,9 +103,9 @@ que más nos conviene a los dos— cobrás igual sobre el valor pleno.
 1. **Vos — Nos pasás el contacto.** Nombre de la empresa, con quién hay que hablar y, si podés, cuántas cuentas bancarias manejan. Un mensaje alcanza.
 2. **Nosotros — Hacemos la demo.** Coordinamos con el cliente y le mostramos el sistema con sus propios números si nos comparte un extracto. Podés participar o no, como prefieras.
 3. **Nosotros — Cotizamos y cerramos.** Presentamos la propuesta, negociamos y firmamos. No tenés que discutir precio ni condiciones si no querés.
-4. **Nosotros — Implementamos.** Cargamos el histórico, armamos las reglas de categorización de cada banco, capacitamos a la gente y acompañamos el primer cierre completo.
+4. **Nosotros — Lo ponemos en marcha.** En Base el cliente se da de alta solo, con videos y manual. En Pro lo acompañamos con un arranque asistido. En Enterprise hacemos la puesta en marcha completa: historial, reglas de cada banco, capacitación y primer cierre.
 5. **Nosotros — Facturamos, cobramos y damos soporte** durante toda la vida de la cuenta.
-6. **Vos — Cobrás.** El 30% de la puesta en marcha cuando el cliente la abona, y tu comisión mensual durante los doce meses siguientes.
+6. **Vos — Cobrás.** El 30% de la puesta en marcha cuando el cliente la abona, y tu comisión mensual durante los doce meses siguientes al primer pago.
 
 ---
 
@@ -109,7 +114,7 @@ que más nos conviene a los dos— cobrás igual sobre el valor pleno.
 El producto sirve desde una empresa con tres cuentas bancarias, pero **donde
 realmente se vende solo es de cinco cuentas para arriba**, sobre todo si además cobra
 con tarjeta o por Mercado Pago. Cuantas más fuentes hay que cruzar, más obvio es el
-ahorro.
+ahorro. Con seis bancos o más, o si quiere todos los módulos, es un Enterprise.
 
 ### Señales de que es un buen prospecto
 
@@ -158,15 +163,17 @@ información que juntaste.
 ## Precios
 
 No hace falta que los manejes de memoria ni que cotices vos. Están acá para que
-tengas dimensión del ticket y puedas responder si te preguntan.
+tengas dimensión del ticket y puedas responder si te preguntan. **Son precios
+finales, sin IVA adicional.**
 
-| | Base | Pro |
-|---|---|---|
-| **Para** | Empresa de uno a tres bancos | Empresa multi-banco con equipo administrativo |
-| **Suscripción** | **$65.000 / mes + IVA** | **$180.000 / mes + IVA** |
-| Cuentas bancarias | 3 | 10 |
-| Usuarios | 3 | 8 |
-| Puesta en marcha | $390.000 | $890.000 |
+| | Base | Pro | Enterprise |
+|---|---|---|---|
+| **Para** | Empresa de uno a tres bancos | Empresa multi-banco con equipo administrativo | Seis bancos o más, o todos los módulos |
+| **Suscripción** | **$65.000 / mes** | **$130.000 / mes** | **$245.000 / mes** |
+| Cuentas | 3, billetera incluida | 5 bancos + 1 billetera | 10 bancos + 1 billetera |
+| Usuarios | 3 | 8 | 15 |
+| Módulos | — | Opcionales | Los tres incluidos |
+| Puesta en marcha | Sin cargo, se da de alta solo | $220.000, arranque asistido | $890.000, completa |
 
 ### Módulos que se suman al plan Pro
 
@@ -176,7 +183,9 @@ tengas dimensión del ticket y puedas responder si te preguntan.
 | Mercado Pago | Movimientos de la billetera cruzados contra la cuenta | $20.000 |
 | Comprobantes | Lectura automática y cruce contra el extracto | $20.000 |
 | ↳ con canal de WhatsApp | El vendedor manda la foto y el comprobante entra solo | $45.000 |
-| **Los tres juntos** | Con el canal de WhatsApp incluido | **$75.000** |
+
+Si el cliente quiere los tres módulos, Enterprise ya los incluye: por $30.000 más que
+Pro con los tres módulos sueltos, tiene el doble de bancos y siete usuarios más.
 
 ### Formas de pago
 
@@ -202,10 +211,10 @@ contratos de alquiler, así que el cliente puede verificarlo por su cuenta.
 - **Sin objetivos de venta ni mínimos.** Traés lo que puedas, cuando puedas.
 - **Todo el material de venta lo ponemos nosotros**, y participamos de la reunión con el cliente si te sirve tener respaldo técnico en la mesa.
 
-> **Lo único que te va a limitar.** Cada implementación lleva trabajo real: cargamos
-> hasta un año de historial de cada cuenta, armamos las reglas de categorización de
-> cada banco y capacitamos a la gente. Eso significa que hay una cantidad limitada de
-> altas que podemos hacer por mes.
+> **Lo único que te va a limitar.** Las puestas en marcha de Pro y Enterprise llevan
+> trabajo real: cargamos historial, armamos las reglas de categorización de cada
+> banco y capacitamos a la gente. Eso significa que hay una cantidad limitada de altas
+> de esos planes que podemos hacer por mes.
 >
 > Si en un momento la demanda supera esa capacidad, los clientes nuevos pasan a una
 > **cola de espera con fecha de implementación pactada de antemano**. La venta no se
@@ -221,5 +230,5 @@ No hace falta firmar nada antes de la primera oportunidad ni prepararte con mate
 Pensá en dos o tres empresas que conozcas que trabajen con varios bancos, hacé las
 cuatro preguntas de más arriba y pasanos lo que te digan.
 
-De ahí en adelante nos ocupamos nosotros, y vos empezás a cobrar apenas el cliente
-abona la puesta en marcha.
+De ahí en adelante nos ocupamos nosotros, y vos empezás a cobrar con el primer pago
+del cliente.

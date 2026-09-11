@@ -49,14 +49,15 @@ export const DOCUMENTOS: Documento[] = [
     slug: 'objeciones',
     titulo: 'Objeciones comerciales',
     resumen:
-      'Por qué trabajamos con el extracto descargado y no con una API, y cómo convertir esa objeción en ventaja. Incluye la tarjeta resumen, siete objeciones con respuesta literal y los diez argumentos de fondo.',
+      'Por qué trabajamos con el extracto descargado y no con una API, y cómo convertir esa objeción en ventaja. Incluye la tarjeta resumen, diez objeciones con respuesta literal y once argumentos de fondo.',
     cuando: 'En la reunión, apenas aparece el tema. Buscá la objeción y leé la respuesta.',
     nivel: 'interno',
     grupo: 'vender',
     tags: [
       'api', 'banco', 'automatico', 'seguridad', 'credenciales', 'interbanking',
       'belvo', 'scraping', 'contador', 'manual', 'mercado pago', 'objecion',
-      'reencuadre', 'open banking', 'extracto',
+      'reencuadre', 'open banking', 'extracto', 'excel', 'planilla', 'ia',
+      'privacidad', 'datos', 'competencia',
     ],
   },
   {
@@ -69,8 +70,8 @@ export const DOCUMENTOS: Documento[] = [
     grupo: 'acordar',
     archivo: 'programa-referidores.md',
     tags: [
-      'referidor', 'comision', 'precios', 'planes', 'base', 'pro', 'modulos',
-      'puesta en marcha', 'formas de pago', 'cola de espera', 'calificacion',
+      'referidor', 'comision', 'precios', 'planes', 'base', 'pro', 'enterprise',
+      'modulos', 'puesta en marcha', 'formas de pago', 'cola de espera', 'calificacion',
     ],
   },
   {
@@ -85,7 +86,8 @@ export const DOCUMENTOS: Documento[] = [
     tags: [
       'precio', 'margen', 'comision', 'capacidad', 'automatizacion', 'icl',
       'ajuste', 'benchmark', 'fonder', 'asentia', 'conciliac', 'roi', 'cct',
-      'puesta en marcha', 'horas',
+      'puesta en marcha', 'horas', 'base', 'pro', 'enterprise', 'fundador',
+      'monotributo', 'factura c', 'senuelo', 'ancla',
     ],
   },
   {
