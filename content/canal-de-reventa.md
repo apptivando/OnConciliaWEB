@@ -72,10 +72,10 @@ del medio.
 | **Precio sugerido** | **$65.000 / mes** | **$130.000 / mes** | **$245.000 / mes** |
 | Piso | $52.000 | $105.000 | $195.000 |
 | Techo | $85.000 | $160.000 | $310.000 |
-| Cuentas | 3, billetera incluida | 5 bancos + 1 billetera | 10 bancos + 1 billetera |
+| Cuentas | 3 bancos + 1 billetera | 5 bancos + 1 billetera | 10 bancos + 1 billetera |
 | Administradores | 1 | 3 | 5 |
 | Editores | 2 | 5 | 10 |
-| Módulos | — | Opcionales, sueltos | Los tres incluidos |
+| Módulos | Mercado Pago | Mercado Pago + opcionales | Todos incluidos |
 | Soporte | Por mail | Por mail | Prioritario + revisión trimestral de reglas |
 | Puesta en marcha | Sin cargo, autoservicio | Arranque asistido, $220.000 | Completa, $890.000 |
 
@@ -86,19 +86,23 @@ tope anual de la categoría K del monotributo es de $126,6 millones desde agosto
 2026: a ticket promedio son unos 70 a 80 clientes, por encima del techo operativo.
 Ojo: el tope es por persona y suma todo lo que se facture con el mismo CUIT.
 
-### Billeteras
+### Billeteras y Mercado Pago
 
-En Base la billetera ocupa uno de los tres lugares. En Pro y Enterprise hay un lugar
-extra reservado para ella. Importar los movimientos de una billetera es parte del
-módulo de Mercado Pago, que es de Pro: en la práctica, conciliar una billetera
-implica estar en Pro.
+Todos los planes suman un lugar para la billetera de Mercado Pago, aparte de sus
+cuentas bancarias: se usa para cargar el saldo diario en Saldos. Y el módulo de
+Mercado Pago —importación y enriquecimiento de los movimientos de la billetera—
+está **incluido en los tres planes**.
 
-### Módulos, en Pro
+Ninguno de los sistemas del segmento lo cobra aparte: Xubio incluye sus
+integraciones en todos los planes, y Colppy desde sus planes medios. Cobrarlo como
+módulo nos dejaba fuera de mercado justo en Base, que es el plan de la pyme que más
+cobra por Mercado Pago.
+
+### Módulos opcionales, en Pro
 
 | Módulo | Qué resuelve | Precio / mes |
 |---|---|---|
 | Liquidaciones | Liquidaciones de tarjeta con desglose de aranceles, IVA y retenciones | $20.000 |
-| Mercado Pago | Importación y enriquecimiento de movimientos de la billetera | $20.000 |
 | Comprobantes | Lectura con IA y match contra el extracto, cargados desde la app | $20.000 |
 | ↳ con canal de WhatsApp | Variante del mismo módulo: el vendedor manda la foto y el comprobante entra solo | $45.000 |
 
@@ -107,7 +111,7 @@ más del doble porque exige un **servidor dedicado corriendo permanentemente** p
 sostener la sesión del agente de mensajería: es el único módulo con costo de
 infraestructura propio y continuo.
 
-**No hay bundle.** En Pro los módulos se venden sueltos, y "los tres juntos" es
+**No hay bundle.** En Pro los dos módulos se venden sueltos, y "los dos juntos" es
 Enterprise, que los incluye con el canal de WhatsApp.
 
 ### Dónde está el señuelo
@@ -116,13 +120,17 @@ La asimetría dominada vive en la configuración de módulos, no en un plan inve
 
 | Configuración | Precio / mes | Cuentas | Usuarios |
 |---|---|---|---|
-| Pro + los tres módulos | $215.000 | 5 bancos + 1 billetera | 8 |
+| Pro + los dos módulos | $195.000 | 5 bancos + 1 billetera | 8 |
 | **Enterprise** | **$245.000** | **10 bancos + 1 billetera** | **15** |
 
-Treinta mil pesos más por el doble de bancos y siete usuarios más. Nadie que quiera
-los tres módulos debería quedarse en Pro, y no hay pérdida: ahí se factura
+Cincuenta mil pesos más por el doble de bancos y siete usuarios más. Nadie que
+quiera los dos módulos debería quedarse en Pro, y no hay pérdida: ahí se factura
 Enterprise. El que quiere un solo módulo se queda en Pro a $150.000, que es la venta
 que buscamos.
+
+Con Mercado Pago incluido, la diferencia pasó de $30.000 a $50.000: el señuelo
+sigue funcionando, con menos filo. Si hiciera falta, se ajusta el precio de
+Enterprise.
 
 > **Enterprise tiene que mostrar su precio**, en la landing y en la hoja de precios,
 > aunque el botón diga "Hablemos". Si dice sólo "consultar", el ancla deja de
@@ -149,8 +157,8 @@ así que ahí la diferencia no aplica.
 
 **Precio fundador para los betas: 30% sobre lista durante los primeros doce meses**,
 no acumulable con el descuento por medio de pago. Premia el feedback y facilita la
-conversación del día 30. ADN (Pro con Mercado Pago) queda en $105.000; Centroficina
-(Enterprise) en $171.500.
+conversación del día 30. ADN (Pro) queda en $91.000; Centroficina (Enterprise) en
+$171.500.
 
 **Prueba de 15 días con tarjeta**, cuando termine la beta. El cliente se suscribe al
 registrarse y el primer débito ocurre solo al día 15.
@@ -292,28 +300,26 @@ Los precios se estimaron a $28.000 la hora de referencia y se cotizan cerrados.
 
 ### Cotización tipo — Pro
 
-Empresa con 4 bancos y Mercado Pago, plan Pro con el módulo de Mercado Pago, año
-anticipado.
+Empresa con 4 bancos y Mercado Pago, plan Pro, año anticipado.
 
 | Concepto | Detalle | Importe |
 |---|---|---|
-| Suscripción Pro | 12 meses × $130.000 | $1.560.000 |
-| Módulo Mercado Pago | 12 meses × $20.000 | $240.000 |
+| Suscripción Pro | 12 meses × $130.000, Mercado Pago incluido | $1.560.000 |
 | Arranque asistido | | $220.000 |
-| **Subtotal a precio de lista** | | **$2.020.000** |
-| Descuento por año anticipado | 10% sobre suscripción y módulo | −$180.000 |
+| **Subtotal a precio de lista** | | **$1.780.000** |
+| Descuento por año anticipado | 10% sobre la suscripción | −$156.000 |
 | Bonificación del arranque | 50% por transferencia anual | −$110.000 |
-| **Total del primer año** | | **$1.730.000** |
+| **Total del primer año** | | **$1.514.000** |
 
-La misma operación por débito automático mensual: $1.620.000 en doce cuotas de
-$135.000, más $154.000 de arranque con la bonificación del 30%. Total $1.774.000. Con
+La misma operación por débito automático mensual: $1.404.000 en doce cuotas de
+$117.000, más $154.000 de arranque con la bonificación del 30%. Total $1.558.000. Con
 una puesta en marcha liviana la diferencia a favor del anticipo se achica a $44.000:
 el argumento para empujarlo pasa a ser la caja anticipada más que el ahorro del
 cliente.
 
 ### Cotización tipo — Enterprise
 
-Empresa con 5 bancos y Mercado Pago que quiere los tres módulos, año anticipado.
+Empresa con 5 bancos y Mercado Pago que quiere los dos módulos, año anticipado.
 
 | Concepto | Detalle | Importe |
 |---|---|---|
@@ -387,7 +393,8 @@ mensuales**, más el 30% de cada puesta en marcha nueva.
 
 ## 8. Qué queda para Apptivando
 
-Primer año de un cliente, con referidor en el tramo del 30%. Pro sin módulos.
+Primer año de un cliente, con referidor en el tramo del 30%. Pro sin módulos
+opcionales.
 
 | Concepto | Pro anticipado | Pro débito | Enterprise anticipado | Enterprise débito |
 |---|---|---|---|---|
@@ -462,8 +469,8 @@ perder ventas, significa arruinar implementaciones ya vendidas.
 | Definición | Resolución |
 |---|---|
 | Planes | Base $65.000, Pro $130.000, Enterprise $245.000, precios finales, con piso y techo para negociar. |
-| Billeteras | En Base ocupan uno de los tres lugares; en Pro y Enterprise hay uno extra. |
-| Módulos | Sueltos en Pro, a $20.000 (Comprobantes con WhatsApp, $45.000). Los tres incluidos en Enterprise. |
+| Billeteras | Todos los planes suman una billetera de Mercado Pago, aparte de las cuentas bancarias. |
+| Módulos | Mercado Pago incluido en todos los planes. Liquidaciones y Comprobantes sueltos en Pro, a $20.000 (Comprobantes con WhatsApp, $45.000); incluidos en Enterprise. |
 | Puesta en marcha | Base sin cargo; Pro $220.000; Enterprise $890.000. |
 | Medios de pago | Sólo transferencia anual anticipada (−10% y −50%) o débito automático mensual (−10% y −30%). |
 | Precio fundador | 30% sobre lista durante doce meses para los betas, no acumulable con el descuento por medio de pago. |
