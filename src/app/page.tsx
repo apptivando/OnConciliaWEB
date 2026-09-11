@@ -200,10 +200,10 @@ export default function Home() {
                 📎
               </div>
               <h3 className="font-semibold text-navy text-base mb-2">
-                Plazos fijos, préstamos y echeqs — todo en un lugar
+                Plazos fijos, fondos y préstamos — todo en un lugar
               </h3>
               <p className="text-slate-600 text-sm leading-relaxed mb-3">
-                Registrá tus inversiones y préstamos y vinculálos con los movimientos reales de la cuenta. OnConcilia te muestra cuánto tenés invertido, qué cuotas vencen y qué cheques están pendientes.
+                Registrá tus inversiones y préstamos y vinculalos con los movimientos reales de la cuenta. OnConcilia te muestra cuánto tenés invertido y qué cuotas vencen.
               </p>
               <span className="inline-block bg-amber-50 text-amber-700 text-xs font-medium px-3 py-1 rounded-full">
                 Sin abrir el portal de cada banco
