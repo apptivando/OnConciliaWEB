@@ -280,13 +280,13 @@ export default function Home() {
                 💳
               </div>
               <h3 className="font-semibold text-navy text-base mb-2">
-                Mercado Pago y Mercado Libre, junto a lo del banco
+                Mercado Pago, junto a lo del banco
               </h3>
               <p className="text-slate-600 text-sm leading-relaxed mb-3">
                 Conectás la cuenta y OnConcilia averigua de cada venta si fue
-                por QR, Point, link de pago o Mercado Libre, con el desglose de
-                comisiones e impuestos de cada operación. Las compras y los
-                costos de venta de Mercado Libre quedan separados de lo demás.
+                por QR, Point o link de pago, con el desglose de comisiones e
+                impuestos de cada operación. Bruto, retenciones y neto, en el
+                mismo lugar que los movimientos del banco.
               </p>
               <span className="inline-block bg-violet-50 text-violet-700 text-xs font-medium px-3 py-1 rounded-full">
                 Incluido en todos los planes

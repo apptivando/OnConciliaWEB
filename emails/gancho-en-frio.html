@@ -1,0 +1,418 @@
+<!doctype html>
+<title>Gancho en Frío</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --canvas: #d9dce1;
+    --surface: #f5f6f8;
+    --surface-2: #ebedf0;
+    --paper: #ffffff;
+    --ink: #1a1d24;
+    --ink-muted: #5b616e;
+    --ink-faint: #868c98;
+    --line: #c2c6cd;
+    --line-strong: #a8adb6;
+    --accent: #a83a2e;
+    --ok: #3f7d5c;
+    --shadow: 0 1px 2px rgba(20, 22, 28, 0.06), 0 12px 28px -12px rgba(20, 22, 28, 0.22);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --canvas: #16181d; --surface: #202329; --surface-2: #262a31; --paper: #eceef1;
+      --ink: #e8eaee; --ink-muted: #9aa0ac; --ink-faint: #6c7280;
+      --line: #34383f; --line-strong: #454a53; --accent: #d9695a; --ok: #7fc9a0;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 16px 32px -14px rgba(0,0,0,.55);
+    }
+  }
+  :root[data-theme="dark"] {
+    --canvas: #16181d; --surface: #202329; --surface-2: #262a31; --paper: #eceef1;
+    --ink: #e8eaee; --ink-muted: #9aa0ac; --ink-faint: #6c7280;
+    --line: #34383f; --line-strong: #454a53; --accent: #d9695a; --ok: #7fc9a0;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 16px 32px -14px rgba(0,0,0,.55);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: "Public Sans", -apple-system, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono { font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; }
+
+  .topbar {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
+    padding: 22px clamp(18px, 4vw, 44px) 16px;
+    border-bottom: 1px solid var(--line);
+    flex-wrap: wrap;
+  }
+  .topbar .brand { font-size: 15px; font-weight: 700; letter-spacing: 0.01em; }
+  .topbar .brand .mark { color: var(--accent); }
+  .topbar .sub {
+    font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-size: 11px;
+    color: var(--ink-faint); letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .theme-toggle {
+    font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-size: 10.5px;
+    letter-spacing: 0.03em; color: var(--ink-faint); background: var(--surface);
+    border: 1px solid var(--line); border-radius: 2px; padding: 5px 9px; cursor: pointer;
+  }
+  .theme-toggle:hover { border-color: var(--line-strong); color: var(--ink); }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr);
+    gap: clamp(16px, 2.4vw, 28px);
+    padding: clamp(18px, 3vw, 32px) clamp(18px, 4vw, 44px) 48px;
+    align-items: start;
+  }
+  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+
+  .rail-label {
+    font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-size: 11px;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint);
+    margin: 0 0 10px 2px;
+  }
+
+  /* --- Panel de datos del prospecto de ejemplo --- */
+  .sample {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 3px;
+    padding: 14px; margin-bottom: 18px;
+  }
+  .sample label {
+    display: block; font-family: "IBM Plex Mono", monospace; font-size: 10px;
+    letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-faint);
+    margin: 10px 0 4px;
+  }
+  .sample label:first-child { margin-top: 0; }
+  .sample input {
+    width: 100%; font: inherit; font-size: 13px; color: var(--ink);
+    background: var(--paper); border: 1px solid var(--line); border-radius: 2px;
+    padding: 7px 9px;
+  }
+  .sample input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .clean {
+    margin: 8px 0 0; font-family: "IBM Plex Mono", monospace; font-size: 11px;
+    line-height: 1.5; color: var(--ink-muted);
+  }
+  .clean b { color: var(--ok); font-weight: 600; }
+  .chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+  .cupo-toggle { display: flex; gap: 5px; }
+  .cupo-toggle button {
+    flex: 1; font-family: "IBM Plex Mono", monospace; font-size: 10.5px;
+    color: var(--ink-muted); background: var(--paper); border: 1px solid var(--line);
+    border-radius: 2px; padding: 6px 4px; cursor: pointer; line-height: 1.3;
+  }
+  .cupo-toggle button:hover { border-color: var(--line-strong); }
+  .cupo-toggle button[aria-current="true"] {
+    background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600;
+  }
+  .chip {
+    font-family: "IBM Plex Mono", monospace; font-size: 10px; color: var(--ink-muted);
+    background: var(--paper); border: 1px solid var(--line); border-radius: 999px;
+    padding: 3px 9px; cursor: pointer;
+  }
+  .chip:hover { border-color: var(--accent); color: var(--ink); }
+
+  .frames { display: flex; flex-direction: column; gap: 10px; }
+  .frame {
+    text-align: left; display: flex; gap: 12px; align-items: flex-start; width: 100%;
+    padding: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 3px;
+    cursor: pointer; font-family: inherit; color: inherit; position: relative;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .frame:hover { border-color: var(--line-strong); }
+  .frame::before {
+    content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px;
+    background: transparent; border-radius: 0 2px 2px 0; transition: background .15s ease;
+  }
+  .frame[aria-current="true"] { background: var(--surface-2); border-color: var(--line-strong); }
+  .frame[aria-current="true"]::before { background: var(--accent); }
+  .frame .letter {
+    width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: "IBM Plex Mono", monospace; font-size: 12px; font-weight: 600;
+    background: var(--surface-2); color: var(--ink-muted); border: 1px solid var(--line);
+  }
+  .frame[aria-current="true"] .letter { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .frame .meta { min-width: 0; flex: 1; }
+  .frame .strategy {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .04em;
+    text-transform: uppercase; color: var(--ink-faint); margin-bottom: 4px;
+  }
+  .frame .subj { font-size: 13px; line-height: 1.4; color: var(--ink); font-weight: 500; }
+  .frame .len { font-family: "IBM Plex Mono", monospace; font-size: 10px; color: var(--ink-faint); margin-top: 4px; }
+  .frame .len.warn { color: var(--accent); }
+
+  .rail-foot {
+    margin-top: 18px; padding: 13px 14px; border: 1px dashed var(--line-strong);
+    border-radius: 3px; font-size: 12px; line-height: 1.55; color: var(--ink-muted);
+  }
+  .rail-foot b { color: var(--ink); }
+  .rail-foot code {
+    font-family: "IBM Plex Mono", monospace; font-size: 11px;
+    background: var(--surface-2); padding: 1px 5px; border-radius: 2px;
+  }
+
+  .viewer { min-width: 0; }
+  .envelope {
+    background: var(--surface); border: 1px solid var(--line); border-bottom: none;
+    border-radius: 3px 3px 0 0; padding: 16px 20px;
+  }
+  .envelope dl { display: grid; grid-template-columns: 68px minmax(0,1fr); row-gap: 5px; column-gap: 10px; margin: 0; }
+  .envelope dt {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--ink-faint); padding-top: 1px;
+  }
+  .envelope dd { margin: 0; font-size: 13px; color: var(--ink); overflow-wrap: anywhere; }
+  .envelope dd.subject { font-weight: 600; }
+
+  .frame-window {
+    background: var(--surface-2); border: 1px solid var(--line);
+    padding: clamp(14px, 2.4vw, 26px); display: flex; justify-content: center;
+  }
+  .frame-window .paper {
+    width: 100%; max-width: 600px; background: var(--paper); border-radius: 8px;
+    box-shadow: var(--shadow); overflow: hidden;
+  }
+  .frame-window iframe { width: 100%; border: none; background: transparent; display: block; }
+
+  .specs {
+    background: var(--surface); border: 1px solid var(--line); border-top: none;
+    border-radius: 0 0 3px 3px; padding: 11px 20px;
+    display: flex; flex-wrap: wrap; gap: 4px 22px;
+    font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--ink-muted);
+  }
+  .specs b { color: var(--ink); font-weight: 600; }
+  .specs .ok { color: var(--ok); }
+  .specs .fail { color: var(--accent); }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="topbar">
+  <div>
+    <div class="brand">Gancho en <span class="mark">Frío</span></div>
+    <div class="sub">A/B/C de asunto · comercios del buscador</div>
+  </div>
+  <button class="theme-toggle" id="themeToggle" type="button">tema: sistema</button>
+</div>
+
+<div class="layout">
+  <div>
+    <div class="sample">
+      <label for="inEmpresa">Nombre tal como lo da Google Places</label>
+      <input id="inEmpresa" type="text" value="Gitana Plus Size - Peatonal Paraná">
+      <p class="clean" id="cleanNote"></p>
+      <div class="chips" id="chips"></div>
+
+      <label>Cupo de la beta</label>
+      <div class="cupo-toggle" id="cupoToggle">
+        <button type="button" data-cupo="false" aria-current="true">Abierto (&lt;20)</button>
+        <button type="button" data-cupo="true" aria-current="false">Lleno (20 beta_activo)</button>
+      </div>
+    </div>
+
+    <p class="rail-label">3 variantes, mismo cuerpo</p>
+    <div class="frames" id="frames"></div>
+    <div class="rail-foot">
+      El cuerpo es <b>el mismo en las 3</b> — lo que cambia es el gancho del
+      asunto. Se asigna solo al buscar (rota A/B/C dentro de cada tanda de
+      resultados) y se manda taggeado en Brevo para comparar aperturas por
+      variante.
+      <br><br>
+      El link de "coordinar" ya existe y funciona (<code>/coordinar/[id]</code>)
+      — pide nombre, teléfono y horario preferido, y actualiza el prospecto
+      real al enviarse. El de acá tiene un id de relleno, no es un prospecto
+      real.
+    </div>
+  </div>
+
+  <div class="viewer">
+    <div class="envelope">
+      <dl>
+        <dt>De</dt>
+        <dd>Guillermo de OnConcilia &lt;guillermo@onconcilia.com&gt;</dd>
+        <dt>Para</dt>
+        <dd id="envPara">—</dd>
+        <dt>Asunto</dt>
+        <dd class="subject" id="envAsunto">—</dd>
+      </dl>
+    </div>
+    <div class="frame-window">
+      <div class="paper"><iframe id="mailFrame" title="Vista previa del email" scrolling="no"></iframe></div>
+    </div>
+    <div class="specs" id="specs"></div>
+  </div>
+</div>
+
+<script>
+  // Espejo exacto de src/lib/prospects/buscar.ts (nombreComercial) y
+  // src/lib/mensajes.ts (ASUNTOS_COMERCIO, acortarEmpresa,
+  // TEMPLATES.comercio[1]) — corregido 09/09/2026: el gancho es sobre el
+  // banco (conciliación), no sobre "cerrar caja" (eso es otro problema,
+  // de POS/retail, que OnConcilia no resuelve). Y de cómo
+  // /api/outreach/send arma el HTML del envío real — sin card, sin header
+  // de marca: system-ui + pre-wrap, como un mail personal. Si esos
+  // archivos cambian, esto se desincroniza y hay que actualizarlo a mano.
+
+  function nombreComercial(raw) {
+    const sinParentesis = raw.replace(/\s*\([^)]*\)\s*$/, "").trim();
+    const cortado = sinParentesis.split(/\s+[-–—]\s+/)[0].trim();
+    return cortado.length >= 3 ? cortado : sinParentesis;
+  }
+  function acortarEmpresa(e) {
+    return e.length > 28 ? e.slice(0, 28).trim() + "…" : e;
+  }
+  const ESTRATEGIA = { A: "Dolor / pérdida", B: "Beneficio directo", C: "Curiosidad" };
+  const ASUNTOS = {
+    A: (e) => `${acortarEmpresa(e)}, ¿cuánto perdés con los movimientos del banco?`,
+    B: (e) => `${acortarEmpresa(e)}: conciliá el banco en minutos, no en horas`,
+    C: (e) => `Una idea rápida para ${acortarEmpresa(e)}`,
+  };
+  function cuerpo(empresa, cupoLleno) {
+    const oferta = cupoLleno
+      ? `Podés probarlo gratis durante 15 días, sin tarjeta ni compromiso.`
+      : `Estamos en beta — buscamos los primeros comercios para probarlo sin costo durante 60 días, a cambio de que nos cuentes qué te sirve y qué no.`;
+    return `Hola,
+
+¿Cuánto perdés por no revisar bien los movimientos del banco? Entre comisiones que pasan sin que nadie las mire, movimientos que no cuadran con lo que tenés anotado y errores que se descubren semanas después, conciliar el banco a mano es un problema que crece con cada cuenta que sumás.
+
+Armamos OnConcilia para resolver justo eso: cruza automáticamente el extracto de ${empresa} (y el de Mercado Pago, si cobrás por QR o link de pago) contra tus movimientos, categoriza todo solo, y te deja ver únicamente lo que necesita tu atención.
+
+${oferta}
+
+Si te interesa, dejame tu teléfono y un horario que te quede bien acá: https://onconcilia.com/coordinar/8f2a1c9e-... — te llamo para coordinar en 15 minutos. Si no es el momento, avisame y no te vuelvo a escribir.
+
+Saludos,
+Guillermo
+OnConcilia
+guillermo@onconcilia.com`;
+  }
+
+  // Nombres reales tal como los da Places, antes de limpiar — para probar
+  // que `nombreComercial()` corta bien el calificador de sucursal.
+  const EJEMPLOS = [
+    "Gitana Plus Size - Peatonal Paraná",
+    "TIENDACRY - ROPA DE HOMBRE - STREETWEAR",
+    "La Tienda",
+    "OFX - Tienda de Ropa - Nueva Cordoba",
+  ];
+
+  const inEmpresa = document.getElementById("inEmpresa");
+  const cleanNote = document.getElementById("cleanNote");
+  const railEl = document.getElementById("frames");
+  const chipsEl = document.getElementById("chips");
+  const cupoToggle = document.getElementById("cupoToggle");
+  const frameEl = document.getElementById("mailFrame");
+  const specsEl = document.getElementById("specs");
+  const letras = ["A", "B", "C"];
+  let current = "A";
+  let cupoLleno = false;
+
+  cupoToggle.querySelectorAll("button").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      cupoLleno = btn.dataset.cupo === "true";
+      cupoToggle.querySelectorAll("button").forEach((b) => b.setAttribute("aria-current", String(b === btn)));
+      renderAll();
+    });
+  });
+
+  function buildChips() {
+    EJEMPLOS.forEach((raw) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "chip";
+      b.textContent = raw.length > 26 ? raw.slice(0, 26) + "…" : raw;
+      b.title = raw;
+      b.addEventListener("click", () => {
+        inEmpresa.value = raw;
+        renderAll();
+      });
+      chipsEl.appendChild(b);
+    });
+  }
+
+  function buildRail() {
+    railEl.innerHTML = "";
+    letras.forEach((L) => {
+      const btn = document.createElement("button");
+      btn.className = "frame";
+      btn.type = "button";
+      btn.dataset.letra = L;
+      railEl.appendChild(btn);
+    });
+  }
+
+  function renderAll() {
+    const raw = inEmpresa.value.trim() || "(sin nombre)";
+    const empresa = nombreComercial(raw);
+
+    if (empresa !== raw) {
+      cleanNote.innerHTML = `Se guarda como <b>"${empresa}"</b> — el calificador de sucursal no se usa en el email.`;
+    } else {
+      cleanNote.innerHTML = `Nombre ya limpio, se usa tal cual.`;
+    }
+
+    [...railEl.children].forEach((btn) => {
+      const L = btn.dataset.letra;
+      const asunto = ASUNTOS[L](empresa);
+      const over = asunto.length > 60;
+      btn.setAttribute("aria-current", L === current ? "true" : "false");
+      btn.innerHTML = `
+        <span class="letter">${L}</span>
+        <span class="meta">
+          <div class="strategy">${ESTRATEGIA[L]}</div>
+          <div class="subj">${asunto}</div>
+          <div class="len ${over ? "warn" : ""}">${asunto.length} caracteres${over ? " — largo para mobile" : ""}</div>
+        </span>
+      `;
+      btn.onclick = () => { current = L; renderAll(); };
+    });
+
+    document.getElementById("envPara").textContent = "contacto@" + empresa.toLowerCase().replace(/[^a-z0-9]+/g, "") + ".com.ar";
+    document.getElementById("envAsunto").textContent = ASUNTOS[current](empresa);
+
+    const body = cuerpo(empresa, cupoLleno);
+    const html = `<div style="font-family:system-ui,sans-serif;font-size:15px;line-height:1.7;color:#1e293b;white-space:pre-wrap">${body.replace(/</g, "&lt;")}</div>`;
+    frameEl.srcdoc = `<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0;padding:28px}</style></head><body>${html}</body></html>`;
+  }
+
+  frameEl.addEventListener("load", () => {
+    try {
+      const b = frameEl.contentDocument.body;
+      frameEl.style.height = b.scrollHeight + "px";
+      const text = b.innerText.trim();
+      const chars = text.length;
+      const words = text.split(/\s+/).filter(Boolean).length;
+      const empresa = nombreComercial(inEmpresa.value.trim() || "(sin nombre)");
+      const asunto = ASUNTOS[current](empresa);
+      const hasCta = /onconcilia\.com\/coordinar/i.test(text);
+      specsEl.innerHTML = `
+        <span><b>${chars}</b> caracteres de cuerpo · <b>${words}</b> palabras</span>
+        <span>asunto: <span class="${asunto.length > 60 ? "fail" : "ok"}">${asunto.length} car.</span></span>
+        <span>CTA: <span class="${hasCta ? "ok" : "fail"}">${hasCta ? "✓ presente" : "✗ falta"}</span></span>
+        <span>variante: <b>${current}</b> — ${ESTRATEGIA[current]}</span>
+      `;
+    } catch (e) { /* no-op */ }
+  });
+
+  inEmpresa.addEventListener("input", renderAll);
+
+  buildChips();
+  buildRail();
+  renderAll();
+
+  const toggle = document.getElementById("themeToggle");
+  const root = document.documentElement;
+  const labels = { system: "tema: sistema", light: "tema: claro", dark: "tema: oscuro" };
+  let mode = "system";
+  toggle.addEventListener("click", () => {
+    mode = mode === "system" ? "light" : mode === "light" ? "dark" : "system";
+    if (mode === "system") root.removeAttribute("data-theme");
+    else root.setAttribute("data-theme", mode);
+    toggle.textContent = labels[mode];
+  });
+</script>

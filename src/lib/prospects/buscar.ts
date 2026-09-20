@@ -87,7 +87,7 @@ function placeToRow(place: PlaceResult, ciudad: string, index: number): Record<s
     google_place_id: place.id,
     direccion: place.address,
     maps_url: place.mapsUrl,
-    localidad: normalizarCiudad(ciudad),
+    localidad: ciudad,
     rating: place.rating,
     reviews_count: place.reviewsCount,
     prioridad_contacto: prioridad,
@@ -109,7 +109,14 @@ export async function buscarProspectos(
     throw new Error("Falta GOOGLE_PLACES_API_KEY (o GOOGLE_PLACES_MOCK=1 para probar)");
   }
 
-  const query = `${opts.rubro} en ${opts.ciudad}`;
+  // Se normaliza una sola vez, acá arriba, y se usa el nombre canónico tanto
+  // en los prospectos como en el log de búsquedas. No es cosmético: el cron
+  // deduce por qué ciudad va **contando filas de `prospect_searches` por
+  // ciudad**, así que un "Cordobá" mal tipeado desde el buscador manual haría
+  // que Córdoba nunca registre ese rubro como buscado.
+  const ciudad = normalizarCiudad(opts.ciudad);
+
+  const query = `${opts.rubro} en ${ciudad}`;
   let results: PlaceResult[];
   try {
     results = await searchPlaces({ query, includedType: opts.tipo, maxResults: opts.cantidad });
@@ -119,17 +126,18 @@ export async function buscarProspectos(
   }
 
   const rows = results
-    .map((p, i) => placeToRow(p, opts.ciudad, i))
+    .map((p, i) => placeToRow(p, ciudad, i))
     .filter((r): r is Record<string, unknown> => r !== null);
   const descartados = results.length - rows.length;
 
-  // Log de la búsqueda — control de gasto, no afecta el resultado si falla.
+  // Log de la búsqueda — control de gasto, y de paso el registro del que el
+  // cron deduce qué rubros ya se buscaron en cada ciudad.
   await supabase
     .from("prospect_searches")
     .insert({
       query,
       rubro: opts.rubro,
-      ciudad: opts.ciudad,
+      ciudad,
       resultados: results.length,
       paginas_consumidas: Math.max(1, Math.ceil(results.length / 20)),
     })

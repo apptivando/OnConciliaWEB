@@ -1,0 +1,144 @@
+<title>Coordinar Preview</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  // Mismo theme que tailwind.config.ts del proyecto real — para que estas
+  // clases (bg-navy, text-brand, bg-accent) rindan exactamente igual acá.
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          navy: "#0F1F3D",
+          "navy-light": "#1a3260",
+          brand: "#2563EB",
+          "brand-hover": "#1d4ed8",
+          accent: "#34D399",
+        },
+      },
+    },
+  }
+</script>
+<style>
+  body { background: #0F1F3D; }
+  .banner {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    background: #1a3260; border-bottom: 1px solid rgba(255,255,255,.1);
+    color: #94a3b8; font-family: ui-monospace, "IBM Plex Mono", Menlo, monospace;
+    font-size: 11px; text-align: center; padding: 7px 12px; letter-spacing: .02em;
+  }
+  .banner b { color: #e2e8f0; }
+  main { padding-top: 44px; }
+</style>
+
+<div class="banner">
+  Vista previa de <b>/coordinar/[id]</b> — mismas clases de Tailwind que el componente real, sin pegarle a la API.
+</div>
+
+<main class="min-h-screen bg-navy flex flex-col items-center justify-center px-4 py-12">
+  <div class="w-full max-w-md">
+    <div class="text-center mb-8">
+      <div class="text-white font-bold text-2xl tracking-tight mb-4">On<span class="text-accent">Concilia</span></div>
+      <h1 class="text-white text-xl font-bold mb-2">Coordinemos tu acceso</h1>
+      <p class="text-slate-400 text-sm">Para <span id="empresaLabel">La Tienda</span> · dejanos tu teléfono y un horario que te quede bien</p>
+    </div>
+
+    <div class="bg-white rounded-2xl p-6 shadow-xl" id="card"></div>
+
+    <p class="text-slate-600 text-xs text-center mt-4">Te llamamos para coordinar en 15 minutos · sin compromiso</p>
+  </div>
+</main>
+
+<script>
+  const HORARIOS = [
+    { value: "manana", label: "Mañana (9 a 13)" },
+    { value: "tarde", label: "Tarde (13 a 18)" },
+    { value: "cualquiera", label: "Cualquier horario" },
+  ];
+  const HORARIO_TEXTO = { manana: "por la mañana", tarde: "por la tarde", cualquiera: "cuando mejor te quede" };
+
+  let form = { nombre: "", telefono: "", horario: "cualquiera", nota: "" };
+  let estado = "idle"; // idle | enviando | enviado
+
+  const card = document.getElementById("card");
+
+  function renderIdle() {
+    card.innerHTML = `
+      <form class="flex flex-col gap-4" id="form">
+        <div>
+          <label class="text-xs font-medium text-slate-600 mb-1 block">Tu nombre *</label>
+          <input id="fNombre" required placeholder="Juan García" value="${form.nombre}"
+            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand" />
+        </div>
+
+        <div>
+          <label class="text-xs font-medium text-slate-600 mb-1 block">Tu teléfono *</label>
+          <input id="fTelefono" type="tel" required placeholder="341 555-1234" value="${form.telefono}"
+            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand" />
+        </div>
+
+        <div>
+          <label class="text-xs font-medium text-slate-600 mb-1 block">¿Cuándo te queda mejor? *</label>
+          <div class="flex flex-col gap-2" id="horarios"></div>
+        </div>
+
+        <div>
+          <label class="text-xs font-medium text-slate-600 mb-1 block">Algo más que quieras contarnos (opcional)</label>
+          <textarea id="fNota" rows="2" placeholder="Ej: manejamos 3 cuentas bancarias distintas..."
+            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand resize-none">${form.nota}</textarea>
+        </div>
+
+        <button type="submit" id="btnSubmit"
+          class="bg-brand hover:bg-brand-hover text-white font-semibold py-3 rounded-xl transition disabled:opacity-50 mt-1">
+          Coordinar llamada →
+        </button>
+      </form>
+    `;
+
+    const horariosEl = document.getElementById("horarios");
+    HORARIOS.forEach((h) => {
+      const label = document.createElement("label");
+      label.className = `flex items-center gap-2 border rounded-lg px-3 py-2 text-sm cursor-pointer transition ${
+        form.horario === h.value ? "border-brand bg-blue-50 text-navy" : "border-slate-200 text-slate-600"
+      }`;
+      label.innerHTML = `<input type="radio" name="horario" value="${h.value}" class="accent-brand" ${form.horario === h.value ? "checked" : ""}> ${h.label}`;
+      label.querySelector("input").addEventListener("change", () => {
+        form.horario = h.value;
+        renderIdle();
+      });
+      horariosEl.appendChild(label);
+    });
+
+    document.getElementById("fNombre").addEventListener("input", (e) => (form.nombre = e.target.value));
+    document.getElementById("fTelefono").addEventListener("input", (e) => (form.telefono = e.target.value));
+    document.getElementById("fNota").addEventListener("input", (e) => (form.nota = e.target.value));
+
+    document.getElementById("form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (!form.nombre || !form.telefono) return;
+      estado = "enviando";
+      document.getElementById("btnSubmit").textContent = "Enviando...";
+      document.getElementById("btnSubmit").disabled = true;
+      setTimeout(() => {
+        estado = "enviado";
+        renderDone();
+      }, 500);
+    });
+  }
+
+  function renderDone() {
+    card.innerHTML = `
+      <div class="text-center py-4">
+        <div class="w-14 h-14 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center text-2xl mx-auto mb-4">✓</div>
+        <p class="text-navy font-semibold text-sm mb-1">¡Listo!</p>
+        <p class="text-slate-500 text-sm">Te llamamos a ${form.telefono} ${HORARIO_TEXTO[form.horario]}.</p>
+        <button id="btnReset" class="mt-5 text-brand hover:underline text-xs font-medium">← Volver a probar</button>
+      </div>
+    `;
+    document.getElementById("btnReset").addEventListener("click", () => {
+      form = { nombre: "", telefono: "", horario: "cualquiera", nota: "" };
+      estado = "idle";
+      renderIdle();
+    });
+  }
+
+  renderIdle();
+</script>

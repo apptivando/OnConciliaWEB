@@ -135,26 +135,36 @@ que me frenan a mí; el resto lo podés hacer en paralelo.
 
 ### Bloquean el lanzamiento
 
-- [ ] **Supabase — correr 2 migraciones** en el SQL Editor del proyecto
+- [ ] **Supabase — correr 1 migración** en el SQL Editor del proyecto
       `bhtkkhytsznivdqzdold`:
-      [`migrate_leads_beta.sql`](onconcilia-web/supabase/migrate_leads_beta.sql)
-      (teléfono y "agendó" en `leads`) y
-      [`migrate_prospect_ciudades.sql`](onconcilia-web/supabase/migrate_prospect_ciudades.sql)
-      (las 48 ciudades con su avance). Sin la primera, el formulario de la
-      landing guarda a medias; sin la segunda, el buscador no sabe por dónde va.
+      [`migrate_leads_beta.sql`](onconcilia-web/supabase/migrate_leads_beta.sql).
+      Agrega teléfono, nota y "cuándo agendó" a `leads`. Sin eso el formulario
+      de la landing guarda a medias.
+
+      > Eran dos. La segunda (`prospect_ciudades`, el avance del buscador) se
+      > descartó: `prospect_searches` ya registraba ciudad y rubro de cada
+      > búsqueda, así que el avance **se deduce** en vez de guardarse. Una
+      > tabla de progreso aparte era un segundo registro de la misma verdad, y
+      > el día que se desincronizara —una búsqueda a mano, una fila borrada—
+      > el motor se saltearía ciudades sin que nadie se entere.
+
 - [ ] **Brevo — armar el Automation.** Es lo único que no se puede hacer por
-      API. Detalle exacto en la Etapa 1.4.
-- [ ] **Vercel — cargar 4 variables**: `BREVO_API_KEY`,
-      `BREVO_LIST_ID_LEADS=3`, `BREVO_WEBHOOK_SECRET` y `CAL_WEBHOOK_SECRET`
-      (esta última la generás vos y la pegás también en Cal.com). En Production
-      y en Preview.
+      API. Paso a paso en la Etapa 1.4.
+- [ ] **Vercel — cargar 2 variables** que faltan: `BREVO_WEBHOOK_SECRET` y
+      `CAL_WEBHOOK_SECRET` (esta la generás vos y la pegás también en
+      Cal.com). En Production y en Preview.
 - [ ] **Cal.com — crear el webhook.** Settings → Webhooks → Add, evento
       `BOOKING_CREATED`, URL `https://onconcilia.com/api/cal/webhook`, con el
       mismo secreto que cargaste como `CAL_WEBHOOK_SECRET`. Sin esto, al que
       agenda le siguen llegando los tres recordatorios de agendar.
-- [ ] **Cal.com — las preguntas del evento de 15 minutos.** Que pida: con
-      cuántos bancos trabajan, **con qué bancos** (define si hay parser que
-      desarrollar), quién revisa los pagos y cuánto tardan en cerrar el mes.
+
+> **Las preguntas de calificación no van en Cal.com.** Estaban en esta lista y
+> se sacaron: los dos formularios que llevan a la reunión —el de la landing y
+> `/coordinar/[id]`— ya preguntan con qué bancos trabajan. Repetirlo en el
+> paso de reserva agrega fricción justo cuando la persona está eligiendo
+> horario, y el dato queda en Cal.com en vez de en nuestra base. El resto
+> (quién revisa los pagos, cuánto tardan en cerrar) es conversación de la
+> reunión, no un formulario.
 
 ### No bloquean, pero cuanto antes mejor
 
@@ -279,8 +289,10 @@ Lo único con fecha dura.
       función que les sirva; el portal del contador no existe y era la promesa
       más cara de incumplir. En su lugar, "comercios que cobran por todos
       lados".
-- [x] Mercado Pago **y Mercado Libre** como función incluida, con el detalle
-      de que separa compras y costos de venta de ML.
+- [x] Mercado Pago como función incluida. **Sin mención a Mercado Libre**: se
+      había colado desde el plan anterior y todavía no hay nada hecho ahí. La
+      landing no promete lo que el producto no hace — es la misma regla por la
+      que salió la tarjeta de estudios contables.
 - [x] Franja de saldos diarios (franja, no tarjeta: es una rutina, no una
       función más).
 - [x] **Sección de módulos opcionales**: echeqs, préstamos, liquidaciones y
@@ -288,9 +300,9 @@ Lo único con fecha dura.
 - [x] Se borró `LeadForm.tsx`, que quedó sin uso. Dejarlo invitaba a que
       alguien lo volviera a colgar en la landing.
 
-> **Una cosa a confirmar.** "Plan Pro completo" en la landing dice *dos*
-> módulos opcionales a elección, que es la definición de PRO. Si la intención
-> era que los betas tengan los cuatro, cambia una línea.
+> **Confirmado:** el beta tiene **dos** módulos opcionales, no los cuatro. Los
+> otros dos se muestran en la reunión; si los quiere, espera a que termine el
+> programa y los paga. La landing ya lo dice así.
 
 ### 1.3 — Los correos, reescritos al nuevo encuadre
 
@@ -343,10 +355,37 @@ tiene API.
       | `paso-2-valor` | 3 días | sigue en la lista |
       | `paso-3-cierre` | 7 días | sigue en la lista |
 
-- [ ] **La condición de "sigue en la lista" no es opcional.** Sacar un contacto
-      de la lista **no corta** un Automation ya empezado: Brevo lo sigue
-      corriendo. Sin esa condición en cada paso, al que agenda le llegan igual
-      los tres recordatorios de agendar.
+#### Por qué hace falta la condición en cada paso
+
+Un Automation de Brevo es una fila de pasos que **empieza a correr para cada
+persona** cuando se cumple el disparador. En este caso el disparador es
+"entró a la lista 3", y a partir de ahí esa persona tiene su propia copia del
+recorrido andando: esperá 2 horas → mandá el correo 1 → esperá 3 días → mandá
+el correo 2 → esperá hasta el día 7 → mandá el correo 3.
+
+El disparador **se evalúa una sola vez, al principio**. Lo que pase después no
+lo vuelve a mirar. Entonces:
+
+| Momento | Qué pasa |
+|---|---|
+| 10:00 | Deja sus datos en la landing → entra a la lista 3 → arranca el Automation |
+| 10:01 | Elige horario en el calendario |
+| 10:01 | Cal.com nos avisa, y nuestro código lo **saca de la lista 3** |
+| 12:00 | El Automation, que nunca se enteró, manda igual «Te falta elegir el horario» |
+
+Sacarlo de la lista no detiene nada: es como bajarse de la cola del banco
+después de que ya te llamaron. Por eso, **antes de cada uno de los tres
+correos** hay que poner un paso de condición que pregunte *"¿este contacto
+está en la lista 3?"*. Si está, sigue y manda. Si no está, el recorrido se
+corta ahí.
+
+En el panel de Brevo el paso se llama **"Condición" / "Si/Entonces"** y la
+regla que se elige es *"El contacto está en una lista"* → lista 3. La rama
+"no" se deja vacía: sin pasos, el recorrido termina.
+
+Sin eso, el webhook de Cal.com no sirve para nada y al que agenda le llegan
+igual los tres recordatorios de agendar — que es la forma más rápida de que
+se dé de baja o nos marque como spam.
 - [ ] Cargar en Vercel `BREVO_API_KEY`, `BREVO_LIST_ID_LEADS=3` y
       `BREVO_WEBHOOK_SECRET` — pendiente del plan anterior, y sin eso las
       rutas no funcionan en producción.
@@ -393,14 +432,24 @@ regional, no población sola. El listado completo con su fundamentación está e
       primer rubro sin buscar, recalcula los correos acumulados y cierra la
       ciudad al llegar a la meta (`BUSQUEDA_META_CORREOS`, default 35) o al
       quedarse sin rubros.
-- [x] Tabla `prospect_ciudades` con el avance —
-      [`migrate_prospect_ciudades.sql`](onconcilia-web/supabase/migrate_prospect_ciudades.sql),
-      **correrla es tarea tuya**.
+- [x] **Sin tabla de avance.** Los rubros ya buscados salen de
+      `prospect_searches` y los correos de contar `prospectos`. Estado
+      deducido, no guardado: no puede desincronizarse de la realidad, y no hay
+      migración que correr.
 - [x] De paso, se corrigió en `daily-search` el mismo agujero de autenticación
       que tenía `daily-enrich`: `if (process.env.CRON_SECRET && ...)` deja el
       endpoint abierto justo cuando falta la variable.
-- [x] `normalizarCiudad` aplicado al insertar, y los 81 registros viejos
-      corregidos a mano ("Cordobá" → Córdoba, "Parana" → Paraná).
+- [x] `normalizarCiudad` aplicado **una sola vez, al entrar a
+      `buscarProspectos`**, así el nombre canónico queda tanto en los
+      prospectos como en el log de búsquedas. Esto último dejó de ser
+      cosmético: ahora el avance se deduce contando filas de
+      `prospect_searches` por ciudad.
+- [x] Corregidos los registros viejos: 81 prospectos y las 2 filas del log
+      ("Cordobá" → Córdoba, "Parana" → Paraná).
+- [x] `/coordinar/[id]` pregunta con qué bancos trabajan, igual que la landing.
+- [x] Las plantillas de correo se movieron a
+      [`onconcilia-web/emails/`](onconcilia-web/emails/), dentro del repo.
+      Estaban en una carpeta suelta fuera de git, sin respaldo.
 
 **Automatización gratuita — `.github/workflows/prospeccion.yml`** ✅
 

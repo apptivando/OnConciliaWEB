@@ -196,7 +196,7 @@ guillermo@onconcilia.com`
     2: ({ nombre, id }) =>
       `Hola${nombre ? ` ${nombre}` : ''},
 
-Te cuento un poco más sobre OnConcilia: subís el extracto del banco (y el de Mercado Pago si vendés por QR, link de pago o Mercado Libre) y el sistema cruza todo solo, categoriza los movimientos y te muestra lo que falta revisar — sin recorrer fila por fila. Las comisiones bancarias quedan con el IVA desglosado por alícuota, que es crédito fiscal que en general se pierde.
+Te cuento un poco más sobre OnConcilia: subís el extracto del banco (y el de Mercado Pago si vendés por QR o link de pago) y el sistema cruza todo solo, categoriza los movimientos y te muestra lo que falta revisar — sin recorrer fila por fila. Las comisiones bancarias quedan con el IVA desglosado por alícuota, que es crédito fiscal que en general se pierde.
 
 Quedan lugares de la beta: 60 días del plan Pro, con 90 días de historial cargado por nosotros.
 

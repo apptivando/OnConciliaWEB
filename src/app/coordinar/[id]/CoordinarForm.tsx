@@ -107,12 +107,18 @@ export default function CoordinarForm({ prospectoId }: { prospectoId: string }) 
           </div>
 
           <div>
-            <label className="text-xs font-medium text-slate-600 mb-1 block">Algo más que quieras contarnos (opcional)</label>
+            {/* Misma pregunta que el formulario de la landing, a propósito: es
+                el dato que define si hay que desarrollar el parser de un banco
+                nuevo antes de poder activarle la cuenta. Se pregunta acá y no
+                en el paso de Cal.com para no agregar fricción justo cuando la
+                persona está eligiendo horario, y para que quede en nuestra
+                base y no sólo en la reserva. */}
+            <label className="text-xs font-medium text-slate-600 mb-1 block">¿Con qué bancos trabajan? (opcional)</label>
             <textarea
               value={form.nota}
               onChange={(e) => set('nota', e.target.value)}
               rows={2}
-              placeholder="Ej: manejamos 3 cuentas bancarias distintas..."
+              placeholder="Ej: Nación, Santander y Mercado Pago"
               className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand resize-none"
             />
           </div>

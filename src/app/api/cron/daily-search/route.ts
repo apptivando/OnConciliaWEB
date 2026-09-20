@@ -1,12 +1,21 @@
-// Cron que corre cada mañana: agota una ciudad rubro por rubro antes de
-// pasar a la siguiente (ver `prospect_ciudades`), en vez de rotar todos los
-// días por un combo ciudad×rubro distinto sin terminar ninguna.
-// Schedule real en .github/workflows/prospeccion.yml — vercel.json solo
-// queda como respaldo del cron nativo de Vercel (una corrida diaria).
+// Cron de búsqueda: agota una ciudad rubro por rubro antes de pasar a la
+// siguiente, en vez de rotar todos los días por un combo ciudad×rubro
+// distinto sin terminar ninguna.
+//
+// **El avance no se guarda en ninguna tabla nueva: se deduce.** Los rubros ya
+// buscados de una ciudad salen de `prospect_searches` (que ya registraba
+// ciudad y rubro de cada búsqueda, para control de gasto de Places) y los
+// correos acumulados salen de contar `prospectos`. Una tabla de progreso
+// aparte sería un segundo registro de la misma verdad, y el día que se
+// desincronice —una búsqueda a mano desde /prospectos, una fila borrada— el
+// motor se saltea ciudades sin que nadie se entere.
+//
+// Schedule real en .github/workflows/prospeccion.yml; vercel.json queda como
+// respaldo del cron nativo (una corrida diaria).
 
 import { createClient } from '@supabase/supabase-js'
 import { buscarProspectos } from '@/lib/prospects/buscar'
-import { RUBROS } from '@/lib/prospects/ciudades'
+import { CIUDADES, RUBROS } from '@/lib/prospects/ciudades'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -16,98 +25,114 @@ const supabase = createClient(
 /** Correos acumulados a partir de los cuales una ciudad se considera cubierta. */
 const META = Number(process.env.BUSQUEDA_META_CORREOS) || 35
 
-interface CiudadRow {
+// Sin `export`: Next.js sólo admite un puñado de nombres exportados en un
+// archivo de ruta (los verbos HTTP, `maxDuration`, `runtime`…) y falla el
+// build con cualquier otro.
+interface Objetivo {
   ciudad: string
-  rubros_buscados: string[]
+  rubro: string
+  indice: number
   correos: number
+  rubrosBuscados: number
 }
 
-/** Trae la primera ciudad abierta con al menos un rubro sin buscar, cerrando de paso las que ya agotaron RUBROS. */
-async function proximaCiudadConRubro(): Promise<{ ciudad: CiudadRow; rubro: string } | null> {
-  const { data: abiertas } = await supabase
-    .from('prospect_ciudades')
-    .select('ciudad, rubros_buscados, correos')
-    .eq('cerrada', false)
-    .order('orden', { ascending: true })
+/** Cuántos prospectos con correo dio una ciudad. Es la medida de "cubierta". */
+async function correosDe(ciudad: string): Promise<number> {
+  const { count } = await supabase
+    .from('prospectos')
+    .select('id', { count: 'exact', head: true })
+    .eq('localidad', ciudad)
+    .not('email', 'is', null)
+    .neq('estado', 'descartado')
+  return count ?? 0
+}
 
-  for (const fila of (abiertas ?? []) as CiudadRow[]) {
-    const rubro = RUBROS.find((r) => !fila.rubros_buscados.includes(r))
-    if (rubro) return { ciudad: fila, rubro }
+/**
+ * Primera ciudad de la lista que todavía no está cubierta, con el primer
+ * rubro que le falta. Recorre en orden: capitales primero, después el ranking
+ * por peso económico.
+ */
+async function proximoObjetivo(): Promise<Objetivo | null> {
+  // Una sola consulta para todo el historial de búsquedas. Son decenas de
+  // filas, no vale la pena una por ciudad.
+  const { data: busquedas } = await supabase
+    .from('prospect_searches')
+    .select('ciudad, rubro')
+    .not('ciudad', 'is', null)
 
-    // Todos los rubros ya se buscaron pero por algún motivo no se cerró antes.
-    await supabase
-      .from('prospect_ciudades')
-      .update({ cerrada: true, cerrada_motivo: 'sin rubros', actualizada_en: new Date().toISOString() })
-      .eq('ciudad', fila.ciudad)
+  const buscadosPorCiudad = new Map<string, Set<string>>()
+  for (const b of (busquedas ?? []) as Array<{ ciudad: string; rubro: string | null }>) {
+    if (!b.rubro) continue
+    const set = buscadosPorCiudad.get(b.ciudad) ?? new Set<string>()
+    set.add(b.rubro)
+    buscadosPorCiudad.set(b.ciudad, set)
   }
+
+  for (let i = 0; i < CIUDADES.length; i++) {
+    const { ciudad } = CIUDADES[i]
+    const buscados = buscadosPorCiudad.get(ciudad) ?? new Set<string>()
+    const rubro = RUBROS.find((r) => !buscados.has(r))
+
+    // Sin rubros por buscar, la ciudad está agotada: dio lo que tenía para
+    // dar. No hace falta contarle los correos para saberlo.
+    if (!rubro) continue
+
+    const correos = await correosDe(ciudad)
+    if (correos >= META) continue
+
+    return { ciudad, rubro, indice: i, correos, rubrosBuscados: buscados.size }
+  }
+
   return null
 }
 
 export async function GET(req: Request) {
-  const secret = req.headers.get('x-vercel-cron') ?? new URL(req.url).searchParams.get('secret')
-  // Sin `&&`: si CRON_SECRET no está seteada el endpoint quedaba abierto.
-  if (secret !== process.env.CRON_SECRET && !req.headers.get('x-vercel-cron')) {
+  const esVercelCron = Boolean(req.headers.get('x-vercel-cron'))
+  const secret = new URL(req.url).searchParams.get('secret')
+  // Sin `&&` contra la variable: si CRON_SECRET no está seteada, un
+  // `if (process.env.CRON_SECRET && ...)` deja el endpoint abierto justo
+  // cuando falta la protección. Era el agujero que tenía este archivo.
+  if (!esVercelCron && secret !== process.env.CRON_SECRET) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const proximo = await proximaCiudadConRubro()
-  if (!proximo) {
+  const objetivo = await proximoObjetivo()
+  if (!objetivo) {
     return Response.json({
       fecha: new Date().toISOString().split('T')[0],
-      mensaje: 'No quedan ciudades abiertas para prospectar.',
-      ciudades_restantes: 0,
+      mensaje: 'Todas las ciudades de la lista están cubiertas o agotadas.',
+      ciudades_pendientes: 0,
     })
   }
 
-  const { ciudad, rubro } = proximo
+  const { ciudad, rubro, indice, rubrosBuscados } = objetivo
 
   try {
-    const resultado = await buscarProspectos(supabase, { rubro, ciudad: ciudad.ciudad })
+    const resultado = await buscarProspectos(supabase, { rubro, ciudad })
 
-    const rubrosBuscados = [...ciudad.rubros_buscados, rubro]
-
-    const { count: correos } = await supabase
-      .from('prospectos')
-      .select('id', { count: 'exact', head: true })
-      .eq('localidad', ciudad.ciudad)
-      .not('email', 'is', null)
-      .neq('estado', 'descartado')
-
-    const correosAcumulados = correos ?? 0
-    const alcanzoMeta = correosAcumulados >= META
-    const agotoRubros = rubrosBuscados.length >= RUBROS.length
-    const cierra = alcanzoMeta || agotoRubros
-
-    await supabase
-      .from('prospect_ciudades')
-      .update({
-        rubros_buscados: rubrosBuscados,
-        correos: correosAcumulados,
-        cerrada: cierra,
-        cerrada_motivo: cierra ? (alcanzoMeta ? 'meta' : 'sin rubros') : null,
-        actualizada_en: new Date().toISOString(),
-      })
-      .eq('ciudad', ciudad.ciudad)
-
-    const { count: restantes } = await supabase
-      .from('prospect_ciudades')
-      .select('ciudad', { count: 'exact', head: true })
-      .eq('cerrada', false)
+    // Se recuentan después de la búsqueda, pero los correos nuevos todavía no
+    // están: el enriquecimiento corre aparte y es el que completa el email.
+    // Este número es el de la corrida anterior más lo que haya enriquecido el
+    // worker mientras tanto, y así se informa.
+    const correosAhora = await correosDe(ciudad)
+    const rubrosRestantes = RUBROS.length - (rubrosBuscados + 1)
 
     return Response.json({
       fecha: new Date().toISOString().split('T')[0],
-      ciudad: ciudad.ciudad,
+      ciudad,
       rubro,
       nuevos: resultado.nuevos,
       fusionados: resultado.fusionados,
-      correos: correosAcumulados,
-      ciudad_cerrada: cierra,
-      ciudades_restantes: restantes ?? 0,
+      correos: correosAhora,
+      meta: META,
+      rubros_restantes_en_ciudad: rubrosRestantes,
+      ciudad_cubierta: correosAhora >= META || rubrosRestantes === 0,
+      ciudades_pendientes: CIUDADES.length - indice - 1,
       resumen: resultado.resumen,
     })
   } catch (err) {
     return Response.json(
-      { ciudad: ciudad.ciudad, rubro, error: err instanceof Error ? err.message : 'Error desconocido' },
+      { ciudad, rubro, error: err instanceof Error ? err.message : 'Error desconocido' },
       { status: 500 }
     )
   }
