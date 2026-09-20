@@ -44,14 +44,19 @@ export async function POST(req: Request) {
 
   if (error) {
     if (error.code === '23505') {
-      // Email duplicado. Se trata como éxito —igual que antes— pero se
-      // completan los datos nuevos: alguien que la primera vez dejó sólo el
-      // correo y ahora deja el teléfono no debería perderlo.
-      await supabase
-        .from('leads')
-        .update({ nombre: fila.nombre, telefono: fila.telefono, nota: fila.nota })
-        .eq('email', limpio)
-        .is('telefono', null)
+      // Email duplicado. Se trata como éxito —igual que antes— y gana lo
+      // último que la persona escribió: si vuelve a mandar el formulario es
+      // porque está corrigiendo algo, típicamente un teléfono mal tipeado.
+      // Sólo se pisan los campos que vinieron con valor, así un reenvío
+      // incompleto no borra lo que ya había.
+      const cambios = Object.fromEntries(
+        Object.entries({ nombre: fila.nombre, telefono: fila.telefono, nota: fila.nota }).filter(
+          ([, v]) => v !== null
+        )
+      )
+      if (Object.keys(cambios).length > 0) {
+        await supabase.from('leads').update(cambios).eq('email', limpio)
+      }
     } else {
       return Response.json({ error: 'Error al guardar' }, { status: 500 })
     }
