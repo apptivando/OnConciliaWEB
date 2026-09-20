@@ -125,38 +125,57 @@ export async function fetchHtml(
         detail: err instanceof Error ? err.message : undefined,
       };
     }
-    clearTimeout(timer);
-
-    if (res.status >= 300 && res.status < 400) {
-      const location = res.headers.get("location");
-      if (!location) return { ok: null, reason: "http-error", detail: `${res.status} sin Location` };
-      let next: URL;
-      try {
-        next = new URL(location, current);
-      } catch {
-        return { ok: null, reason: "bad-url", detail: location };
+    // El timer NO se cancela acá. Tiene que seguir vivo durante la lectura
+    // del cuerpo: `fetch` resuelve apenas llegan los headers, y `readCapped`
+    // después consume el stream sin límite propio. Medido el 19/09/2026
+    // contra sitios reales de comercios: un servidor que manda los headers y
+    // después deja de enviar bytes colgaba el worker para siempre — un lote
+    // de 4 prospectos tardó **979 segundos** con un presupuesto de 75. En
+    // Vercel la función se corta sola a los 60s y el trabajo se pierde a
+    // medio guardar, que es lo que hace que un cron parezca "no correr".
+    try {
+      if (res.status >= 300 && res.status < 400) {
+        const location = res.headers.get("location");
+        if (!location) return { ok: null, reason: "http-error", detail: `${res.status} sin Location` };
+        let next: URL;
+        try {
+          next = new URL(location, current);
+        } catch {
+          return { ok: null, reason: "bad-url", detail: location };
+        }
+        if (!opts.allowCrossDomain && registrableDomain(next.hostname) !== originDomain) {
+          return { ok: null, reason: "offsite-redirect", detail: next.hostname };
+        }
+        current = next;
+        continue;
       }
-      if (!opts.allowCrossDomain && registrableDomain(next.hostname) !== originDomain) {
-        return { ok: null, reason: "offsite-redirect", detail: next.hostname };
+
+      if (!res.ok) {
+        await res.body?.cancel().catch(() => {});
+        return { ok: null, reason: "http-error", detail: String(res.status) };
       }
-      current = next;
-      continue;
-    }
 
-    if (!res.ok) {
-      await res.body?.cancel().catch(() => {});
-      return { ok: null, reason: "http-error", detail: String(res.status) };
-    }
+      // Nada de PDFs, imágenes ni descargas: solo HTML.
+      const ctype = res.headers.get("content-type") ?? "";
+      if (!/text\/html|application\/xhtml\+xml/i.test(ctype)) {
+        await res.body?.cancel().catch(() => {});
+        return { ok: null, reason: "not-html", detail: ctype.split(";")[0] };
+      }
 
-    // Nada de PDFs, imágenes ni descargas: solo HTML.
-    const ctype = res.headers.get("content-type") ?? "";
-    if (!/text\/html|application\/xhtml\+xml/i.test(ctype)) {
-      await res.body?.cancel().catch(() => {});
-      return { ok: null, reason: "not-html", detail: ctype.split(";")[0] };
+      const { text, truncated } = await readCapped(res, maxBytes);
+      return { ok: { url: current.toString(), status: res.status, body: text, truncated }, reason: null };
+    } catch (err) {
+      // Abortar a mitad del stream hace que `reader.read()` rechace: es el
+      // timeout haciendo su trabajo, no un sitio roto.
+      const aborted = err instanceof Error && (err.name === "AbortError" || /abort/i.test(err.message));
+      return {
+        ok: null,
+        reason: aborted ? "timeout" : "network",
+        detail: err instanceof Error ? err.message : undefined,
+      };
+    } finally {
+      clearTimeout(timer);
     }
-
-    const { text, truncated } = await readCapped(res, maxBytes);
-    return { ok: { url: current.toString(), status: res.status, body: text, truncated }, reason: null };
   }
 
   return { ok: null, reason: "too-many-redirects" };

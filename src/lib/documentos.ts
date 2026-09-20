@@ -141,6 +141,31 @@ export const DOCUMENTOS: Documento[] = [
     archivo: 'plan-landing-brevo.md',
     tags: ['brevo', 'landing', 'crm', 'email', 'implementacion'],
   },
+  {
+    slug: 'plan-beta-planes',
+    titulo: 'Plan: programa beta y pasaje a los tres planes',
+    resumen:
+      'Las cinco etapas del programa beta, la grilla nueva de planes con los módulos opcionales, y el rendimiento medido del buscador. Reemplaza las partes de landing y Brevo del plan anterior.',
+    cuando: 'Es el plan vigente. Se consulta antes de tocar campañas, precios o el buscador.',
+    nivel: 'interno',
+    grupo: 'estrategia',
+    archivo: 'plan-beta-planes.md',
+    tags: [
+      'beta', 'planes', 'base', 'pro', 'enterprise', 'modulos', 'opcionales',
+      'historial', 'encuestas', 'buscador', 'embudo', 'descuento', 'reunion',
+    ],
+  },
+  {
+    slug: 'checklist-busqueda',
+    titulo: 'Checklist de búsqueda — ciudad × rubro',
+    resumen:
+      'Las 48 ciudades en orden (capitales primero, después por peso económico) con los diez rubros de cada una, para ir tildando a medida que se buscan.',
+    cuando: 'Cada vez que se dispara una tanda de búsqueda desde /prospectos.',
+    nivel: 'interno',
+    grupo: 'estrategia',
+    archivo: 'checklist-busqueda.md',
+    tags: ['buscador', 'ciudades', 'rubros', 'places', 'prospectos', 'checklist'],
+  },
 ]
 
 export function getDocumento(slug: string): Documento | undefined {
