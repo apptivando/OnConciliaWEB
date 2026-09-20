@@ -111,7 +111,9 @@ y pasan a **vender los tres planes**.
 | 4 | **La reunión de 15 minutos es obligatoria para la beta** | Es la única puerta de entrada al programa |
 | 5 | Historial de beta: **90 días de todas las cuentas** | Aunque el cliente después no las quiera todas |
 | 6 | Módulos opcionales: **echeqs, préstamos, liquidaciones y comprobantes** | Préstamos pasa a ser opcional: hoy no tiene feature flag, hay que crearlo |
+| 6b | **Mercado Pago no es opcional: va incluido en los tres planes** | Lo va a necesitar todo el mundo, y mostrarlo incluido es argumento de venta, no un módulo más que cobrar |
 | 7 | PRO elige **2 del menú de 4**; el canal de WhatsApp queda afuera | Es el único módulo con servidor dedicado propio |
+| 7b | **WhatsApp no se usa para contacto en frío** | Meta lo tiene muy controlado para publicidad e invitaciones; el riesgo real es que bloqueen el número y se pierda el canal para los clientes de verdad |
 | 8 | **BASE no incluye historial.** Se cotiza **por trimestre y por cuenta** | Es lo que hace que la importación por lote siga siendo necesaria, pero por los betas y por el historial pago, no por BASE |
 | 9 | Las redes no se visitan | Se toma sólo el link que la bio enlaza (sitio propio, linktree, `wa.me`) |
 
@@ -141,9 +143,27 @@ Con el 17,3% medido y tasas de referencia de correo frío B2B:
 
 > **El cuello no es la plata, es el tiempo de envío.** Con el tope de 50
 > correos por día ya decidido, 1.100 correos son **22 días hábiles** de envío
-> continuo — que entra justo en la ventana de la beta si arranca ya. Los 14
-> WhatsApp encontrados importan más de lo que parece: convierten bastante mejor
-> que el correo frío y no consumen ese cupo.
+> continuo — que entra justo en la ventana de la beta si arranca ya.
+
+### WhatsApp no es un canal de contacto en frío
+
+Los 14 WhatsApp encontrados **no cambian la cuenta de arriba**. Meta tiene muy
+controlado el envío de publicidad e invitaciones por ese medio, y el costo de
+equivocarse no es una campaña floja: es que la gente bloquee el número, que es
+un daño que no se revierte y que se lleva puesto el canal para los clientes
+reales. El correo frío 1:1 tiene sus reglas y las conocemos; WhatsApp en frío
+no.
+
+**Dónde sí sirve:** después de que el prospecto respondió, agendó la reunión o
+pidió que lo llamemos. Ahí es el mejor canal que hay. Antes de eso, no.
+
+> **Consecuencia sobre `prioridad_contacto`.** Hoy la escala pone WhatsApp en
+> 1 y email en 2, o sea "contactalo por WhatsApp primero". Esa escala se
+> escribió pensando en qué dato es más valioso, no en qué canal se usa para
+> abrir. Para el trabajo en frío el orden real es **email → teléfono**, con
+> WhatsApp reservado para después de la respuesta. Hay que decidir si se
+> reordena la escala o se deja y se documenta que significa otra cosa — ver
+> Etapa 2.4.
 
 ---
 
@@ -200,8 +220,9 @@ ofrece**, no la estructura.
 | `ASUNTOS_COMERCIO` A/B/C | Test en curso desde el 08/09 | **No tocar** — todavía no midió nada; cambiarlo ahora lo invalida |
 
 - [ ] Reescribir los 4 textos.
-- [ ] **Guion de WhatsApp**, que hoy no existe y ahora hay 14 contactos de
-      prioridad 1 esperándolo.
+- [ ] **Guion de WhatsApp para después de la respuesta** — no para abrir. Se
+      usa cuando el prospecto ya contestó el correo, agendó o pidió que lo
+      llamemos (ver *WhatsApp no es un canal de contacto en frío*).
 
 ### 1.4 — Brevo
 
@@ -280,6 +301,11 @@ siguiendo el checklist.
       próxima ciudad. Hoy no hay forma de saber dónde está parado el motor sin
       consultar la base a mano — que es exactamente por qué nadie se enteró de
       que llevaba dos semanas detenido.
+- [ ] Decidir qué hacer con `prioridad_contacto`: hoy WhatsApp es 1 y email 2,
+      lo que se lee como "abrí por WhatsApp" y es justo lo que no hay que
+      hacer. O se reordena a **email → teléfono → WhatsApp**, o se renombra la
+      escala para que quede claro que mide calidad del dato, no orden de
+      contacto.
 
 ---
 
@@ -301,15 +327,23 @@ Hoy **no existe** ningún campo de prueba, vencimiento ni suscripción en
 
 Es la promesa más cara: 20 betas × 90 días × todas sus cuentas.
 
+**La importación por lote es requisito del programa beta**, no una mejora
+deseable. Se construye *mientras salen las campañas*: la ventana entre el
+primer correo enviado y el primer beta activado es exactamente el tiempo que
+hay para tenerla lista. Si los betas empiezan a entrar y la carga sigue siendo
+archivo por archivo, el cuello de botella somos nosotros desde el día uno.
+
 - [ ] Medir cuánto lleva hoy cargar 90 días de una cuenta, con un caso real.
-- [ ] **Importación por lote** — subir los 3 archivos de una cuenta juntos y
+      Es el número que dice cuán urgente es el lote.
+- [ ] **Importación por lote** — subir los archivos de una cuenta juntos y
       procesarlos en cola. El mapeo de columnas ya se reconoce solo a partir
-      del segundo archivo.
+      del segundo archivo, así que la parte difícil está hecha.
 
 > **Corrección respecto de lo que decía `canal-de-reventa.md`.** Ahí la
-> importación por lote figuraba como requisito del autoservicio de BASE. Ya no:
-> **BASE no incluye historial**. Sigue siendo necesaria, pero por los betas y
-> por el historial que se venda suelto, no por BASE.
+> importación por lote figuraba como requisito del **autoservicio de BASE**.
+> Eso ya no aplica: BASE no incluye historial. Lo que la hace obligatoria es el
+> programa beta, y después el historial que se venda suelto por trimestre y
+> cuenta.
 
 ### 3.3 — Bancos nuevos
 
@@ -347,6 +381,7 @@ beta que traiga un banco distinto de los seis soportados.
 | Usuarios | 3 | 8 | 15 |
 | Historial incluido | **Ninguno** — se cotiza **por trimestre y por cuenta** | **1 trimestre** | **1 año** |
 | Categorización | **Defaults automáticos, sin asistencia** | **Asistida** | **Asistida** |
+| Mercado Pago | **Incluido** | **Incluido** | **Incluido** |
 | Opcionales | Ninguno; **cada uno con costo de instalación** | **2 a elección** de echeqs · préstamos · liquidaciones · comprobantes | **Los 4 + canal de WhatsApp** |
 | Capacitación en vivo | Ninguna (videos y manual) | **2 sesiones, hasta 2 personas** | **5 sesiones, hasta 3 personas** |
 | Acompañamiento | — | Primer cierre | **Virtual durante el 1er mes** |
