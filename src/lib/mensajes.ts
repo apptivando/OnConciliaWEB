@@ -171,17 +171,21 @@ guillermo@onconcilia.com`,
       // marco: ya no es "sumate a la beta", es "probalo gratis".
       const oferta = cupoLleno
         ? `Podés probarlo gratis durante 15 días, sin tarjeta ni compromiso.`
-        : `Estamos en beta — buscamos los primeros comercios para probarlo sin costo durante 60 días, a cambio de que nos cuentes qué te sirve y qué no.`
+        : `Estamos abriendo 20 lugares de beta. El que entra tiene 60 días del plan Pro completo sin cargo, con 90 días de historial de todas sus cuentas ya cargado por nosotros — y si trabajás con un banco que todavía no leemos, lo desarrollamos sin cargo.`
 
       return `Hola${nombre ? ` ${nombre}` : ''},
 
 ¿Cuánto perdés por no revisar bien los movimientos del banco? Entre comisiones que pasan sin que nadie las mire, movimientos que no cuadran con lo que tenés anotado y errores que se descubren semanas después, conciliar el banco a mano es un problema que crece con cada cuenta que sumás.
 
-Armamos OnConcilia para resolver justo eso: cruza automáticamente el extracto de tu banco o billetera virtual (de momento Mercado Pago) contra tus movimientos, categoriza todo solo, y te deja ver únicamente lo que necesita tu atención.
+Armamos OnConcilia para resolver justo eso: cruza automáticamente el extracto de tu banco o de Mercado Pago contra tus movimientos, categoriza todo solo, y te deja ver únicamente lo que necesita tu atención.
 
 ${oferta}
 
-Si te interesa, dejame tu teléfono y un horario para hablar 15 minutos: ${appUrl()}/coordinar/${id}. Si no es el momento, gracias por leer este correo.
+No hay alta automática: antes de activar nada hablamos 15 minutos para entender cómo llevás hoy el banco. Si no te sirve, te lo digo en esa misma llamada.
+
+Dejame tu teléfono y elegí el horario acá: ${appUrl()}/coordinar/${id}
+
+Si no es el momento, gracias por leer este correo.
 
 Saludos,
 Guillermo
@@ -189,23 +193,25 @@ OnConcilia
 guillermo@onconcilia.com`
     },
 
-    2: ({ nombre }) =>
+    2: ({ nombre, id }) =>
       `Hola${nombre ? ` ${nombre}` : ''},
 
-Te cuento un poco más sobre OnConcilia: subís el extracto del banco (y el de Mercado Pago si vendés por QR o link de pago) y el sistema cruza todo solo, categoriza los movimientos y te muestra lo que falta revisar — sin recorrer fila por fila.
+Te cuento un poco más sobre OnConcilia: subís el extracto del banco (y el de Mercado Pago si vendés por QR, link de pago o Mercado Libre) y el sistema cruza todo solo, categoriza los movimientos y te muestra lo que falta revisar — sin recorrer fila por fila. Las comisiones bancarias quedan con el IVA desglosado por alícuota, que es crédito fiscal que en general se pierde.
 
-Estamos en beta y buscamos los primeros comercios para probarlo sin costo, a cambio de feedback real sobre lo que funciona y lo que no.
+Quedan lugares de la beta: 60 días del plan Pro, con 90 días de historial cargado por nosotros.
 
-¿Te sirve que te lo muestre en una llamada corta esta semana?`,
+Son 15 minutos y elegís vos el horario: ${appUrl()}/coordinar/${id}`,
 
-    3: ({ nombre, empresa }) =>
+    3: ({ nombre, empresa, id }) =>
       `Hola${nombre ? ` ${nombre}` : ''},
 
-Sigo la idea de mi mensaje anterior: en ${empresa}, entre el banco y Mercado Pago, cerrar la caja del día puede llevar bastante más tiempo del necesario.
+Último mensaje sobre esto, para no hacerme pesado.
 
-OnConcilia lo hace por vos: importa los extractos, los categoriza y te deja ver solo lo que necesita tu atención. Acceso gratuito para los primeros comercios de la beta, sin compromiso.
+En ${empresa}, entre el banco y Mercado Pago, revisar qué entró y qué falta se lleva bastante más tiempo del necesario. OnConcilia importa los extractos, los categoriza y te deja ver solo lo que necesita tu atención.
 
-¿Tenés 15 minutos esta semana para que te lo muestre?
+Si te interesa entrar a la beta, el horario lo elegís acá: ${appUrl()}/coordinar/${id}
+
+Si no, no hace falta que hagas nada — no te escribo más por este tema.
 
 Saludos,
 Guillermo

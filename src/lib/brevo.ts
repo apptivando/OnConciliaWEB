@@ -76,6 +76,37 @@ export async function upsertContacto(opts: UpsertContactoOpts): Promise<string |
   }
 }
 
+/**
+ * Saca un contacto de una lista. Se usa cuando alguien agenda la reunión: la
+ * secuencia opt-in son tres recordatorios de agendar, y seguir mandándoselos
+ * a quien ya agendó es la forma más rápida de que se dé de baja.
+ *
+ * Quitarlo de la lista **no corta por sí solo** un Automation ya empezado:
+ * Brevo lo sigue corriendo salvo que cada paso tenga una condición de
+ * pertenencia a la lista. Esa condición se configura en el panel — ver el
+ * plan, Etapa 1.4.
+ *
+ * Nunca tira: que Brevo falle no debe romper el webhook de Cal.com, porque
+ * el dato importante (la reunión agendada) ya se guardó en nuestra base.
+ */
+export async function quitarDeLista(email: string, listId: number): Promise<boolean> {
+  try {
+    const res = await brevoFetch(`/contacts/lists/${listId}/contacts/remove`, {
+      method: 'POST',
+      body: JSON.stringify({ emails: [email] }),
+    })
+    // 400 con "Contact already removed" es el caso normal de un reintento.
+    if (!res.ok && res.status !== 400) {
+      console.error('Brevo quitarDeLista', res.status, await res.text())
+      return false
+    }
+    return true
+  } catch (err) {
+    console.error('Brevo quitarDeLista', err)
+    return false
+  }
+}
+
 export interface EnviarTransaccionalOpts {
   to: { email: string; name?: string }
   sender: { email: string; name: string }

@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { upsertContacto } from '@/lib/brevo'
+import { toE164Ar } from '@/lib/phone'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -7,35 +8,74 @@ const supabase = createClient(
 )
 
 /**
- * Reemplaza el insert directo que hacía `LeadForm.tsx` desde el navegador
- * (cliente anon → tabla `leads`). Pasa por acá para poder sincronizar el
- * contacto en Brevo del lado del servidor — el insert directo no tenía
- * ningún punto donde enganchar eso.
+ * Alta de un lead desde la landing (`BetaForm`). Reemplazó al insert directo
+ * que hacía el viejo `LeadForm` desde el navegador con la anon key: pasa por
+ * acá para poder sincronizar el contacto en Brevo del lado del servidor.
  *
- * La secuencia de 3 pasos no la dispara este código: se configura como un
- * Automation en el dashboard de Brevo, activado por entrar a la lista
- * `BREVO_LIST_ID_LEADS`.
+ * Recibe nombre y teléfono además del correo, porque el formulario de la
+ * landing es ahora el mismo de la reunión — se piden los datos, se guardan, y
+ * recién después se muestra el calendario. Si la persona cierra la pestaña
+ * antes de elegir horario, el contacto ya quedó.
+ *
+ * La secuencia de 3 correos no la dispara este código: es un Automation en
+ * el dashboard de Brevo, activado por entrar a la lista
+ * `BREVO_LIST_ID_LEADS`. Quien después agenda sale de esa lista por
+ * `/api/cal/webhook`, para que no le sigan llegando recordatorios de hacer
+ * algo que ya hizo.
  */
 export async function POST(req: Request) {
-  const { email, fuente } = await req.json()
+  const { email, nombre, telefono, nota, fuente } = await req.json()
   if (!email || typeof email !== 'string') {
     return Response.json({ error: 'Falta el email' }, { status: 400 })
   }
 
   const limpio = email.toLowerCase().trim()
+  const tel = typeof telefono === 'string' ? telefono.trim() : null
 
-  const { error } = await supabase
-    .from('leads')
-    .insert({ email: limpio, fuente: fuente ?? 'landing' })
-
-  if (error && error.code !== '23505') {
-    // 23505 = email duplicado — lo tratamos como éxito, igual que antes.
-    return Response.json({ error: 'Error al guardar' }, { status: 500 })
+  const fila = {
+    email: limpio,
+    nombre: typeof nombre === 'string' ? nombre.trim() || null : null,
+    telefono: tel || null,
+    nota: typeof nota === 'string' ? nota.trim() || null : null,
+    fuente: fuente ?? 'landing',
   }
 
+  const { error } = await supabase.from('leads').insert(fila)
+
+  if (error) {
+    if (error.code === '23505') {
+      // Email duplicado. Se trata como éxito —igual que antes— pero se
+      // completan los datos nuevos: alguien que la primera vez dejó sólo el
+      // correo y ahora deja el teléfono no debería perderlo.
+      await supabase
+        .from('leads')
+        .update({ nombre: fila.nombre, telefono: fila.telefono, nota: fila.nota })
+        .eq('email', limpio)
+        .is('telefono', null)
+    } else {
+      return Response.json({ error: 'Error al guardar' }, { status: 500 })
+    }
+  }
+
+  // FIRSTNAME y SMS son atributos que Brevo trae de fábrica, así que no hay
+  // que crearlos a mano en el panel — a diferencia de EMPRESA/LOCALIDAD/
+  // SECTOR/PRIORIDAD, que sí hubo que definir para el carril frío. Brevo
+  // rechaza SMS si no viene en E.164, así que un teléfono que no se pueda
+  // normalizar se omite en vez de invalidar todo el upsert.
+  const e164 = tel ? toE164Ar(tel)?.e164 ?? null : null
   const listId = Number(process.env.BREVO_LIST_ID_LEADS)
   if (listId) {
-    await upsertContacto({ email: limpio, listIds: [listId] })
+    const brevoId = await upsertContacto({
+      email: limpio,
+      attributes: {
+        ...(fila.nombre ? { FIRSTNAME: fila.nombre } : {}),
+        ...(e164 ? { SMS: e164 } : {}),
+      },
+      listIds: [listId],
+    })
+    if (brevoId) {
+      await supabase.from('leads').update({ brevo_contact_id: brevoId }).eq('email', limpio)
+    }
   }
 
   return Response.json({ ok: true })

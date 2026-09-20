@@ -12,6 +12,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { searchPlaces, placesConfigured, PlacesError, type PlaceResult } from "./places";
 import { classifyUrl } from "./urls";
 import { toE164Ar } from "@/lib/phone";
+import { normalizarCiudad } from "./ciudades";
 import type { RedesProspecto } from "@/lib/types";
 
 export interface BuscarOpts {
@@ -86,7 +87,7 @@ function placeToRow(place: PlaceResult, ciudad: string, index: number): Record<s
     google_place_id: place.id,
     direccion: place.address,
     maps_url: place.mapsUrl,
-    localidad: ciudad,
+    localidad: normalizarCiudad(ciudad),
     rating: place.rating,
     reviews_count: place.reviewsCount,
     prioridad_contacto: prioridad,

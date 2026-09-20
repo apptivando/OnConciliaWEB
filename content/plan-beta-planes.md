@@ -128,6 +128,83 @@ infraestructura propio y continuo. No es una regla arbitraria de packaging.
 
 ---
 
+## TUS TAREAS, EN ORDEN
+
+Ordenadas por lo que bloquea a lo que. Las de Supabase y Brevo son las únicas
+que me frenan a mí; el resto lo podés hacer en paralelo.
+
+### Bloquean el lanzamiento
+
+- [ ] **Supabase — correr 2 migraciones** en el SQL Editor del proyecto
+      `bhtkkhytsznivdqzdold`:
+      [`migrate_leads_beta.sql`](onconcilia-web/supabase/migrate_leads_beta.sql)
+      (teléfono y "agendó" en `leads`) y
+      [`migrate_prospect_ciudades.sql`](onconcilia-web/supabase/migrate_prospect_ciudades.sql)
+      (las 48 ciudades con su avance). Sin la primera, el formulario de la
+      landing guarda a medias; sin la segunda, el buscador no sabe por dónde va.
+- [ ] **Brevo — armar el Automation.** Es lo único que no se puede hacer por
+      API. Detalle exacto en la Etapa 1.4.
+- [ ] **Vercel — cargar 4 variables**: `BREVO_API_KEY`,
+      `BREVO_LIST_ID_LEADS=3`, `BREVO_WEBHOOK_SECRET` y `CAL_WEBHOOK_SECRET`
+      (esta última la generás vos y la pegás también en Cal.com). En Production
+      y en Preview.
+- [ ] **Cal.com — crear el webhook.** Settings → Webhooks → Add, evento
+      `BOOKING_CREATED`, URL `https://onconcilia.com/api/cal/webhook`, con el
+      mismo secreto que cargaste como `CAL_WEBHOOK_SECRET`. Sin esto, al que
+      agenda le siguen llegando los tres recordatorios de agendar.
+- [ ] **Cal.com — las preguntas del evento de 15 minutos.** Que pida: con
+      cuántos bancos trabajan, **con qué bancos** (define si hay parser que
+      desarrollar), quién revisa los pagos y cuánto tardan en cerrar el mes.
+
+### No bloquean, pero cuanto antes mejor
+
+- [ ] **GitHub — cargar dos secrets** en el repo `apptivando/OnConciliaWEB`
+      (Settings → Secrets and variables → Actions): `CRON_SECRET` (el mismo
+      que ya está en Vercel) y `APP_URL` (`https://onconcilia.com`). Con eso
+      el workflow de prospección empieza a correr solo.
+- [ ] **Brevo — confirmar que la key no quedó cargada en el proyecto viejo de
+      Vercel.** Si quedó, las campañas salen duplicadas. Es el mismo problema
+      que ya pasó con Resend en agosto.
+- [ ] **Brevo — apuntar el webhook a `onconcilia.com`** cuando esto se mergee
+      a `main`. Hoy apunta a `dev.onconcilia.com`.
+- [ ] **Leer los textos** de la landing y de los tres correos y marcarme lo que
+      no te cierre.
+- [ ] **Decidir la Etapa 4** (puesta en marcha y qué entra en el abono), que
+      quedaste pensando.
+
+### Y lo que hay que hacer en el otro repo (OnConcilia_Saas)
+
+- [ ] Crear el **feature flag `prestamos`**. Hoy préstamos lo ve cualquier
+      organización; si pasa a ser módulo opcional, necesita flag propio.
+      No corre prisa: recién hace falta cuando se vendan planes.
+
+---
+
+## MIS TAREAS — estado
+
+| Etapa | Qué | Estado |
+|---|---|---|
+| 1.1 | Worker de enriquecimiento (`/api/cron/daily-enrich`) | ✅ |
+| 1.1 | Bug de timeout en `http.ts` (979s → 8s) | ✅ |
+| 1.1 | Enriquecer los 30 sitios pendientes | ✅ 14 correos |
+| 1.1 | Checklist ciudad × rubro | ✅ |
+| 1.1 | Normalizar las localidades mal tipeadas | ✅ 81 filas |
+| 1.2 | Landing con el encuadre de beta Pro | ✅ |
+| 1.2 | Formulario de la reunión como CTA (`BetaForm`) | ✅ |
+| 1.3 | Los 3 correos opt-in reescritos | ✅ |
+| 1.3 | Correo frío 1:1 con el CTA nuevo | ✅ |
+| 1.5 | Webhook de Cal.com (`/api/cal/webhook`) | ✅ |
+| 2.1 | Ciudades y rubros ordenados (`ciudades.ts`) | ✅ |
+| 2.2 | Buscador secuencial por ciudad | ✅ |
+| 2.2 | Workflow de GitHub Actions | ✅ |
+| 1.5 | Guion de la reunión de 15 minutos | ⏳ pendiente |
+| 1.3 | Guion de WhatsApp para después de la respuesta | ⏳ pendiente |
+| 2.4 | Tablero de avance en `/prospectos` | ⏳ pendiente |
+| 2.3 | Seguir el link que enlaza la bio de la red | ⏳ pendiente |
+| 3.x | Todo lo de operar la beta | ⏳ durante la beta |
+
+---
+
 ## Aritmética del embudo — cuánto hay que buscar para 20 betas
 
 Con el 17,3% medido y tasas de referencia de correo frío B2B:
@@ -180,30 +257,40 @@ Lo único con fecha dura.
 - [x] Rendimiento medido: **17,3% de correos por prospecto**.
 - [x] [`CHECKLIST_Busqueda_Ciudad_Rubro.md`](CHECKLIST_Busqueda_Ciudad_Rubro.md)
       — 48 ciudades × 10 rubros, para tildar a mano.
-- [ ] Reemplazar los 8 rubros del cron por los 10 del checklist.
-- [ ] Normalizar el nombre de ciudad antes de insertar (el caso "Cordobá").
-- [ ] Buscar y enriquecer las primeras ciudades del checklist.
+- [x] Los 10 rubros del checklist reemplazan a los 8 del cron viejo.
+- [x] Normalización del nombre de ciudad, al insertar y sobre lo ya guardado.
+- [ ] Buscar y enriquecer las primeras ciudades del checklist. **Arranca en
+      cuanto corras la migración de `prospect_ciudades`.**
 
-### 1.2 — Landing: la beta pasa a ser PRO
+### 1.2 — Landing: la beta pasa a ser PRO ✅
 
-Hoy la landing dice "acceso gratuito por 60 días" sin decir a qué, y promete a
-estudios contables un panel multi-cliente que el producto no tiene.
+- [x] **El CTA es el formulario de la reunión**, no una captura de correo.
+      Mismo patrón que `/coordinar/[id]`: nombre, correo, teléfono y con qué
+      bancos trabajan; se guardan, y recién después aparece el calendario.
+      Componente nuevo `BetaForm`, en el hero y en el cierre.
+- [x] Los datos se guardan **antes** del calendario, a propósito: el que
+      abandona ahí entra igual a la secuencia de correos, que ahora son
+      recordatorios de agendar.
+- [x] Sección "La beta": plan Pro completo, 90 días de historial de todas las
+      cuentas, y el banco que falte desarrollado sin cargo.
+- [x] Qué se pide a cambio: las dos encuestas (día 15 y 45) y el 50% × 3 meses
+      que las paga. Decirlo de entrada filtra al que no va a contestar nunca.
+- [x] **Fuera la tarjeta de estudios contables.** Vuelve cuando haya una
+      función que les sirva; el portal del contador no existe y era la promesa
+      más cara de incumplir. En su lugar, "comercios que cobran por todos
+      lados".
+- [x] Mercado Pago **y Mercado Libre** como función incluida, con el detalle
+      de que separa compras y costos de venta de ML.
+- [x] Franja de saldos diarios (franja, no tarjeta: es una rutina, no una
+      función más).
+- [x] **Sección de módulos opcionales**: echeqs, préstamos, liquidaciones y
+      comprobantes, aclarando que en la beta se eligen dos.
+- [x] Se borró `LeadForm.tsx`, que quedó sin uso. Dejarlo invitaba a que
+      alguien lo volviera a colgar en la landing.
 
-- [ ] Encuadre nuevo: **plan PRO completo, 90 días de historial de todas tus
-      cuentas, y la categorización de tu banco si no lo soportamos**. Es una
-      oferta mucho más concreta que "acceso gratuito".
-- [ ] El CTA pasa a ser **"agendá 15 minutos"**, no "dejá tu mail". La reunión
-      es obligatoria, así que el formulario deja de ser el camino principal:
-      queda para quien no quiera agendar en el momento, y el correo siguiente
-      lo lleva igual a la reunión.
-- [ ] Decir qué se pide a cambio: dos encuestas (día 15 y día 45). Es lo que
-      justifica el 50% × 3 meses, y decirlo de entrada filtra al que no va a
-      contestar nunca.
-- [ ] Corregir la tarjeta de estudios contables (punto 1.2 del plan anterior,
-      sigue sin hacerse). Es la promesa más cara de incumplir.
-- [ ] Sumar Mercado Pago al hero y las dos tarjetas que faltan (Mercado Pago y
-      Comprobantes) — puntos 1.1 y 1.4 del plan anterior.
-- [ ] Franja de saldos diarios (punto 1.5, ya decidido: franja, no tarjeta).
+> **Una cosa a confirmar.** "Plan Pro completo" en la landing dice *dos*
+> módulos opcionales a elección, que es la definición de PRO. Si la intención
+> era que los betas tengan los cuatro, cambia una línea.
 
 ### 1.3 — Los correos, reescritos al nuevo encuadre
 
@@ -211,45 +298,74 @@ Los 3 opt-in (`emails-automation-optin/paso-*.html`) y el frío 1:1
 (`mensajes.ts`, `comercio[1]`) ya existen y están bien armados. Cambia **qué se
 ofrece**, no la estructura.
 
-| Pieza | Qué dice hoy | Qué tiene que decir |
-|---|---|---|
-| `paso-1-bienvenida` | "60 días gratis a cambio de 15 minutos" | PRO completo + 90 días de historial + tu banco; la reunión es la puerta |
-| `paso-2-valor` | El problema del cierre de mes | Igual, cerrando en la reunión |
-| `paso-3-cierre` | "Quedan pocos lugares" | Igual, con el contador real de lugares |
-| `mensajes.ts` `comercio[1]` | "beta, 60 días sin costo" | Mismo encuadre, con el link a `/coordinar/[id]` |
-| `ASUNTOS_COMERCIO` A/B/C | Test en curso desde el 08/09 | **No tocar** — todavía no midió nada; cambiarlo ahora lo invalida |
+| Pieza | Qué cambió |
+|---|---|
+| ~~`paso-1-bienvenida`~~ → **`paso-1-agenda`** | Ya no es una bienvenida: es el recordatorio de elegir horario. Dispara **a las 2 horas**, no inmediato — el contacto entra a la lista antes de ver el calendario, y el que agenda enseguida sale por el webhook, que tarda unos segundos |
+| `paso-2-valor` | El dato del BCRA (777 millones de transferencias, +22%) y por qué ya no se concilia una vez por mes. Cierra en la reunión |
+| `paso-3-cierre` | Último correo, y lo dice: "si no, no hace falta que hagas nada". Baja bajas y marcas de spam |
+| `mensajes.ts` `comercio[1..3]` | Encuadre nuevo de la beta y el link a `/coordinar/[id]` en los tres pasos, no sólo en el primero |
+| `ASUNTOS_COMERCIO` A/B/C | **Sin tocar**, como pediste: el test sigue corriendo y cambiar el asunto ahora lo invalidaría |
 
-- [ ] Reescribir los 4 textos.
+- [x] Reescritos los 4 textos.
 - [ ] **Guion de WhatsApp para después de la respuesta** — no para abrir. Se
       usa cuando el prospecto ya contestó el correo, agendó o pidió que lo
       llamemos (ver *WhatsApp no es un canal de contacto en frío*).
 
-### 1.4 — Brevo
+### 1.4 — Brevo: qué está hecho y qué falta
 
-La infraestructura está hecha y verificada (dominio autenticado, lista id 3,
-webhook id 2168911, envío real confirmado `delivered`). Falta lo de panel.
+Tenías razón en que está armado. Lo que falta es poco, pero es justo lo que no
+tiene API.
 
-- [ ] **Tuyo:** armar el Automation — trigger "contacto entra a la lista
-      `BREVO_LIST_ID_LEADS`" → los 3 correos, día 0 / día 3 / día 7.
-- [ ] **Tuyo:** cargar en Vercel `BREVO_API_KEY`, `BREVO_LIST_ID_LEADS=3` y
-      `BREVO_WEBHOOK_SECRET` (pendiente del plan anterior; sin esto las rutas
-      nuevas no funcionan en producción).
-- [ ] **Tuyo:** apuntar el webhook a `onconcilia.com` cuando esto llegue a
-      `main` (hoy apunta a `dev.onconcilia.com`).
-- [ ] **Tuyo:** confirmar que la key de Brevo **no** quedó cargada en el
-      proyecto viejo de Vercel, o las campañas salen duplicadas.
+**Ya hecho, verificado contra la API real (04/09):**
+
+| Pieza | Estado |
+|---|---|
+| Dominio `onconcilia.com` autenticado (DKIM×2, DMARC, código) | ✅ `{"authenticated": true}` |
+| Lista de leads | ✅ id **3** |
+| Webhook de eventos (rebote, spam, baja, apertura, clic) | ✅ id **2168911** |
+| Atributos personalizados `EMPRESA`/`LOCALIDAD`/`SECTOR`/`PRIORIDAD` | ✅ |
+| Envío real de punta a punta | ✅ confirmado `delivered` |
+| Código: `upsertContacto`, `enviarTransaccional`, baja automática por webhook | ✅ |
+| Código nuevo: `quitarDeLista()`, y el alta de lead manda `FIRSTNAME` y `SMS` | ✅ |
+
+> `FIRSTNAME` y `SMS` son atributos que Brevo trae de fábrica, así que **no hay
+> que crearlos** en el panel — a diferencia de los cuatro del carril frío, que
+> sí hubo que definir a mano.
+
+**Lo que falta, todo del lado del panel:**
+
+- [ ] **Armar el Automation.** Trigger: contacto entra a la lista 3. Tres
+      correos con los textos de `emails-automation-optin/`:
+
+      | Paso | Espera | Condición antes de enviar |
+      |---|---|---|
+      | `paso-1-agenda` | **2 horas** | sigue en la lista |
+      | `paso-2-valor` | 3 días | sigue en la lista |
+      | `paso-3-cierre` | 7 días | sigue en la lista |
+
+- [ ] **La condición de "sigue en la lista" no es opcional.** Sacar un contacto
+      de la lista **no corta** un Automation ya empezado: Brevo lo sigue
+      corriendo. Sin esa condición en cada paso, al que agenda le llegan igual
+      los tres recordatorios de agendar.
+- [ ] Cargar en Vercel `BREVO_API_KEY`, `BREVO_LIST_ID_LEADS=3` y
+      `BREVO_WEBHOOK_SECRET` — pendiente del plan anterior, y sin eso las
+      rutas no funcionan en producción.
+- [ ] Apuntar el webhook a `onconcilia.com` cuando esto llegue a `main` (hoy
+      apunta a `dev.onconcilia.com`).
+- [ ] Confirmar que la key **no** quedó cargada en el proyecto viejo de Vercel.
 
 ### 1.5 — La reunión como única puerta
 
-Ya está casi todo: Cal.com `/15min`, `/coordinar/[id]` que guarda el contacto
-antes de mostrar el calendario, y el estado `respondio_positivo`.
-
-- [ ] **Tuyo:** revisar el evento de Cal.com para que las preguntas del
-      formulario de reserva sirvan a la reunión: con cuántos bancos trabajan,
-      **con qué bancos** (define si hay parser que desarrollar), quién revisa
-      los pagos y cuánto tarda el cierre.
-- [ ] Guion de la reunión de 15 minutos. Hoy no existe. Tiene que cubrir cómo
-      trabajan hoy, qué les cambia, y el compromiso de las dos encuestas.
+- [x] **Webhook de Cal.com** (`/api/cal/webhook`, nuevo). Recibe
+      `BOOKING_CREATED` con firma HMAC verificada, marca el lead como
+      `reunion_agendada`, marca el prospecto como `demo_agendada` si el correo
+      coincide con uno del carril frío, y saca el contacto de la lista de
+      Brevo. Es la pieza que faltaba para distinguir al que agendó del que no.
+- [ ] **Tuyo:** crear el webhook en Cal.com y cargar `CAL_WEBHOOK_SECRET` en
+      Vercel (ver *Tus tareas*).
+- [ ] **Tuyo:** las preguntas del evento de 15 minutos.
+- [ ] Guion de la reunión. Tiene que cubrir cómo trabajan hoy, qué les cambia,
+      con qué bancos operan, y el compromiso de las dos encuestas.
 
 ---
 
@@ -269,22 +385,38 @@ regional, no población sola. El listado completo con su fundamentación está e
 > densidad comercial para llegar a 35 correos. La regla de "si no alcanzás,
 > pasá a la siguiente" es la que las resuelve.
 
-### 2.2 — Ejecución a mano, con opción de automatizar gratis
+### 2.2 — Buscador secuencial ✅
 
-Decidido: **no se paga Vercel Pro**. Se dispara a mano desde `/prospectos`
-siguiendo el checklist.
+- [x] `src/lib/prospects/ciudades.ts` — las 48 ciudades en orden, los 10
+      rubros, y `normalizarCiudad()`.
+- [x] `/api/cron/daily-search` reescrito: toma la primera ciudad abierta, el
+      primer rubro sin buscar, recalcula los correos acumulados y cierra la
+      ciudad al llegar a la meta (`BUSQUEDA_META_CORREOS`, default 35) o al
+      quedarse sin rubros.
+- [x] Tabla `prospect_ciudades` con el avance —
+      [`migrate_prospect_ciudades.sql`](onconcilia-web/supabase/migrate_prospect_ciudades.sql),
+      **correrla es tarea tuya**.
+- [x] De paso, se corrigió en `daily-search` el mismo agujero de autenticación
+      que tenía `daily-enrich`: `if (process.env.CRON_SECRET && ...)` deja el
+      endpoint abierto justo cuando falta la variable.
+- [x] `normalizarCiudad` aplicado al insertar, y los 81 registros viejos
+      corregidos a mano ("Cordobá" → Córdoba, "Parana" → Paraná).
 
-- [ ] Opcional, cuando moleste hacerlo a mano: **GitHub Actions** con un
-      `schedule` que le pegue a `/api/cron/daily-search` y
-      `/api/cron/daily-enrich` con el `CRON_SECRET`. El repo ya está en
-      GitHub, el secreto vive en los Secrets del repo, y el historial de
-      corridas queda visible en la pestaña Actions — que es justo lo que faltó
-      para notar que el cron llevaba dos semanas sin correr. Contra: GitHub
-      desactiva los workflows programados si el repo pasa 60 días sin commits.
-- [ ] Estado de avance por ciudad persistido (tabla nueva o columnas en
-      `prospect_searches`): qué rubros se buscaron, cuántos correos lleva, si
-      está cerrada. Es lo que hace que el checklist no haya que llevarlo a mano
-      en dos lugares.
+**Automatización gratuita — `.github/workflows/prospeccion.yml`** ✅
+
+Decidido: no se paga Vercel Pro, que además limita a un cron por día. El
+workflow corre tres veces por día hábil en horario argentino y le pega primero
+a `daily-search` y después a `daily-enrich`, imprimiendo la respuesta de cada
+llamada en el log. También tiene disparo manual (`workflow_dispatch`) con un
+input de vueltas, para empujar volumen cuando haga falta.
+
+Ventaja sobre el cron de Vercel, que no es menor: **el historial de corridas
+queda a la vista en la pestaña Actions**. Es justo lo que faltó para notar que
+el buscador llevaba dos semanas detenido.
+
+- [ ] **Tuyo:** cargar los secrets `CRON_SECRET` y `APP_URL` en el repo.
+- [ ] Ojo con esto: GitHub **desactiva los workflows programados si el repo
+      pasa 60 días sin commits**. Con el proyecto activo no molesta.
 
 ### 2.3 — Enriquecimiento
 
@@ -371,6 +503,10 @@ beta que traiga un banco distinto de los seis soportados.
 ---
 
 ## ETAPA 4 — Los tres planes (durante la beta, en paralelo)
+
+> **En pausa a propósito.** Lo estás pensando: qué entra en el abono y cómo
+> queda la puesta en marcha. Nada de acá se toca hasta que eso esté decidido.
+> La grilla de abajo es el borrador sobre el que discutir, no una definición.
 
 ### 4.1 — Grilla nueva (a validar)
 

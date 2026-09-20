@@ -1,0 +1,41 @@
+# Dispara la búsqueda y el enriquecimiento de prospectos sin depender del
+# cron nativo de Vercel: el plan Hobby solo permite una corrida diaria, que
+# no alcanza para agotar ciudad por ciudad a buen ritmo.
+#
+# Secrets a cargar en el repo (Settings > Secrets and variables > Actions):
+#   CRON_SECRET  — mismo valor que la variable de entorno del deploy en Vercel.
+#   APP_URL      — URL pública del sitio (ej. https://onconcilia.com), sin barra final.
+#
+# GitHub desactiva los workflows programados si el repo pasa 60 días sin
+# commits — si un día deja de correr sola, revisar eso primero.
+name: Prospección
+
+on:
+  schedule:
+    # 11, 14 y 17 UTC = 8, 11 y 14 hora Argentina, lunes a viernes.
+    - cron: '0 11,14,17 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      vueltas:
+        description: 'Cantidad de vueltas búsqueda+enriquecimiento a ejecutar'
+        required: false
+        default: '1'
+
+jobs:
+  prospectar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ejecutar vueltas de búsqueda y enriquecimiento
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          APP_URL: ${{ secrets.APP_URL }}
+          VUELTAS: ${{ github.event.inputs.vueltas || '1' }}
+        run: |
+          for i in $(seq 1 "$VUELTAS"); do
+            echo "== Vuelta $i/$VUELTAS - búsqueda =="
+            curl --fail-with-body -sS --max-time 300 "$APP_URL/api/cron/daily-search?secret=$CRON_SECRET"
+            echo
+            echo "== Vuelta $i/$VUELTAS - enriquecimiento =="
+            curl --fail-with-body -sS --max-time 300 "$APP_URL/api/cron/daily-enrich?secret=$CRON_SECRET"
+            echo
+          done
