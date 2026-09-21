@@ -28,7 +28,7 @@ sí solo un Automation ya empezado.
           Nos quedó pendiente el horario
         </h1>
         <p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#334155;">
-          Hola{{ contact.FIRSTNAME }}, dejaste tus datos para la beta pero no
+          {% if contact.FIRSTNAME %}Hola {{ contact.FIRSTNAME }},{% else %}Hola,{% endif %} dejaste tus datos para la beta pero no
           llegaste a elegir un horario. Es lo único que falta: la beta se entra
           por una llamada de <b>15 minutos</b>, no por un alta automática.
         </p>
