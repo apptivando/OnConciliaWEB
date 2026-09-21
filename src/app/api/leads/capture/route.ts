@@ -62,18 +62,23 @@ export async function POST(req: Request) {
     }
   }
 
-  // FIRSTNAME y SMS son atributos que Brevo trae de fábrica, así que no hay
-  // que crearlos a mano en el panel — a diferencia de EMPRESA/LOCALIDAD/
-  // SECTOR/PRIORIDAD, que sí hubo que definir para el carril frío. Brevo
-  // rechaza SMS si no viene en E.164, así que un teléfono que no se pueda
-  // normalizar se omite en vez de invalidar todo el upsert.
+  // `NOMBRE`, no `FIRSTNAME`: **Brevo nombra sus atributos de fábrica en el
+  // idioma de la cuenta**, y ésta está en español, así que son `NOMBRE` y
+  // `APELLIDOS`. Verificado contra `GET /v3/contacts/attributes` el
+  // 20/09/2026 — `FIRSTNAME` no existe en esta cuenta. Importa porque Brevo
+  // **ignora en silencio** un atributo que no existe: no devuelve error, el
+  // dato simplemente no se guarda y el `{% if %}` de la plantilla nunca da
+  // verdadero.
+  //
+  // Brevo rechaza SMS si no viene en E.164, así que un teléfono que no se
+  // pueda normalizar se omite en vez de invalidar todo el upsert.
   const e164 = tel ? toE164Ar(tel)?.e164 ?? null : null
   const listId = Number(process.env.BREVO_LIST_ID_LEADS)
   if (listId) {
     const brevoId = await upsertContacto({
       email: limpio,
       attributes: {
-        ...(fila.nombre ? { FIRSTNAME: fila.nombre } : {}),
+        ...(fila.nombre ? { NOMBRE: fila.nombre } : {}),
         ...(e164 ? { SMS: e164 } : {}),
       },
       listIds: [listId],

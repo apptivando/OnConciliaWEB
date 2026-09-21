@@ -28,7 +28,7 @@ no corta por sí solo un Automation ya empezado.
           Nos quedó pendiente el horario
         </h1>
         <p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#334155;">
-          {% if contact.FIRSTNAME %}Hola {{ contact.FIRSTNAME }},{% else %}Hola,{% endif %}
+          Hola{% if contact.NOMBRE %} {{ contact.NOMBRE }}{% endif %},
           dejaste tus datos para la beta pero no llegaste a elegir un horario.
           Son <b>solo 20 lugares</b>, y se ocupan por orden de llamada.
         </p>
