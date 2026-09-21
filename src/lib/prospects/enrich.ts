@@ -291,15 +291,25 @@ export interface EnrichOutcome {
 }
 
 /**
- * Deriva la prioridad de contacto (1-4) a partir de lo encontrado más lo que
- * ya tenía el prospecto. 1=WhatsApp, 2=email, 3=solo teléfono, 4=sin contacto.
+ * Mejor canal para abrir la conversación: 1=email, 2=WhatsApp, 3=solo
+ * teléfono, 4=sin contacto.
+ *
+ * El email va primero, aunque el WhatsApp sea un dato más difícil de
+ * conseguir: **WhatsApp no es un canal de contacto en frío**. Meta tiene muy
+ * controlado el envío de publicidad e invitaciones por ahí, y el costo de
+ * equivocarse es que bloqueen el número, que se lleva puesto el canal para
+ * los clientes reales. WhatsApp sirve después de que la persona respondió.
+ *
+ * Es sólo para ordenar y mostrar. **No se usa para filtrar**: un prospecto
+ * con las dos cosas tiene que aparecer en los dos lados, y un número único
+ * lo mete en un solo casillero. Los filtros van por presencia de cada canal.
  */
 function calcularPrioridad(f: Findings, prospecto: Prospecto): number {
   const whatsapp = f.whatsapp ?? prospecto.whatsapp;
   const email = f.email ?? prospecto.email;
   const telefono = f.phoneE164 ?? prospecto.telefono;
-  if (whatsapp) return 1;
-  if (email) return 2;
+  if (email) return 1;
+  if (whatsapp) return 2;
   if (telefono) return 3;
   return 4;
 }

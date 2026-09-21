@@ -2,14 +2,7 @@
 
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { useState, useEffect, useTransition } from 'react'
-import { SECTORES, ESTADOS, ESTADOS_ORDEN, ORIGEN_STYLE, OrigenProspecto } from '@/lib/types'
-
-const PRIORIDADES = [
-  { value: '1', label: '1 · Con WhatsApp' },
-  { value: '2', label: '2 · Con email' },
-  { value: '3', label: '3 · Solo teléfono' },
-  { value: '4', label: '4 · Sin contacto' },
-]
+import { SECTORES, ESTADOS, ESTADOS_ORDEN, ORIGEN_STYLE, OrigenProspecto, CANALES_FILTRO } from '@/lib/types'
 
 const selectClass =
   'bg-white border border-slate-200 rounded-lg px-2.5 py-2 text-xs text-slate-700 focus:outline-none focus:border-brand'
@@ -44,7 +37,7 @@ export default function ProspectosToolbar({ localidades }: { localidades: string
     startTransition(() => router.replace(`${pathname}?${next.toString()}`, { scroll: false }))
   }
 
-  const activeFilters = ['sector', 'estado', 'prioridad', 'localidad', 'origen', 'q'].filter((k) => params.get(k))
+  const activeFilters = ['sector', 'estado', 'canal', 'localidad', 'origen', 'q'].filter((k) => params.get(k))
 
   return (
     <div className="flex flex-wrap items-center gap-2 px-5 py-3 border-b border-slate-100 bg-slate-50/60">
@@ -69,10 +62,13 @@ export default function ProspectosToolbar({ localidades }: { localidades: string
         ))}
       </select>
 
-      <select value={params.get('prioridad') ?? ''} onChange={(e) => apply('prioridad', e.target.value)} className={selectClass}>
-        <option value="">Toda prioridad</option>
-        {PRIORIDADES.map((p) => (
-          <option key={p.value} value={p.value}>{p.label}</option>
+      {/* Por canal disponible, no por prioridad: quien tiene correo y
+          WhatsApp tiene que aparecer en los dos filtros, y un número único
+          lo mete en uno solo. */}
+      <select value={params.get('canal') ?? ''} onChange={(e) => apply('canal', e.target.value)} className={selectClass}>
+        <option value="">Todo canal</option>
+        {CANALES_FILTRO.map((c) => (
+          <option key={c.value} value={c.value}>{c.label}</option>
         ))}
       </select>
 

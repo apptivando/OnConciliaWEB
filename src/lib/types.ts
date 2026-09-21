@@ -96,13 +96,27 @@ export const SECTORES: Record<Sector, string> = {
   comercio:   'Comercio',
 }
 
-/** 1=WhatsApp confirmado, 2=email, 3=solo teléfono, 4=sin contacto. */
+/**
+ * Mejor canal para abrir: 1=email, 2=WhatsApp, 3=solo teléfono, 4=sin nada.
+ * El email va primero porque WhatsApp no sirve para contacto en frío (Meta
+ * bloquea el número). Es para ordenar y mostrar, no para filtrar: quien
+ * tiene correo **y** WhatsApp debe aparecer en los dos filtros, y un número
+ * único lo mete en un solo casillero.
+ */
 export const PRIORIDAD_CONTACTO: Record<number, { label: string; color: string }> = {
-  1: { label: 'WhatsApp', color: 'bg-emerald-100 text-emerald-700' },
-  2: { label: 'Email',    color: 'bg-blue-100 text-blue-700' },
+  1: { label: 'Email',    color: 'bg-blue-100 text-blue-700' },
+  2: { label: 'WhatsApp', color: 'bg-emerald-100 text-emerald-700' },
   3: { label: 'Teléfono', color: 'bg-amber-100 text-amber-700' },
   4: { label: 'Sin contacto', color: 'bg-slate-100 text-slate-500' },
 }
+
+/** Filtros del CRM por canal disponible. Por presencia, no excluyentes. */
+export const CANALES_FILTRO = [
+  { value: 'email',    label: 'Con email' },
+  { value: 'whatsapp', label: 'Con WhatsApp' },
+  { value: 'telefono', label: 'Con teléfono' },
+  { value: 'sin',      label: 'Sin contacto' },
+] as const
 
 export const ORIGEN_STYLE: Record<OrigenProspecto, { label: string; color: string }> = {
   busqueda: { label: 'Búsqueda', color: 'bg-blue-50 text-blue-700 border-blue-100' },

@@ -23,7 +23,7 @@ export default async function ProspectosPage({
     q?: string
     sector?: string
     estado?: string
-    prioridad?: string
+    canal?: string
     localidad?: string
     origen?: string
     page?: string
@@ -34,7 +34,7 @@ export default async function ProspectosPage({
 
   const page = Math.max(Number(searchParams.page ?? 1) || 1, 1)
   const isFiltered = Boolean(
-    searchParams.q || searchParams.sector || searchParams.estado || searchParams.prioridad || searchParams.localidad || searchParams.origen
+    searchParams.q || searchParams.sector || searchParams.estado || searchParams.canal || searchParams.localidad || searchParams.origen
   )
 
   let query = supabase.from('prospectos').select('*', { count: 'exact' })
@@ -47,9 +47,15 @@ export default async function ProspectosPage({
   if (searchParams.estado) query = query.eq('estado', searchParams.estado)
   if (searchParams.localidad) query = query.eq('localidad', searchParams.localidad)
   if (searchParams.origen) query = query.eq('origen', searchParams.origen)
-  if (searchParams.prioridad) {
-    const n = Number(searchParams.prioridad)
-    if (n >= 1 && n <= 4) query = query.eq('prioridad_contacto', n)
+  // Filtro por canal, **por presencia y no por la prioridad**. Con un número
+  // único, quien tiene correo y WhatsApp cae en un solo casillero: medido el
+  // 21/09/2026, de los 14 prospectos con correo, 13 quedaban fuera del filtro
+  // "Email" porque también tenían WhatsApp. Con esto aparecen en los dos.
+  if (searchParams.canal === 'email') query = query.not('email', 'is', null)
+  else if (searchParams.canal === 'whatsapp') query = query.not('whatsapp', 'is', null)
+  else if (searchParams.canal === 'telefono') query = query.not('telefono', 'is', null)
+  else if (searchParams.canal === 'sin') {
+    query = query.is('email', null).is('whatsapp', null).is('telefono', null)
   }
 
   query = query
