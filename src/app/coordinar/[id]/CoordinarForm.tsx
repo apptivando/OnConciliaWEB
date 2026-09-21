@@ -12,7 +12,13 @@ import Cal, { getCalApi } from '@calcom/embed-react'
 const CAL_LINK = process.env.NEXT_PUBLIC_CAL_LINK ?? 'guillermo-onconcilia/15min'
 const CAL_NAMESPACE = '15min'
 
-export default function CoordinarForm({ prospectoId }: { prospectoId: string }) {
+export default function CoordinarForm({
+  prospectoId,
+  email,
+}: {
+  prospectoId: string
+  email?: string | null
+}) {
   const [form, setForm] = useState({ nombre: '', telefono: '', nota: '' })
   const [estado, setEstado] = useState<'idle' | 'enviando' | 'agendar' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
@@ -78,7 +84,13 @@ export default function CoordinarForm({ prospectoId }: { prospectoId: string }) 
             namespace={CAL_NAMESPACE}
             calLink={CAL_LINK}
             style={{ width: '100%', height: '680px', overflow: 'auto' }}
-            config={{ theme: 'light', layout: 'month_view', name: form.nombre, notes: form.nota }}
+            config={{
+              theme: 'light',
+              layout: 'month_view',
+              name: form.nombre,
+              notes: form.nota,
+              ...(email ? { email } : {}),
+            }}
           />
         </>
       ) : (

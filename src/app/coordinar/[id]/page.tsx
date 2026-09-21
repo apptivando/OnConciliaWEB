@@ -14,7 +14,7 @@ const supabase = createClient(
 export default async function CoordinarPage({ params }: { params: { id: string } }) {
   const { data: prospecto } = await supabase
     .from('prospectos')
-    .select('id, empresa, estado')
+    .select('id, empresa, estado, email')
     .eq('id', params.id)
     .maybeSingle()
 
@@ -54,7 +54,13 @@ export default async function CoordinarPage({ params }: { params: { id: string }
 
       {/* Sin envoltorio de ancho fijo acá — CoordinarForm controla su propio
           ancho (se ensancha solo en el paso de Cal.com). */}
-      <CoordinarForm prospectoId={prospecto.id} />
+      {/* El correo va precargado en Cal.com para que no lo escriba de nuevo.
+          No es sólo comodidad: el webhook de Cal reconoce a quién agendó por
+          el correo, y uno tipeado distinto crea un prospecto duplicado y deja
+          al original recibiendo recordatorios de agendar después de haber
+          agendado. Mostrarlo acá no expone nada nuevo: el id del link sólo
+          lo tiene quien recibió el correo en esa dirección. */}
+      <CoordinarForm prospectoId={prospecto.id} email={prospecto.email} />
 
       <p className="w-full max-w-md text-slate-600 text-xs text-center mt-4">
         Te llamamos para coordinar en 15 minutos · sin compromiso
