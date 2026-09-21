@@ -32,8 +32,6 @@ import {
   inlineJsonScripts,
 } from "./extract";
 import { toWhatsappNumber } from "@/lib/phone";
-import { upsertContacto } from "@/lib/brevo";
-import { ASUNTOS_COMERCIO, appUrl, CUPO_BETA } from "@/lib/mensajes";
 import type { Prospecto, RedesProspecto } from "@/lib/types";
 
 /** Páginas máximas por sitio (la home cuenta como una). */
@@ -238,50 +236,21 @@ async function runLevel1(prospecto: Prospecto, f: Findings): Promise<{ error: st
   return { error: pagesRead === 0 ? firstError : null };
 }
 
-// ─── Sincronización a Brevo (dispara la Automation "Leads Search") ─────────
-
-const OFERTA_BETA =
-  "Estamos en beta — buscamos los primeros comercios para probarlo sin costo durante 60 días, a cambio de que nos cuentes qué te sirve y qué no.";
-const OFERTA_TRIAL = "Podés probarlo gratis durante 15 días, sin tarjeta ni compromiso.";
-
-/**
- * Solo comercios de búsqueda: son los únicos con `variante_asunto` (A/B/C) y
- * los únicos que este carril de outreach frío por email cubre hoy — LinkedIn,
- * WhatsApp y teléfono quedan como dato manual en la ficha, sin automatizar.
- *
- * Entrar a la lista `BREVO_LIST_ID_SEARCH` dispara la Automation configurada
- * en el dashboard de Brevo — el envío en sí no lo hace este código. ASUNTO,
- * OFERTA y COORDINAR_URL van como atributos del contacto porque el template
- * de Brevo no tiene la lógica de variantes ni de cupo: la resuelve acá,
- * reusando exactamente lo que ya calcula `mensajes.ts`.
- */
-async function sincronizarBrevo(
-  prospecto: Prospecto,
-  email: string,
-  cupoLleno: boolean
-): Promise<string | null> {
-  if (prospecto.sector !== "comercio" || prospecto.origen !== "busqueda" || !prospecto.variante_asunto) {
-    return null;
-  }
-
-  const listId = Number(process.env.BREVO_LIST_ID_SEARCH) || undefined;
-
-  return upsertContacto({
-    email,
-    attributes: {
-      EMPRESA: prospecto.empresa,
-      LOCALIDAD: prospecto.localidad ?? "",
-      SECTOR: prospecto.sector,
-      PRIORIDAD: prospecto.prioridad_contacto ?? null,
-      ASUNTO: ASUNTOS_COMERCIO[prospecto.variante_asunto](prospecto.empresa),
-      OFERTA: cupoLleno ? OFERTA_TRIAL : OFERTA_BETA,
-      COORDINAR_URL: `${appUrl()}/coordinar/${prospecto.id}`,
-    },
-    listIds: listId ? [listId] : undefined,
-  });
-}
-
 // ─── Orquestador ─────────────────────────────────────────────────────────────
+//
+// **El enriquecimiento no manda nada.** Hasta el 21/09/2026 sí: al encontrar
+// un correo subía el contacto a la lista "OnConcilia - Leads Search" de Brevo,
+// y eso disparaba la "Automatización #2", que mandaba el correo frío sola.
+// Convivió un día con el cron de envío (`/api/cron/daily-outreach`) y el
+// resultado fue el esperable con dos emisores: 33 correos de golpe sin tope
+// desde un dominio que nunca había enviado en frío, 5 empresas que recibieron
+// el mismo correo dos veces, y 28 que el CRM creía no contactadas y que al
+// día siguiente iban a recibir la copia.
+//
+// Queda un solo emisor, el cron, que tiene tope diario, evita duplicados por
+// dirección y lleva la secuencia de seguimientos. Encontrar un correo es un
+// dato, no una acción. La automatización quedó apagada en Brevo; si alguna
+// vez se reactivara, igual no dispararía, porque ya nadie entra a esa lista.
 
 export interface EnrichOutcome {
   prospectoId: string;
@@ -317,8 +286,7 @@ function calcularPrioridad(f: Findings, prospecto: Prospecto): number {
 /** Enriquece un prospecto y guarda el resultado. Nunca tira. */
 export async function enrichProspecto(
   supabase: SupabaseClient,
-  prospecto: Prospecto,
-  cupoLleno: boolean
+  prospecto: Prospecto
 ): Promise<EnrichOutcome> {
   const f = emptyFindings();
   let error: string | null = null;
@@ -364,12 +332,6 @@ export async function enrichProspecto(
     patch.notas = [prospecto.notas, ...notasExtra].filter(Boolean).join("\n").slice(0, 2000);
   }
 
-  const emailFinal = f.email ?? prospecto.email;
-  if (emailFinal && !prospecto.brevo_contact_id) {
-    const brevoId = await sincronizarBrevo(prospecto, emailFinal, cupoLleno);
-    if (brevoId) patch.brevo_contact_id = brevoId;
-  }
-
   const { error: dbError } = await supabase.from("prospectos").update(patch).eq("id", prospecto.id);
 
   return {
@@ -404,24 +366,20 @@ export async function enrichBatch(
 ): Promise<BatchResult> {
   const limit = opts.limit ?? 12;
 
-  const [{ data }, { count: betasActivos }] = await Promise.all([
-    supabase
-      .from("prospectos")
-      .select("*")
-      .not("sitio_web", "is", null)
-      .is("enriquecido_en", null)
-      .neq("estado", "descartado")
-      .order("created_at", { ascending: true })
-      .limit(limit),
-    supabase.from("prospectos").select("id", { count: "exact", head: true }).eq("estado", "beta_activo"),
-  ]);
+  const { data } = await supabase
+    .from("prospectos")
+    .select("*")
+    .not("sitio_web", "is", null)
+    .is("enriquecido_en", null)
+    .neq("estado", "descartado")
+    .order("created_at", { ascending: true })
+    .limit(limit);
 
-  const cupoLleno = (betasActivos ?? 0) >= CUPO_BETA;
   const prospectos = (data ?? []) as Prospecto[];
   const outcomes: EnrichOutcome[] = [];
 
   for (const prospecto of prospectos) {
-    outcomes.push(await enrichProspecto(supabase, prospecto, cupoLleno));
+    outcomes.push(await enrichProspecto(supabase, prospecto));
   }
 
   return {

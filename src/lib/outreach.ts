@@ -147,9 +147,11 @@ export async function enviarCorreoFrio(
     return { ok: false, error: `Tope diario alcanzado (${ya}/${limite}). Se reinicia mañana.`, status: 429 }
   }
 
-  // Sólo los que salieron de una búsqueda entran a "OnConcilia - Leads
-  // Search" — el carril de LinkedIn no tiene lista propia en Brevo.
-  const listIdSearch = Number(process.env.BREVO_LIST_ID_SEARCH) || undefined
+  // El contacto se crea en Brevo, pero **no se suma a ninguna lista**. Entrar
+  // a "OnConcilia - Leads Search" disparaba la Automatización #2, que mandaba
+  // el mismo correo frío por su cuenta: el 21/09/2026 eso produjo envíos
+  // duplicados con este cron. Queda apagada, y sin nadie entrando a la lista
+  // no puede volver a disparar aunque alguien la reactive por error.
   const brevoId = await upsertContacto({
     email: p.email,
     attributes: {
@@ -159,7 +161,6 @@ export async function enviarCorreoFrio(
       // PRIORIDAD es numérico en Brevo — null, no '', cuando no hay valor.
       PRIORIDAD: p.prioridad_contacto ?? null,
     },
-    listIds: p.origen === 'busqueda' && listIdSearch ? [listIdSearch] : undefined,
   })
 
   // Autoritativo del lado del servidor: el asunto nunca se toma de quien
