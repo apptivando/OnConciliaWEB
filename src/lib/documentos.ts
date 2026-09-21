@@ -61,6 +61,20 @@ export const DOCUMENTOS: Documento[] = [
     ],
   },
   {
+    slug: 'guion-reunion',
+    titulo: 'Guion de la reunión de 15 minutos',
+    resumen:
+      'La primera llamada con quien agendó: siete preguntas abiertas para que el cliente cuente cómo lleva hoy los movimientos y qué busca, la devolución, el cierre con la beta y qué anotar en la ficha.',
+    cuando: 'Abierto al lado durante la llamada. Leelo una vez antes de la primera.',
+    nivel: 'interno',
+    grupo: 'vender',
+    archivo: 'guion-reunion.md',
+    tags: [
+      'reunion', 'llamada', 'guion', 'preguntas', 'escuchar', 'beta', 'cierre',
+      'bancos', 'modulos', 'demo', 'calificacion', 'ficha',
+    ],
+  },
+  {
     slug: 'programa-referidores',
     titulo: 'Programa de referidores',
     resumen:

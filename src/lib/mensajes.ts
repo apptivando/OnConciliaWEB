@@ -55,6 +55,19 @@ export const ASUNTO_GENERICO = (nombre: string) => `${nombre}, ¿conversamos sob
 
 type Templates = Record<Sector, Record<1 | 2 | 3, (v: TemplateVars) => string>>
 
+/**
+ * La oferta del correo frío a comercios, igual en la apertura y en el
+ * recordatorio. Con los 20 lugares de la beta llenos ("estamos abriendo
+ * lugares" ya no es cierto) pasa a una prueba estándar — no sólo cambia el
+ * número de días, cambia el marco: ya no es "sumate a la beta", es "probalo
+ * gratis".
+ */
+function ofertaComercio(cupoLleno?: boolean): string {
+  return cupoLleno
+    ? `Podés probarlo gratis durante 15 días, sin tarjeta ni compromiso.`
+    : `Estamos abriendo 20 lugares de beta. El que entra tiene 60 días del plan Pro completo sin cargo, con 90 días de historial de todas sus cuentas ya cargado por nosotros — y si trabajás con un banco que todavía no leemos, lo desarrollamos sin cargo.`
+}
+
 export const TEMPLATES: Templates = {
   pyme: {
     1: ({ nombre, empresa }) =>
@@ -160,26 +173,22 @@ guillermo@onconcilia.com`,
 
   // A diferencia de los otros tres segmentos, estos comercios salen de una
   // búsqueda en Google Places, no de una conexión en LinkedIn: el tono es de
-  // email frío, no de seguimiento. El paso 1 es el único que usa /cola hoy —
-  // el asunto NO va acá, sale de `ASUNTOS_COMERCIO` según
-  // `prospecto.variante_asunto` (A/B/C, test en curso desde el 08/09/2026).
+  // email frío, no de seguimiento. El asunto NO va acá, sale de
+  // `ASUNTOS_COMERCIO` según `prospecto.variante_asunto` (test A/B/C).
+  //
+  // La secuencia fría son **dos** correos: la apertura (1) y un recordatorio
+  // a los 15 días (2), con texto parecido. Decidido el 21/09/2026; ver
+  // `PASOS_FRIO` en `lib/outreach.ts`. El 3 queda porque el tipo lo exige
+  // para todos los sectores, pero el cron no lo manda a comercios.
   comercio: {
-    1: ({ nombre, id, cupoLleno }) => {
-      // Con los 20 lugares de la beta llenos ("estamos en beta, buscamos
-      // los primeros comercios" ya no es cierto), la oferta pasa a un
-      // trial estándar — no solo cambia el número de días, cambia el
-      // marco: ya no es "sumate a la beta", es "probalo gratis".
-      const oferta = cupoLleno
-        ? `Podés probarlo gratis durante 15 días, sin tarjeta ni compromiso.`
-        : `Estamos abriendo 20 lugares de beta. El que entra tiene 60 días del plan Pro completo sin cargo, con 90 días de historial de todas sus cuentas ya cargado por nosotros — y si trabajás con un banco que todavía no leemos, lo desarrollamos sin cargo.`
-
-      return `Hola${nombre ? ` ${nombre}` : ''},
+    1: ({ nombre, id, cupoLleno }) =>
+      `Hola${nombre ? ` ${nombre}` : ''},
 
 ¿Cuánto perdés por no revisar bien los movimientos del banco? Entre comisiones que pasan sin que nadie las mire, movimientos que no cuadran con lo que tenés anotado y errores que se descubren semanas después, conciliar el banco a mano es un problema que crece con cada cuenta que sumás.
 
 Armamos OnConcilia para resolver justo eso: cruza automáticamente el extracto de tu banco o de Mercado Pago contra tus movimientos, categoriza todo solo, y te deja ver únicamente lo que necesita tu atención.
 
-${oferta}
+${ofertaComercio(cupoLleno)}
 
 No hay alta automática: antes de activar nada hablamos 15 minutos para entender cómo llevás hoy el banco. Si no te sirve, te lo digo en esa misma llamada.
 
@@ -190,17 +199,32 @@ Si no es el momento, gracias por leer este correo.
 Saludos,
 Guillermo
 OnConcilia
-guillermo@onconcilia.com`
-    },
+guillermo@onconcilia.com`,
 
-    2: ({ nombre, id }) =>
+    // Recordatorio a los 15 días. Parecido a la apertura a propósito: quien
+    // no contestó la primera vez probablemente ni la leyó, así que no se da
+    // por sabido nada. Es el último correo: lo dice, y eso baja las bajas y
+    // las marcas de spam — el que no está interesado sabe que no tiene que
+    // hacer nada.
+    2: ({ nombre, id, cupoLleno }) =>
       `Hola${nombre ? ` ${nombre}` : ''},
 
-Te cuento un poco más sobre OnConcilia: subís el extracto del banco (y el de Mercado Pago si vendés por QR o link de pago) y el sistema cruza todo solo, categoriza los movimientos y te muestra lo que falta revisar — sin recorrer fila por fila. Las comisiones bancarias quedan con el IVA desglosado por alícuota, que es crédito fiscal que en general se pierde.
+Hace un par de semanas te escribí sobre OnConcilia y no quería dejarlo sin volver a preguntar.
 
-Quedan lugares de la beta: 60 días del plan Pro, con 90 días de historial cargado por nosotros.
+¿Cuánto tiempo se les va por día en revisar los movimientos del banco? Entre comisiones que nadie mira, pagos que no cuadran con lo anotado y errores que aparecen semanas después, conciliar a mano es un trabajo que crece con cada cuenta.
 
-Son 15 minutos y elegís vos el horario: ${appUrl()}/coordinar/${id}`,
+OnConcilia cruza solo el extracto de tu banco y de Mercado Pago contra tus movimientos, categoriza todo y te deja ver únicamente lo que necesita tu atención.
+
+${ofertaComercio(cupoLleno)}
+
+Si te interesa, dejame tu teléfono y elegí el horario acá: ${appUrl()}/coordinar/${id}
+
+Y si no es el momento, no te escribo más por este tema.
+
+Saludos,
+Guillermo
+OnConcilia
+guillermo@onconcilia.com`,
 
     3: ({ nombre, empresa, id }) =>
       `Hola${nombre ? ` ${nombre}` : ''},

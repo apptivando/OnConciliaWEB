@@ -20,6 +20,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { CUPO_BETA } from '@/lib/mensajes'
 import {
+  DIAS_RECORDATORIO,
   enviarCorreoFrio,
   enviadosHoy,
   pasoQueSigue,
@@ -30,8 +31,25 @@ import type { Prospecto } from '@/lib/types'
 
 export const maxDuration = 60
 
-/** Días de espera entre el paso 1 y el 2, y entre el 2 y el 3. */
-const ESPERA_DIAS: Record<2 | 3, number> = { 2: 3, 3: 4 }
+/**
+ * Horas (Argentina) en que corre el workflow — tienen que coincidir con el
+ * `cron` de `.github/workflows/prospeccion.yml` (11, 14 y 17 UTC).
+ *
+ * Sirven para repartir el tope del día entre las corridas en vez de
+ * gastarlo entero en la primera. Quince correos en el mismo minuto a las 8
+ * de la mañana es un patrón mucho más de robot que la cantidad diaria en sí.
+ */
+const HORAS_CORRIDA = [8, 11, 14]
+
+function corridasQueQuedan(): number {
+  const hora = Number(
+    new Intl.DateTimeFormat('en-GB', { timeZone: 'America/Argentina/Buenos_Aires', hour: '2-digit', hour12: false }).format(new Date())
+  )
+  // La corrida actual cuenta. Una manual a otra hora toma lo que le toca a
+  // la siguiente programada; después de la última, puede usar todo lo que
+  // quede del día.
+  return Math.max(HORAS_CORRIDA.filter((h) => h >= hora - 1).length, 1)
+}
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -55,10 +73,12 @@ export async function GET(req: Request) {
 
   const limite = topeDiario()
   const ya = await enviadosHoy(supabase)
-  let cupo = Math.max(limite - ya, 0)
-  if (cupo === 0) {
+  const quedaHoy = Math.max(limite - ya, 0)
+  if (quedaHoy === 0) {
     return Response.json({ mensaje: `Tope diario alcanzado (${ya}/${limite}).`, enviados: 0 })
   }
+  // Lo que queda del día se reparte parejo entre las corridas que faltan.
+  let cupo = Math.ceil(quedaHoy / corridasQueQuedan())
 
   const { count: betas } = await supabase
     .from('prospectos')
@@ -74,10 +94,12 @@ export async function GET(req: Request) {
       .not('email', 'is', null)
       .eq('email_estado', 'activo')
 
-  // 1) Seguimientos: ya se les escribió y les toca el paso 2 o el 3.
+  // 1) Recordatorios: recibieron la apertura hace 15 días o más y no
+  //    contestaron (si hubieran completado el formulario, su estado ya no
+  //    sería 'solicitud_enviada').
   const { data: enCurso } = await base()
     .eq('estado', 'solicitud_enviada')
-    .lte('ultimo_envio_en', haceDias(ESPERA_DIAS[2]))
+    .lte('ultimo_envio_en', haceDias(DIAS_RECORDATORIO))
     .order('ultimo_envio_en', { ascending: true })
     .limit(cupo)
 
@@ -117,18 +139,9 @@ export async function GET(req: Request) {
 
     const paso = await pasoQueSigue(supabase, fila.id)
     if (!paso) {
-      omitidos.push({ empresa: fila.empresa, motivo: 'ya recibió los 3 pasos' })
+      // Ya recibió la apertura y el recordatorio: no se le escribe más.
+      omitidos.push({ empresa: fila.empresa, motivo: 'ya recibió los 2 correos de la secuencia' })
       continue
-    }
-
-    // El salto entre el paso 2 y el 3 es más corto que el del 1 al 2, así que
-    // la ventana se chequea por paso y no una sola vez en la query.
-    if (paso > 1 && fila.ultimo_envio_en) {
-      const espera = ESPERA_DIAS[paso as 2 | 3]
-      if (new Date(fila.ultimo_envio_en) > new Date(haceDias(espera))) {
-        omitidos.push({ empresa: fila.empresa, motivo: `todavía no pasaron ${espera} días` })
-        continue
-      }
     }
 
     const mensaje = textoDelPaso(fila, paso, cupoLleno)

@@ -20,14 +20,41 @@ import { ESTADOS_ORDEN, type EstadoProspecto, type Prospecto } from '@/lib/types
 // descartada el 04/09/2026: autenticar el subdominio aparte nunca validó).
 const REMITENTE = { email: 'guillermo@onconcilia.com', name: 'Guillermo de OnConcilia' }
 
-export function topeDiario(): number {
-  return Number(process.env.OUTREACH_DAILY_LIMIT) || 50
+function hoyAR(): string {
+  // Evita el bug UTC de "hoy" cruzando la medianoche en Argentina (UTC-3).
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date())
 }
 
 function inicioDeHoyAR(): string {
-  // Evita el bug UTC de "hoy" cruzando la medianoche en Argentina (UTC-3).
-  const hoy = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date())
-  return `${hoy}T00:00:00-03:00`
+  return `${hoyAR()}T00:00:00-03:00`
+}
+
+/**
+ * Tope del día, **distinto cada día** dentro de un rango.
+ *
+ * Mandar siempre la misma cantidad exacta es un patrón de robot. Se toma un
+ * número al azar entre `OUTREACH_DAILY_MIN` y `OUTREACH_DAILY_MAX`, pero
+ * sembrado con la fecha: las tres corridas del mismo día tienen que ver el
+ * mismo tope, o la tercera podría sortear uno más bajo que lo ya enviado y la
+ * suma del día no respondería a ningún número.
+ *
+ * Si sólo está `OUTREACH_DAILY_LIMIT` (la variable de antes), se usa como
+ * tope fijo, así un deploy sin las variables nuevas no cambia de golpe.
+ */
+export function topeDiario(): number {
+  const fijo = Number(process.env.OUTREACH_DAILY_LIMIT) || 50
+  const min = Number(process.env.OUTREACH_DAILY_MIN) || fijo
+  const max = Math.max(Number(process.env.OUTREACH_DAILY_MAX) || fijo, min)
+  if (min === max) return min
+
+  // FNV-1a sobre la fecha: sin dependencias, determinístico, y alcanza para
+  // repartir parejo un rango chico.
+  let h = 0x811c9dc5
+  for (const c of hoyAR()) {
+    h ^= c.charCodeAt(0)
+    h = Math.imul(h, 0x01000193)
+  }
+  return min + ((h >>> 0) % (max - min + 1))
 }
 
 /** Correos fríos ya enviados hoy. Se cuentan de `interacciones`, que es el registro real. */
@@ -42,12 +69,25 @@ export async function enviadosHoy(supabase: SupabaseClient): Promise<number> {
 }
 
 /**
- * Qué paso de la secuencia le toca a un prospecto: 1 si nunca se le escribió,
- * 2 o 3 según cuántos correos ya se le mandaron. Se deduce contando
+ * Cuántos correos tiene la secuencia fría: la apertura y **un solo
+ * recordatorio a los 15 días**, con texto parecido. Decidido el 21/09/2026.
+ *
+ * No confundir con la automatización de Brevo, que son los 3 recordatorios
+ * de agendar para quien sí completó el formulario. Esta secuencia es para
+ * quien nunca respondió, y a esa persona no se le escribe más de dos veces.
+ */
+export const PASOS_FRIO = 2
+
+/** Días entre la apertura y el recordatorio. */
+export const DIAS_RECORDATORIO = 15
+
+/**
+ * Qué paso le toca a un prospecto: 1 si nunca se le escribió, 2 si ya recibió
+ * la apertura, `null` si ya recibió los dos. Se deduce contando
  * `interacciones`, en vez de guardar un contador aparte que se puede
  * desincronizar del registro real.
  */
-export async function pasoQueSigue(supabase: SupabaseClient, prospectoId: string): Promise<1 | 2 | 3 | null> {
+export async function pasoQueSigue(supabase: SupabaseClient, prospectoId: string): Promise<1 | 2 | null> {
   const { count } = await supabase
     .from('interacciones')
     .select('id', { count: 'exact', head: true })
@@ -55,8 +95,8 @@ export async function pasoQueSigue(supabase: SupabaseClient, prospectoId: string
     .eq('tipo', 'mensaje')
     .eq('canal', 'email')
   const ya = count ?? 0
-  if (ya >= 3) return null
-  return (ya + 1) as 1 | 2 | 3
+  if (ya >= PASOS_FRIO) return null
+  return (ya + 1) as 1 | 2
 }
 
 /**
@@ -102,7 +142,7 @@ function mensajeAHtml(mensaje: string): string {
 }
 
 /** Texto del paso que corresponda, con el link a /coordinar/[id]. */
-export function textoDelPaso(p: Prospecto, paso: 1 | 2 | 3, cupoLleno: boolean): string {
+export function textoDelPaso(p: Prospecto, paso: 1 | 2, cupoLleno: boolean): string {
   return generarMensaje(p.sector, paso, {
     // Para comercios `nombre === empresa` (Places no da el nombre de una
     // persona): pasarlo rompería el saludo — "Hola La," para "La Tienda".
