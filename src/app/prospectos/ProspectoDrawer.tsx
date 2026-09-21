@@ -193,6 +193,27 @@ function TabResumen({ p }: { p: Prospecto }) {
 function TabMensajes({ p, cupoLleno, onRegistrado }: { p: Prospecto; cupoLleno: boolean; onRegistrado: () => void }) {
   const [paso, setPaso] = useState<1 | 2 | 3>(1)
   const [copiado, setCopiado] = useState(false)
+  const [enviando, setEnviando] = useState(false)
+  const [enviado, setEnviado] = useState(false)
+  const [errorEnvio, setErrorEnvio] = useState<string | null>(null)
+
+  function cambiarPaso(n: 1 | 2 | 3) {
+    setPaso(n)
+    setEnviado(false)
+    setErrorEnvio(null)
+  }
+
+  // Qué paso es un email depende del sector, no del número. Los comercios
+  // salen de una búsqueda en Places, no de LinkedIn: sus tres pasos son
+  // correos, y el primero es justamente el de contacto frío. En los otros
+  // tres sectores el 1 y el 2 son LinkedIn y sólo el 3 es email.
+  const esEmail = p.sector === 'comercio' || paso === 3
+
+  const motivoDeshabilitado = !p.email
+    ? 'Sin email'
+    : p.email_estado !== 'activo'
+      ? `Email ${p.email_estado === 'rebotado' ? 'rebotado' : p.email_estado === 'baja' ? 'dado de baja' : 'marcado como spam'}`
+      : null
 
   // Para comercios nombre === empresa (Places no da nombre de una persona) —
   // pasarlo igual rompería el saludo ("Hola La," para "La Tienda"). Mismo
@@ -213,12 +234,37 @@ function TabMensajes({ p, cupoLleno, onRegistrado }: { p: Prospecto; cupoLleno: 
     const supabase = createClient()
     await supabase.from('interacciones').insert({
       prospecto_id: p.id,
-      tipo: paso === 3 ? 'email' : 'mensaje',
+      tipo: esEmail ? 'email' : 'mensaje',
       contenido: mensaje,
-      canal: paso === 3 ? 'email' : 'linkedin',
+      canal: esEmail ? 'email' : 'linkedin',
     })
     await supabase.from('prospectos').update({ fecha_ultimo_contacto: new Date().toISOString().split('T')[0] }).eq('id', p.id)
     onRegistrado()
+  }
+
+  async function enviarPorCorreo() {
+    setEnviando(true)
+    setErrorEnvio(null)
+    try {
+      const res = await fetch('/api/outreach/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prospecto_id: p.id, canal: 'email', mensaje }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setErrorEnvio(data.error ?? 'Error al enviar')
+        return
+      }
+      // La ruta ya registra la interacción y actualiza el prospecto server-side —
+      // insertarla también acá dejaría dos filas por envío.
+      setEnviado(true)
+      onRegistrado()
+    } catch {
+      setErrorEnvio('Error de red al enviar')
+    } finally {
+      setEnviando(false)
+    }
   }
 
   return (
@@ -229,7 +275,7 @@ function TabMensajes({ p, cupoLleno, onRegistrado }: { p: Prospecto; cupoLleno: 
           {([1, 2, 3] as const).map((n) => (
             <button
               key={n}
-              onClick={() => setPaso(n)}
+              onClick={() => cambiarPaso(n)}
               className={`w-8 h-8 rounded-lg text-xs font-semibold transition ${
                 paso === n ? 'bg-navy text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
               }`}
@@ -241,16 +287,28 @@ function TabMensajes({ p, cupoLleno, onRegistrado }: { p: Prospecto; cupoLleno: 
       </div>
 
       <div className="text-xs text-slate-400 mb-3">
-        {paso === 1 && 'Solicitud de conexión en LinkedIn (≤300 chars)'}
-        {paso === 2 && 'Mensaje de valor tras la conexión (día 3)'}
-        {paso === 3 && 'Email de seguimiento + CTA a demo (día 7)'}
+        {p.sector === 'comercio' ? (
+          <>
+            {paso === 1 && 'Correo frío con el link a la reunión'}
+            {paso === 2 && 'Seguimiento con más detalle (día 3)'}
+            {paso === 3 && 'Último correo del ciclo (día 7)'}
+          </>
+        ) : (
+          <>
+            {paso === 1 && 'Solicitud de conexión en LinkedIn (≤300 chars)'}
+            {paso === 2 && 'Mensaje de valor tras la conexión (día 3)'}
+            {paso === 3 && 'Email de seguimiento + CTA a demo (día 7)'}
+          </>
+        )}
       </div>
 
       <div className="bg-slate-50 rounded-xl p-4 text-sm text-slate-700 whitespace-pre-line leading-relaxed min-h-[120px] border border-slate-100">
         {mensaje}
       </div>
 
-      {paso === 1 && (
+      {/* El tope de 300 es de la solicitud de conexión de LinkedIn. En un
+          comercio el paso 1 es un correo, donde ese límite no existe. */}
+      {paso === 1 && !esEmail && (
         <div className="mt-2 text-right">
           <span className={`text-xs ${mensaje.length > 300 ? 'text-red-500 font-medium' : 'text-slate-400'}`}>
             {mensaje.length}/300 caracteres
@@ -258,12 +316,32 @@ function TabMensajes({ p, cupoLleno, onRegistrado }: { p: Prospecto; cupoLleno: 
         </div>
       )}
 
-      <button
-        onClick={copiar}
-        className="mt-3 w-full bg-brand hover:bg-brand-hover text-white py-2.5 rounded-xl text-sm font-medium transition"
-      >
-        {copiado ? '✓ Copiado al clipboard' : 'Copiar mensaje'}
-      </button>
+      <div className="mt-3 flex gap-2">
+        <button
+          onClick={copiar}
+          className="flex-1 bg-brand hover:bg-brand-hover text-white py-2.5 rounded-xl text-sm font-medium transition"
+        >
+          {copiado ? '✓ Copiado al clipboard' : 'Copiar mensaje'}
+        </button>
+
+        {esEmail && (
+          <button
+            onClick={enviarPorCorreo}
+            disabled={enviando || Boolean(motivoDeshabilitado)}
+            title={motivoDeshabilitado ?? undefined}
+            className="flex-1 bg-navy hover:opacity-90 text-white py-2.5 rounded-xl text-sm font-medium transition disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {enviando ? 'Enviando...' : enviado ? '✓ Enviado' : 'Enviar por correo'}
+          </button>
+        )}
+      </div>
+
+      {esEmail && motivoDeshabilitado && (
+        <p className="mt-2 text-xs text-amber-600">No se puede enviar: {motivoDeshabilitado.toLowerCase()}.</p>
+      )}
+      {esEmail && errorEnvio && (
+        <p className="mt-2 text-xs text-red-500">{errorEnvio}</p>
+      )}
     </div>
   )
 }

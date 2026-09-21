@@ -1,8 +1,7 @@
 import crypto from 'node:crypto'
 import { createClient } from '@supabase/supabase-js'
 import { quitarDeLista } from '@/lib/brevo'
-import { toE164Ar } from '@/lib/phone'
-import { registrableDomain } from '@/lib/prospects/urls'
+import { filaProspectoLanding } from '@/lib/prospects/desdeLanding'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -12,25 +11,23 @@ const supabase = createClient(
 /**
  * Webhook de Cal.com. Lo único que nos importa es saber **quién agendó**.
  *
- * La secuencia opt-in son tres recordatorios de agendar la reunión. Sin este
- * webhook no hay forma de distinguir al que dejó sus datos y agendó del que
- * dejó sus datos y no: los dos entran igual a la lista, y al primero le
- * llegarían tres correos pidiéndole que haga algo que ya hizo.
+ * Hace dos cosas con ese dato. La primera: pasar el prospecto a
+ * `demo_agendada`, que es el estado desde el que se trabaja la beta. La
+ * segunda, y sin ella la primera no alcanza: sacar el contacto de la lista de
+ * Brevo. La secuencia opt-in son tres recordatorios de agendar, y al que ya
+ * agendó hay que dejar de mandárselos — es la forma más rápida de que se dé
+ * de baja o nos marque como spam.
  *
- * Marca el lead, marca el prospecto si el correo coincide con uno del carril
- * frío, y saca el contacto de la lista de Brevo.
- *
- * Configuración del lado de Cal.com (tarea manual, ver plan Etapa 1.5):
- * Settings → Webhooks → Add, evento `BOOKING_CREATED`, URL
- * `https://onconcilia.com/api/cal/webhook`, con un secret que se carga acá
- * como `CAL_WEBHOOK_SECRET`.
+ * Configuración del lado de Cal.com: Settings → Webhooks → Add, evento
+ * `BOOKING_CREATED`, URL `https://onconcilia.com/api/cal/webhook`, con un
+ * secreto que se carga acá como `CAL_WEBHOOK_SECRET`.
  */
 export async function POST(req: Request) {
   const secret = process.env.CAL_WEBHOOK_SECRET
   if (!secret) {
     // Sin secreto configurado se rechaza, no se deja pasar. Es el mismo
     // criterio que se corrigió en los crons: un `if (secret && ...)` deja el
-    // endpoint abierto justo cuando falta la variable.
+    // endpoint abierto justo cuando falta la protección.
     return Response.json({ error: 'Webhook sin configurar' }, { status: 503 })
   }
 
@@ -49,7 +46,7 @@ export async function POST(req: Request) {
     triggerEvent?: string
     payload?: {
       startTime?: string
-      attendees?: Array<{ email?: string; name?: string }>
+      attendees?: Array<{ email?: string; name?: string; phoneNumber?: string }>
       responses?: { email?: { value?: string } }
     }
   }
@@ -63,11 +60,8 @@ export async function POST(req: Request) {
     return Response.json({ ok: true, ignorado: evento.triggerEvent ?? null })
   }
 
-  const email = (
-    evento.payload?.attendees?.[0]?.email ??
-    evento.payload?.responses?.email?.value ??
-    ''
-  )
+  const asistente = evento.payload?.attendees?.[0]
+  const email = (asistente?.email ?? evento.payload?.responses?.email?.value ?? '')
     .toLowerCase()
     .trim()
 
@@ -79,17 +73,8 @@ export async function POST(req: Request) {
 
   const cuando = evento.payload?.startTime ?? new Date().toISOString()
 
-  const { data: lead } = await supabase
-    .from('leads')
-    .update({ reunion_agendada_en: cuando, estado: 'reunion_agendada' })
-    .eq('email', email)
-    .select('id, nombre, telefono, nota')
-    .maybeSingle()
-
-  // El mismo correo puede estar del otro lado: un prospecto del carril frío
-  // que agendó desde /coordinar/[id]. Se busca sin filtrar por estado —
-  // incluso uno descartado es un prospecto existente, y crear otro al lado
-  // sería duplicarlo.
+  // Se busca sin filtrar por estado: incluso uno descartado es un prospecto
+  // existente, y crear otro al lado sería duplicarlo.
   const { data: existente } = await supabase
     .from('prospectos')
     .select('id, estado')
@@ -104,46 +89,35 @@ export async function POST(req: Request) {
     if (existente.estado !== 'descartado') {
       await supabase
         .from('prospectos')
-        .update({ estado: 'demo_agendada', proxima_accion: 'Reunión de 15 minutos agendada' })
+        .update({
+          estado: 'demo_agendada',
+          proxima_accion: `Reunión de 15 minutos — ${cuando.slice(0, 16).replace('T', ' ')}`,
+          fecha_ultimo_contacto: new Date().toISOString().split('T')[0],
+        })
         .eq('id', existente.id)
       await supabase.from('interacciones').insert({
         prospecto_id: existente.id,
         tipo: 'cambio_estado',
+        estado_anterior: existente.estado,
         estado_nuevo: 'demo_agendada',
         canal: 'cal.com',
       })
     }
-  } else if (lead) {
-    // Agendar la reunión es lo que convierte a un lead en prospecto: recién
-    // ahí hay con quién hablar y un embudo que seguir (demo agendada → demo
-    // realizada → beta activo → feedback). La tabla `leads` no tiene estados
-    // ni historial, y los 20 betas hay que seguirlos en algún lado.
-    const nombre = (lead.nombre as string | null)?.trim() || email.split('@')[0]
+  } else {
+    // El camino normal ya dejó el prospecto creado al completar el formulario.
+    // Se llega acá cuando alguien reserva directo desde el link de Cal.com sin
+    // pasar por la landing — un reenvío del link, por ejemplo. Vale la pena
+    // registrarlo igual: agendó una reunión, es un prospecto.
     const fila = {
-      nombre,
-      empresa: empresaDesde(email, nombre),
-      sector: 'pyme', // No lo pregunta la landing. Se confirma en la reunión.
-      email,
-      telefono: lead.telefono ? toE164Ar(lead.telefono as string)?.e164 ?? (lead.telefono as string) : null,
-      canal: 'otro',
-      origen: 'landing',
+      ...filaProspectoLanding({ email, nombre: asistente?.name, telefono: asistente?.phoneNumber }),
       estado: 'demo_agendada',
-      proxima_accion: 'Reunión de 15 minutos agendada',
-      fecha_primer_contacto: new Date().toISOString().split('T')[0],
-      notas: 'Vino de la landing y agendó la reunión. Falta confirmar empresa y rubro.',
+      proxima_accion: `Reunión de 15 minutos — ${cuando.slice(0, 16).replace('T', ' ')}`,
+      notas: 'Reservó directo desde el link de Cal.com, sin pasar por el formulario.',
     }
     const { data: nuevo } = await supabase.from('prospectos').insert(fila).select('id').maybeSingle()
     if (nuevo?.id) {
       prospectoId = nuevo.id
       creado = true
-      if (lead.nota) {
-        await supabase.from('interacciones').insert({
-          prospecto_id: nuevo.id,
-          tipo: 'nota',
-          canal: 'formulario',
-          contenido: `Con qué bancos trabaja: ${lead.nota}`,
-        })
-      }
       await supabase.from('interacciones').insert({
         prospecto_id: nuevo.id,
         tipo: 'cambio_estado',
@@ -156,28 +130,5 @@ export async function POST(req: Request) {
   const listId = Number(process.env.BREVO_LIST_ID_LEADS)
   if (listId) await quitarDeLista(email, listId)
 
-  return Response.json({ ok: true, lead: Boolean(lead), prospecto: prospectoId, creado })
-}
-
-/**
- * `empresa` es `not null` y la landing no la pregunta — sumarle un campo más
- * al formulario que lleva a la reunión cuesta conversiones.
- *
- * El dominio del correo la resuelve gratis cuando es corporativo
- * (`juan@ferreteriasur.com.ar` → `ferreteriasur.com.ar`). Con un correo de
- * Gmail no hay nada que deducir, y poner el nombre de la persona en la
- * columna "empresa" del CRM confunde más de lo que ayuda: se deja explícito
- * que falta completarlo.
- */
-const CORREOS_PERSONALES = new Set([
-  'gmail.com', 'hotmail.com', 'hotmail.com.ar', 'outlook.com', 'outlook.com.ar',
-  'yahoo.com', 'yahoo.com.ar', 'live.com', 'live.com.ar', 'icloud.com', 'me.com',
-  'protonmail.com', 'proton.me', 'fibertel.com.ar', 'speedy.com.ar',
-  'arnet.com.ar', 'ciudad.com.ar',
-])
-
-function empresaDesde(email: string, nombre: string): string {
-  const dominio = email.split('@')[1]?.toLowerCase() ?? ''
-  if (!dominio || CORREOS_PERSONALES.has(dominio)) return `(completar) ${nombre}`
-  return registrableDomain(dominio) || `(completar) ${nombre}`
+  return Response.json({ ok: true, prospecto: prospectoId, creado })
 }

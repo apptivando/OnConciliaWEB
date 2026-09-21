@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { useState, useEffect, useTransition } from 'react'
-import { SECTORES, ESTADOS, ESTADOS_ORDEN } from '@/lib/types'
+import { SECTORES, ESTADOS, ESTADOS_ORDEN, ORIGEN_STYLE, OrigenProspecto } from '@/lib/types'
 
 const PRIORIDADES = [
   { value: '1', label: '1 · Con WhatsApp' },
@@ -44,7 +44,7 @@ export default function ProspectosToolbar({ localidades }: { localidades: string
     startTransition(() => router.replace(`${pathname}?${next.toString()}`, { scroll: false }))
   }
 
-  const activeFilters = ['sector', 'estado', 'prioridad', 'localidad', 'q'].filter((k) => params.get(k))
+  const activeFilters = ['sector', 'estado', 'prioridad', 'localidad', 'origen', 'q'].filter((k) => params.get(k))
 
   return (
     <div className="flex flex-wrap items-center gap-2 px-5 py-3 border-b border-slate-100 bg-slate-50/60">
@@ -73,6 +73,13 @@ export default function ProspectosToolbar({ localidades }: { localidades: string
         <option value="">Toda prioridad</option>
         {PRIORIDADES.map((p) => (
           <option key={p.value} value={p.value}>{p.label}</option>
+        ))}
+      </select>
+
+      <select value={params.get('origen') ?? ''} onChange={(e) => apply('origen', e.target.value)} className={selectClass}>
+        <option value="">Todo origen</option>
+        {(Object.keys(ORIGEN_STYLE) as OrigenProspecto[]).map((o) => (
+          <option key={o} value={o}>{ORIGEN_STYLE[o].label}</option>
         ))}
       </select>
 

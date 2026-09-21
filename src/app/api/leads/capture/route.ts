@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { upsertContacto } from '@/lib/brevo'
 import { toE164Ar } from '@/lib/phone'
+import { filaProspectoLanding } from '@/lib/prospects/desdeLanding'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -8,83 +9,79 @@ const supabase = createClient(
 )
 
 /**
- * Alta de un lead desde la landing (`BetaForm`). Reemplazó al insert directo
- * que hacía el viejo `LeadForm` desde el navegador con la anon key: pasa por
- * acá para poder sincronizar el contacto en Brevo del lado del servidor.
+ * Alta desde el formulario de la landing (`BetaForm`).
  *
- * Recibe nombre y teléfono además del correo, porque el formulario de la
- * landing es ahora el mismo de la reunión — se piden los datos, se guardan, y
- * recién después se muestra el calendario. Si la persona cierra la pestaña
- * antes de elegir horario, el contacto ya quedó.
+ * **Escribe en `prospectos`, no en `leads`.** Los dos carriles —búsqueda en
+ * Places y formulario— viven en la misma tabla y se distinguen por `origen`.
+ * `leads` quedó como archivo histórico: mantener el mismo contacto en dos
+ * tablas obligaba a sincronizar "si agendó" en los dos lados, y `prospectos`
+ * ya tiene todo lo que hacía falta (estados, historial de interacciones y las
+ * columnas de Brevo).
  *
- * La secuencia de 3 correos no la dispara este código: es un Automation en
- * el dashboard de Brevo, activado por entrar a la lista
- * `BREVO_LIST_ID_LEADS`. Quien después agenda sale de esa lista por
- * `/api/cal/webhook`, para que no le sigan llegando recordatorios de hacer
- * algo que ya hizo.
+ * Los datos se guardan **antes** de mostrar el calendario, así que quien
+ * abandona ahí queda igual registrado y entra a la secuencia de recordatorios.
+ * Quien después agenda sale de la lista por `/api/cal/webhook`, para que no le
+ * sigan llegando recordatorios de hacer algo que ya hizo.
  */
 export async function POST(req: Request) {
-  const { email, nombre, telefono, nota, fuente } = await req.json()
+  const { email, nombre, telefono, nota } = await req.json()
   if (!email || typeof email !== 'string') {
     return Response.json({ error: 'Falta el email' }, { status: 400 })
   }
 
   const limpio = email.toLowerCase().trim()
-  const tel = typeof telefono === 'string' ? telefono.trim() : null
+  const fila = filaProspectoLanding({ email: limpio, nombre, telefono, nota })
 
-  const fila = {
-    email: limpio,
-    nombre: typeof nombre === 'string' ? nombre.trim() || null : null,
-    telefono: tel || null,
-    nota: typeof nota === 'string' ? nota.trim() || null : null,
-    fuente: fuente ?? 'landing',
-  }
+  const { data: existente } = await supabase
+    .from('prospectos')
+    .select('id, estado')
+    .eq('email', limpio)
+    .limit(1)
+    .maybeSingle()
 
-  const { error } = await supabase.from('leads').insert(fila)
-
-  if (error) {
-    if (error.code === '23505') {
-      // Email duplicado. Se trata como éxito —igual que antes— y gana lo
-      // último que la persona escribió: si vuelve a mandar el formulario es
-      // porque está corrigiendo algo, típicamente un teléfono mal tipeado.
-      // Sólo se pisan los campos que vinieron con valor, así un reenvío
-      // incompleto no borra lo que ya había.
-      const cambios = Object.fromEntries(
-        Object.entries({ nombre: fila.nombre, telefono: fila.telefono, nota: fila.nota }).filter(
-          ([, v]) => v !== null
-        )
-      )
-      if (Object.keys(cambios).length > 0) {
-        await supabase.from('leads').update(cambios).eq('email', limpio)
-      }
-    } else {
+  if (existente) {
+    // Puede ser un prospecto del carril frío que decidió anotarse por la
+    // landing, o alguien corrigiendo un dato. Gana lo último que escribió,
+    // pero sólo en los campos que vinieron con valor: un reenvío incompleto
+    // no debe borrar lo que ya había. `origen` y `estado` no se tocan —
+    // alguien que viene de la búsqueda sigue siendo de la búsqueda, y el
+    // estado lo maneja el CRM.
+    const cambios = Object.fromEntries(
+      Object.entries({
+        nombre: fila.nombre,
+        telefono: fila.telefono,
+        notas: fila.notas,
+      }).filter(([, v]) => v !== null && v !== undefined)
+    )
+    if (Object.keys(cambios).length > 0) {
+      await supabase.from('prospectos').update(cambios).eq('id', existente.id)
+    }
+  } else {
+    const { error } = await supabase.from('prospectos').insert(fila)
+    if (error) {
+      console.error('[leads/capture]', error.message)
       return Response.json({ error: 'Error al guardar' }, { status: 500 })
     }
   }
 
-  // `NOMBRE`, no `FIRSTNAME`: **Brevo nombra sus atributos de fábrica en el
-  // idioma de la cuenta**, y ésta está en español, así que son `NOMBRE` y
-  // `APELLIDOS`. Verificado contra `GET /v3/contacts/attributes` el
-  // 20/09/2026 — `FIRSTNAME` no existe en esta cuenta. Importa porque Brevo
-  // **ignora en silencio** un atributo que no existe: no devuelve error, el
-  // dato simplemente no se guarda y el `{% if %}` de la plantilla nunca da
-  // verdadero.
-  //
-  // Brevo rechaza SMS si no viene en E.164, así que un teléfono que no se
-  // pueda normalizar se omite en vez de invalidar todo el upsert.
-  const e164 = tel ? toE164Ar(tel)?.e164 ?? null : null
+  // `NOMBRE`, no `FIRSTNAME`: Brevo nombra sus atributos de fábrica en el
+  // idioma de la cuenta, y ésta está en español. Importa porque Brevo ignora
+  // en silencio un atributo inexistente — no da error, el dato simplemente no
+  // se guarda. Brevo rechaza SMS si no viene en E.164, así que un teléfono
+  // que no se pueda normalizar se omite en vez de invalidar todo el upsert.
+  const e164 = typeof telefono === 'string' ? toE164Ar(telefono)?.e164 ?? null : null
   const listId = Number(process.env.BREVO_LIST_ID_LEADS)
   if (listId) {
     const brevoId = await upsertContacto({
       email: limpio,
       attributes: {
-        ...(fila.nombre ? { NOMBRE: fila.nombre } : {}),
+        ...(fila.nombre ? { NOMBRE: fila.nombre as string } : {}),
         ...(e164 ? { SMS: e164 } : {}),
       },
       listIds: [listId],
     })
     if (brevoId) {
-      await supabase.from('leads').update({ brevo_contact_id: brevoId }).eq('email', limpio)
+      await supabase.from('prospectos').update({ brevo_contact_id: brevoId }).eq('email', limpio)
     }
   }
 

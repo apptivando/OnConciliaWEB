@@ -25,6 +25,7 @@ export default async function ProspectosPage({
     estado?: string
     prioridad?: string
     localidad?: string
+    origen?: string
     page?: string
     cliente?: string
   }
@@ -33,7 +34,7 @@ export default async function ProspectosPage({
 
   const page = Math.max(Number(searchParams.page ?? 1) || 1, 1)
   const isFiltered = Boolean(
-    searchParams.q || searchParams.sector || searchParams.estado || searchParams.prioridad || searchParams.localidad
+    searchParams.q || searchParams.sector || searchParams.estado || searchParams.prioridad || searchParams.localidad || searchParams.origen
   )
 
   let query = supabase.from('prospectos').select('*', { count: 'exact' })
@@ -45,6 +46,7 @@ export default async function ProspectosPage({
   if (searchParams.sector) query = query.eq('sector', searchParams.sector)
   if (searchParams.estado) query = query.eq('estado', searchParams.estado)
   if (searchParams.localidad) query = query.eq('localidad', searchParams.localidad)
+  if (searchParams.origen) query = query.eq('origen', searchParams.origen)
   if (searchParams.prioridad) {
     const n = Number(searchParams.prioridad)
     if (n >= 1 && n <= 4) query = query.eq('prioridad_contacto', n)
@@ -92,6 +94,12 @@ export default async function ProspectosPage({
         </Link>
         <div className="flex items-center gap-4">
           <span className="text-slate-400 text-sm">CRM de Prospectos</span>
+          <Link
+            href="/prospectos?origen=landing"
+            className="text-slate-400 hover:text-white text-sm transition"
+          >
+            Landing
+          </Link>
           <Link
             href="/documentos"
             className="text-slate-400 hover:text-white text-sm transition"

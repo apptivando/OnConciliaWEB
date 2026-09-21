@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { upsertContacto, enviarTransaccional } from '@/lib/brevo'
 import { ASUNTOS_COMERCIO, ASUNTO_GENERICO, appUrl } from '@/lib/mensajes'
+import { ESTADOS_ORDEN, type EstadoProspecto } from '@/lib/types'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -156,11 +157,20 @@ export async function POST(req: Request) {
     }
   }
 
-  // Para LinkedIn, el "envío" es manual — solo registramos
+  // El estado nunca retrocede. Antes se escribía 'solicitud_enviada' a
+  // ciegas, que servía cuando todos los prospectos salían de una búsqueda y
+  // arrancaban en 'por_contactar'. Desde que la landing crea prospectos que
+  // pueden estar en 'demo_agendada', mandarle un correo de seguimiento a uno
+  // de ellos lo devolvía al principio del embudo y se perdía el dato de que
+  // ya había agendado.
+  const anterior = p.estado as EstadoProspecto
+  const avanza = ESTADOS_ORDEN.indexOf('solicitud_enviada') > ESTADOS_ORDEN.indexOf(anterior)
+  const nuevo = avanza ? 'solicitud_enviada' : anterior
+
   await supabase
     .from('prospectos')
     .update({
-      estado: 'solicitud_enviada',
+      estado: nuevo,
       fecha_ultimo_contacto: new Date().toISOString().split('T')[0],
       ultimo_envio_en: new Date().toISOString(),
       ...(brevoContactId ? { brevo_contact_id: brevoContactId } : {}),
@@ -172,8 +182,8 @@ export async function POST(req: Request) {
     tipo: 'mensaje',
     contenido: mensaje,
     canal,
-    estado_anterior: 'por_contactar',
-    estado_nuevo: 'solicitud_enviada',
+    estado_anterior: anterior,
+    estado_nuevo: nuevo,
   })
 
   return Response.json({ ok: true })

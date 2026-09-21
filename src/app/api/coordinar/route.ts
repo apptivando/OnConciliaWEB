@@ -1,4 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
+import { upsertContacto } from '@/lib/brevo'
+import { toE164Ar } from '@/lib/phone'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -6,13 +8,21 @@ const supabase = createClient(
 )
 
 /**
- * Público — sin login. Lo llama /coordinar/[id], el link del email frío a
+ * Público — sin login. Lo llama /coordinar/[id], el link del correo frío a
  * comercios. Actualiza el prospecto existente, no crea uno nuevo (a
- * diferencia de /api/leads/qualify, que sí es alta nueva).
+ * diferencia de /api/leads/capture, que sí es alta nueva).
  *
  * Guarda el contacto acá y recién después se muestra el embed de Cal.com
- * para elegir el turno — así el teléfono/nota quedan en el CRM aunque la
+ * para elegir el turno — así el teléfono y la nota quedan en el CRM aunque la
  * persona cierre la pestaña antes de terminar de agendar.
+ *
+ * **Y acá se cruzan los dos carriles, que es el punto de este endpoint.**
+ * Brevo prohíbe mandar campañas a listas armadas por scraping, y por eso el
+ * correo frío sale uno por uno como transaccional, nunca como campaña. Pero
+ * alguien que completa este formulario dejó de ser un dato scrapeado: se dio
+ * de alta solo. Ahí sí corresponde sumarlo a la lista opt-in y que le corra
+ * la secuencia de recordatorios, igual que a los que vienen de la landing. Si
+ * después elige horario, el webhook de Cal.com lo saca de la lista.
  */
 export async function POST(req: Request) {
   const { prospecto_id, nombre, telefono, nota } = await req.json()
@@ -23,7 +33,7 @@ export async function POST(req: Request) {
 
   const { data: p, error: fetchError } = await supabase
     .from('prospectos')
-    .select('id, estado, telefono, notas, fecha_primer_contacto')
+    .select('id, estado, telefono, notas, fecha_primer_contacto, email, email_estado')
     .eq('id', prospecto_id)
     .single()
 
@@ -61,6 +71,22 @@ export async function POST(req: Request) {
     canal: 'formulario',
     contenido: `Dejó sus datos para coordinar llamada — nombre: ${nombre}, teléfono: ${telefono}${nota ? `, nota: ${nota}` : ''}. Turno a confirmar por Cal.com.`,
   })
+
+  // Sólo si tenemos correo y sigue siendo enviable: sumar a la lista a
+  // alguien que rebotó o se dio de baja sería justo lo contrario de lo que
+  // el webhook de bajas viene a proteger.
+  const listId = Number(process.env.BREVO_LIST_ID_LEADS)
+  if (listId && p.email && (p.email_estado ?? 'activo') === 'activo') {
+    const e164 = toE164Ar(telefono)?.e164 ?? null
+    await upsertContacto({
+      email: p.email,
+      attributes: {
+        NOMBRE: nombre,
+        ...(e164 ? { SMS: e164 } : {}),
+      },
+      listIds: [listId],
+    })
+  }
 
   return Response.json({ ok: true })
 }
