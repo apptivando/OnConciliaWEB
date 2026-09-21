@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Prospecto, SECTORES, ORIGEN_STYLE, PRIORIDAD_CONTACTO } from '@/lib/types'
 import ContactChips from '@/components/prospectos/ContactChips'
-import { IconChat, IconActividad, IconRefresh } from '@/components/prospectos/icons'
+import { IconActividad, IconRefresh } from '@/components/prospectos/icons'
 import ProspectoDrawer from './ProspectoDrawer'
 
 /**
@@ -274,9 +274,6 @@ export default function ProspectosTable({
 
                     <td className="px-5 py-3" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-1 whitespace-nowrap">
-                        <button onClick={() => openProspecto(p.id)} title="Mensajes" aria-label={`Mensajes de ${p.nombre}`} className={ACCION_CLS}>
-                          <IconChat />
-                        </button>
                         <button onClick={() => openProspecto(p.id)} title="Timeline" aria-label={`Timeline de ${p.nombre}`} className={ACCION_CLS}>
                           <IconActividad />
                         </button>

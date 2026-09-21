@@ -72,6 +72,16 @@ export async function POST(req: Request) {
   }
 
   const cuando = evento.payload?.startTime ?? new Date().toISOString()
+  // Cal.com manda la hora en UTC. Cortar el string mostraba una reunión de
+  // las 10 como si fuera a las 13: se formatea en hora argentina.
+  const cuandoAR = new Date(cuando).toLocaleString('es-AR', {
+    timeZone: 'America/Argentina/Buenos_Aires',
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 
   // Se busca sin filtrar por estado: incluso uno descartado es un prospecto
   // existente, y crear otro al lado sería duplicarlo.
@@ -91,7 +101,7 @@ export async function POST(req: Request) {
         .from('prospectos')
         .update({
           estado: 'demo_agendada',
-          proxima_accion: `Reunión de 15 minutos — ${cuando.slice(0, 16).replace('T', ' ')}`,
+          proxima_accion: `Reunión de 15 minutos — ${cuandoAR}`,
           fecha_ultimo_contacto: new Date().toISOString().split('T')[0],
         })
         .eq('id', existente.id)
@@ -102,6 +112,18 @@ export async function POST(req: Request) {
         estado_nuevo: 'demo_agendada',
         canal: 'cal.com',
       })
+      // Dicho en palabras, además del cambio de estado. El formulario deja
+      // escrito "todavía no eligió horario"; sin esta nota, el Timeline
+      // mostraría esa frase y a continuación sólo una flecha de estado, y
+      // hay que leer entre líneas para saber qué pasó.
+      await supabase.from('interacciones').insert({
+        prospecto_id: existente.id,
+        tipo: 'nota',
+        canal: 'cal.com',
+        // La fecha va al final: el formato de hora termina en "a. m." y un
+        // punto después quedaba doble.
+        contenido: `Agendó la reunión de 15 minutos y sale de los recordatorios de Brevo. Turno: ${cuandoAR}`,
+      })
     }
   } else {
     // El camino normal ya dejó el prospecto creado al completar el formulario.
@@ -111,7 +133,7 @@ export async function POST(req: Request) {
     const fila = {
       ...filaProspectoLanding({ email, nombre: asistente?.name, telefono: asistente?.phoneNumber }),
       estado: 'demo_agendada',
-      proxima_accion: `Reunión de 15 minutos — ${cuando.slice(0, 16).replace('T', ' ')}`,
+      proxima_accion: `Reunión de 15 minutos — ${cuandoAR}`,
       notas: 'Reservó directo desde el link de Cal.com, sin pasar por el formulario.',
     }
     const { data: nuevo } = await supabase.from('prospectos').insert(fila).select('id').maybeSingle()

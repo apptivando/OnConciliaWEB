@@ -42,15 +42,32 @@ export async function POST(req: Request) {
   }
 
   const hoy = new Date().toISOString().split('T')[0]
+  const bancos = typeof nota === 'string' && nota.trim() ? nota.trim() : null
 
   await supabase
     .from('prospectos')
     .update({
+      // El nombre que deja la persona pasa a ser el nombre de la ficha. En
+      // los comercios de Places `nombre` venía igual a la empresa, porque
+      // Google no da el nombre de nadie: hasta ahora el formulario lo
+      // guardaba sólo como texto en una nota del Timeline y la ficha seguía
+      // mostrando el comercio como si fuera la persona. La empresa no se
+      // toca, y la tabla muestra las dos.
+      nombre,
       // No se pisa un teléfono que ya teníamos con uno distinto sin querer —
       // el que deja la persona en el formulario es el que vale.
       telefono: telefono || p.telefono,
+      // Lo que contestó en "¿con qué bancos trabajan?" va a las notas de la
+      // ficha y no sólo al Timeline: es el dato que define si hay que
+      // desarrollar un lector antes de activarle la cuenta, y tiene que
+      // verse sin tener que ir a buscarlo.
+      ...(bancos ? { notas: [p.notas, `Trabaja con: ${bancos}`].filter(Boolean).join('\n') } : {}),
       estado: 'respondio_positivo',
-      proxima_accion: `Llamar a ${nombre} — turno a coordinar por Cal.com`,
+      // Explícito, porque el formulario se completa ANTES de ver el
+      // calendario: en este momento todavía no eligió horario. Si lo elige,
+      // el webhook de Cal.com pisa esto con la fecha de la reunión; si no,
+      // queda así y dice la verdad.
+      proxima_accion: `${nombre} dejó sus datos pero todavía no eligió horario — le llegan los recordatorios de agendar`,
       fecha_ultimo_contacto: hoy,
       fecha_primer_contacto: p.fecha_primer_contacto ?? hoy,
     })
@@ -69,7 +86,9 @@ export async function POST(req: Request) {
     prospecto_id,
     tipo: 'nota',
     canal: 'formulario',
-    contenido: `Dejó sus datos para coordinar llamada — nombre: ${nombre}, teléfono: ${telefono}${nota ? `, nota: ${nota}` : ''}. Turno a confirmar por Cal.com.`,
+    contenido:
+      `Completó el formulario: ${nombre}, ${telefono}${bancos ? `, trabaja con ${bancos}` : ''}. ` +
+      `Todavía no eligió horario: entra a los recordatorios de agendar.`,
   })
 
   // Sólo si tenemos correo y sigue siendo enviable: sumar a la lista a

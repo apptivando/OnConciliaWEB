@@ -145,6 +145,23 @@ function TabResumen({ p }: { p: Prospecto }) {
         <ContactChips p={p} />
       </div>
 
+      {/* Lo primero que se mira de un prospecto es en qué punto está y qué
+          hay que hacer. Antes el Resumen no mostraba el estado en ningún
+          lado, y "dejó sus datos pero no agendó" sólo se podía deducir
+          leyendo el Timeline. */}
+      <div>
+        <p className="text-[11px] font-semibold tracking-wide uppercase text-slate-400 mb-1.5">Situación</p>
+        <Fila label="Estado">
+          <span className={`inline-flex items-center rounded px-2 py-0.5 text-xs font-medium ${ESTADOS[p.estado].color}`}>
+            {ESTADOS[p.estado].label}
+          </span>
+        </Fila>
+        <Fila label="Próxima acción">
+          {p.proxima_accion ?? '—'}
+          {p.fecha_proxima_accion && ` (${p.fecha_proxima_accion})`}
+        </Fila>
+      </div>
+
       <div>
         <p className="text-[11px] font-semibold tracking-wide uppercase text-slate-400 mb-1.5">Contacto</p>
         <Fila label="Empresa">{p.empresa}</Fila>
@@ -166,19 +183,12 @@ function TabResumen({ p }: { p: Prospecto }) {
         {p.enriquecido_en && <Fila label="Enriquecido">{fmtFecha(p.enriquecido_en)}</Fila>}
       </div>
 
-      {(p.proxima_accion || p.notas) && (
+      {p.notas && (
         <div>
           <p className="text-[11px] font-semibold tracking-wide uppercase text-slate-400 mb-1.5">Notas</p>
-          {p.proxima_accion && (
-            <Fila label="Próxima acción">
-              {p.proxima_accion}{p.fecha_proxima_accion && ` (${p.fecha_proxima_accion})`}
-            </Fila>
-          )}
-          {p.notas && (
-            <Fila label="Notas">
-              <span className="whitespace-pre-wrap">{p.notas}</span>
-            </Fila>
-          )}
+          <Fila label="Notas">
+            <span className="whitespace-pre-wrap">{p.notas}</span>
+          </Fila>
         </div>
       )}
     </div>
