@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
 import { Prospecto } from '@/lib/types'
-import { CUPO_BETA } from '@/lib/mensajes'
 import ProspectosToolbar from './ProspectosToolbar'
 import ProspectosTable from './ProspectosTable'
 import BuscadorAgent from './BuscadorAgent'
@@ -151,7 +150,6 @@ export default async function ProspectosPage({
           prospectos={lista}
           filtered={isFiltered}
           initialClientId={searchParams.cliente ?? null}
-          cupoLleno={stats.betas >= CUPO_BETA}
         />
 
         {totalPages > 1 && (

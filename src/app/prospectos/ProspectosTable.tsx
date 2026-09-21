@@ -59,14 +59,11 @@ export default function ProspectosTable({
   prospectos,
   filtered,
   initialClientId,
-  cupoLleno,
 }: {
   prospectos: Prospecto[]
   /** Si hay filtros activos, no se agrupa: la agrupación confundiría los conteos. */
   filtered: boolean
   initialClientId: string | null
-  /** true cuando ya hay CUPO_BETA prospectos en beta_activo — cambia la oferta del email frío. */
-  cupoLleno: boolean
 }) {
   const [collapsed, setCollapsed] = useState<Set<Grupo>>(new Set<Grupo>([4, 0]))
   const scroll = useHorizontalOverflow()
@@ -304,7 +301,6 @@ export default function ProspectosTable({
         onPrev={openIndex > 0 ? () => openProspecto(prospectos[openIndex - 1].id) : undefined}
         onNext={openIndex >= 0 && openIndex < prospectos.length - 1 ? () => openProspecto(prospectos[openIndex + 1].id) : undefined}
         position={openIndex >= 0 ? { index: openIndex, total: prospectos.length } : undefined}
-        cupoLleno={cupoLleno}
       />
     </div>
   )

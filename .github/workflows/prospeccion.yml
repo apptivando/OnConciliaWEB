@@ -20,6 +20,12 @@ on:
         description: 'Cantidad de vueltas búsqueda+enriquecimiento a ejecutar'
         required: false
         default: '1'
+      simulacro:
+        description: 'Envío en seco: lista a quién escribiría, sin mandar nada'
+        required: false
+        default: 'no'
+        type: choice
+        options: ['no', 'si']
 
 jobs:
   prospectar:
@@ -39,3 +45,19 @@ jobs:
             curl --fail-with-body -sS --max-time 300 "$APP_URL/api/cron/daily-enrich?secret=$CRON_SECRET"
             echo
           done
+
+      # Va al final y como paso aparte: manda correos de verdad, así que
+      # tiene que correr después del enriquecimiento (si no, los que acaban
+      # de conseguir correo esperan hasta mañana) y tiene que poder fallar
+      # sin arrastrar a los otros dos. El tope diario lo controla la ruta en
+      # cada envío, así que correr tres veces por día no manda de más:
+      # reparte la tanda en el día, que además entrega mejor.
+      - name: Tanda de correos fríos
+        if: always()
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          APP_URL: ${{ secrets.APP_URL }}
+          DRY: ${{ github.event.inputs.simulacro == 'si' && '&dry=1' || '' }}
+        run: |
+          curl --fail-with-body -sS --max-time 300 "$APP_URL/api/cron/daily-outreach?secret=$CRON_SECRET$DRY"
+          echo
