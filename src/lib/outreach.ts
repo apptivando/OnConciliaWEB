@@ -18,7 +18,38 @@ import { ESTADOS_ORDEN, type EstadoProspecto, type Prospecto } from '@/lib/types
 // mkt.onconcilia.com — autenticar uno no autentica el otro. Se resignó el
 // aislamiento de reputación entre marketing y producto (opción B, intentada y
 // descartada el 04/09/2026: autenticar el subdominio aparte nunca validó).
-const REMITENTE = { email: 'guillermo@onconcilia.com', name: 'Guillermo de OnConcilia' }
+export const REMITENTE = { email: 'guillermo@onconcilia.com', name: 'Guillermo de OnConcilia' }
+
+/**
+ * A dónde van las respuestas al correo frío.
+ *
+ * Con `OUTREACH_REPLY_TO=guillermo@respuestas.onconcilia.com`, la respuesta
+ * la recibe Brevo, que la pasa a `/api/brevo/inbound`: ahí se registra en el
+ * CRM (y el prospecto sale del recordatorio de los 15 días) y se reenvía a
+ * la casilla de siempre para contestar.
+ *
+ * Sin la variable, las respuestas llegan directo a la casilla, como antes.
+ * Está detrás de una variable a propósito: mientras la respuesta pasa por
+ * nuestra ruta, si la ruta falla la respuesta no llega. Se activa recién
+ * después de probar el circuito entero con un correo real.
+ */
+function responderA(): { email: string; name: string } {
+  return { email: process.env.OUTREACH_REPLY_TO || REMITENTE.email, name: REMITENTE.name }
+}
+
+/**
+ * Si el prospecto contestó el correo. Lo registra `/api/brevo/inbound` como
+ * una interacción con canal 'respuesta'; las respuestas automáticas (fuera de
+ * la oficina) van con otro canal y no cuentan: no son una persona contestando.
+ */
+export async function contestoElCorreo(supabase: SupabaseClient, prospectoId: string): Promise<boolean> {
+  const { count } = await supabase
+    .from('interacciones')
+    .select('id', { count: 'exact', head: true })
+    .eq('prospecto_id', prospectoId)
+    .eq('canal', 'respuesta')
+  return (count ?? 0) > 0
+}
 
 function hoyAR(): string {
   // Evita el bug UTC de "hoy" cruzando la medianoche en Argentina (UTC-3).
@@ -214,6 +245,7 @@ export async function enviarCorreoFrio(
     await enviarTransaccional({
       to: { email: p.email, name: p.nombre },
       sender: REMITENTE,
+      replyTo: responderA(),
       subject,
       htmlContent: mensajeAHtml(mensaje),
       textContent: mensaje,

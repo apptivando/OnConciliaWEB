@@ -21,6 +21,7 @@ import { createClient } from '@supabase/supabase-js'
 import { CUPO_BETA } from '@/lib/mensajes'
 import {
   DIAS_RECORDATORIO,
+  contestoElCorreo,
   enviarCorreoFrio,
   enviadosHoy,
   pasoQueSigue,
@@ -141,6 +142,15 @@ export async function GET(req: Request) {
     if (!paso) {
       // Ya recibió la apertura y el recordatorio: no se le escribe más.
       omitidos.push({ empresa: fila.empresa, motivo: 'ya recibió los 2 correos de la secuencia' })
+      continue
+    }
+
+    // Quien contestó el correo no recibe el recordatorio. El estado no sirve
+    // para saberlo, porque una respuesta no lo cambia sola —un "no me
+    // interesa" también es una respuesta, y la clasifica una persona al
+    // leerla—, así que se mira el registro de respuestas.
+    if (paso === 2 && (await contestoElCorreo(supabase, fila.id))) {
+      omitidos.push({ empresa: fila.empresa, motivo: 'contestó el correo' })
       continue
     }
 
