@@ -95,7 +95,13 @@ export async function POST(req: Request) {
   // alguien que rebotó o se dio de baja sería justo lo contrario de lo que
   // el webhook de bajas viene a proteger.
   const listId = Number(process.env.BREVO_LIST_ID_LEADS)
-  if (listId && p.email && (p.email_estado ?? 'activo') === 'activo') {
+  if (!listId) {
+    // Mismo agujero que tenía /api/leads/capture: sin la variable, el
+    // contacto no entra a la lista y no le corren los recordatorios, y el
+    // formulario responde "ok" igual. Que quede escrito en los registros.
+    console.error('[coordinar] Falta BREVO_LIST_ID_LEADS: no entra a los recordatorios de agendar.')
+  }
+  if (p.email && (p.email_estado ?? 'activo') === 'activo') {
     const e164 = toE164Ar(telefono)?.e164 ?? null
     await upsertContacto({
       email: p.email,
@@ -103,7 +109,7 @@ export async function POST(req: Request) {
         NOMBRE: nombre,
         ...(e164 ? { SMS: e164 } : {}),
       },
-      listIds: [listId],
+      ...(listId ? { listIds: [listId] } : {}),
     })
   }
 

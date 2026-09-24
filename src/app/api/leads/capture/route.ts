@@ -69,21 +69,39 @@ export async function POST(req: Request) {
   // en silencio un atributo inexistente — no da error, el dato simplemente no
   // se guarda. Brevo rechaza SMS si no viene en E.164, así que un teléfono
   // que no se pueda normalizar se omite en vez de invalidar todo el upsert.
+  // El contacto se crea SIEMPRE, y la lista se agrega sólo si la variable
+  // está. Antes todo el bloque colgaba de `if (listId)`, así que sin la
+  // variable no se sincronizaba nada **en silencio**: el formulario
+  // respondía "ok", el prospecto quedaba creado, y nadie se enteraba de que
+  // el contacto nunca había llegado a Brevo ni entrado a la secuencia de
+  // recordatorios. Fue exactamente lo que pasó el 24/09/2026 en producción.
   const e164 = typeof telefono === 'string' ? toE164Ar(telefono)?.e164 ?? null : null
   const listId = Number(process.env.BREVO_LIST_ID_LEADS)
-  if (listId) {
-    const brevoId = await upsertContacto({
-      email: limpio,
-      attributes: {
-        ...(fila.nombre ? { NOMBRE: fila.nombre as string } : {}),
-        ...(e164 ? { SMS: e164 } : {}),
-      },
-      listIds: [listId],
-    })
-    if (brevoId) {
-      await supabase.from('prospectos').update({ brevo_contact_id: brevoId }).eq('email', limpio)
-    }
+  if (!listId) {
+    console.error(
+      '[leads/capture] Falta BREVO_LIST_ID_LEADS: el contacto se crea pero NO entra a la lista, ' +
+        'así que no le corren los recordatorios de agendar.'
+    )
   }
 
-  return Response.json({ ok: true })
+  const brevoId = await upsertContacto({
+    email: limpio,
+    attributes: {
+      ...(fila.nombre ? { NOMBRE: fila.nombre as string } : {}),
+      ...(e164 ? { SMS: e164 } : {}),
+    },
+    ...(listId ? { listIds: [listId] } : {}),
+  })
+  if (brevoId) {
+    await supabase.from('prospectos').update({ brevo_contact_id: brevoId }).eq('email', limpio)
+  }
+
+  // El aviso viaja también en la respuesta: es lo que hace que una prueba con
+  // curl muestre el problema en el acto, en vez de tener que ir a buscarlo a
+  // los registros del deploy.
+  return Response.json({
+    ok: true,
+    ...(listId ? {} : { aviso: 'Falta BREVO_LIST_ID_LEADS — el contacto no entra a la lista' }),
+    ...(brevoId ? {} : { aviso_brevo: 'No se pudo crear el contacto en Brevo' }),
+  })
 }
