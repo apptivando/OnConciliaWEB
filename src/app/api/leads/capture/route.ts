@@ -64,6 +64,11 @@ export async function POST(req: Request) {
     }
   }
 
+  // `TELEFONO` (texto) y no `SMS`: Brevo exige que el número del campo SMS
+  // sea único entre contactos, y rechaza el alta entera si otro contacto ya
+  // lo tiene —pasó el 24/09/2026 con dos pruebas del mismo teléfono—. No
+  // mandamos SMS, así que ese campo sólo nos traía una restricción.
+  //
   // `NOMBRE`, no `FIRSTNAME`: Brevo nombra sus atributos de fábrica en el
   // idioma de la cuenta, y ésta está en español. Importa porque Brevo ignora
   // en silencio un atributo inexistente — no da error, el dato simplemente no
@@ -88,7 +93,7 @@ export async function POST(req: Request) {
     email: limpio,
     attributes: {
       ...(fila.nombre ? { NOMBRE: fila.nombre as string } : {}),
-      ...(e164 ? { SMS: e164 } : {}),
+      ...(e164 ? { TELEFONO: e164 } : {}),
     },
     ...(listId ? { listIds: [listId] } : {}),
   })

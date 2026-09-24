@@ -107,7 +107,7 @@ export async function POST(req: Request) {
       email: p.email,
       attributes: {
         NOMBRE: nombre,
-        ...(e164 ? { SMS: e164 } : {}),
+        ...(e164 ? { TELEFONO: e164 } : {}),
       },
       ...(listId ? { listIds: [listId] } : {}),
     })
