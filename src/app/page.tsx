@@ -423,7 +423,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="bg-navy border-t border-white/10 px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-2">
         <p className="text-slate-600 text-xs">
-          OnConcilia · Paraná, Entre Ríos, Argentina
+          OnConcilia es una marca de Apptivando · Paraná, Entre Ríos, Argentina
         </p>
         <p className="text-slate-600 text-xs">
           guillermo@onconcilia.com

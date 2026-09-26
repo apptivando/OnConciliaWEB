@@ -20,6 +20,11 @@ export const metadata: Metadata = {
     locale: "es_AR",
     type: "website",
   },
+  // Verificación del dominio en el portfolio comercial de Meta (WhatsApp Cloud API
+  // vía Zernio). Si se borra, Meta puede dar el dominio por no verificado.
+  other: {
+    "facebook-domain-verification": "ry3oix1d29b14otyzk4lh5h6l4kugw",
+  },
 };
 
 export default function RootLayout({
