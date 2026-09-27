@@ -158,7 +158,17 @@ const INFRA_DOMAINS = [
   "google-analytics.com", "googletagmanager.com", "w3.org", "schema.org",
   "example.com", "example.org", "example.net", "domain.com", "email.com",
   "sentry-next.wixpress.com", "cdn.ampproject.org",
+  // `returns@mail.com` quedó guardado en 5 fichas distintas (22/09/2026): es
+  // una dirección de relleno de alguna plantilla, no la de un comercio.
+  "mail.com",
 ];
+
+/**
+ * Terminaciones mal tipeadas: `gmail.con` pasa la regex y rebota seguro.
+ * Un rebote duro le pega a la reputación del dominio que también manda los
+ * correos del producto, así que se descartan en vez de intentar corregirlas.
+ */
+const TYPO_TLDS = new Set(["con", "cmo", "ocm", "vom", "xom", "comar", "coma"]);
 
 const PLACEHOLDER_LOCALS = new Set([
   "email", "correo", "mail", "nombre", "name", "test", "demo", "sample",
@@ -182,13 +192,18 @@ const COMMERCIAL_LOCALS = new Set([
 
 const FREE_MAIL = /^(gmail|hotmail|yahoo|outlook|live|icloud|aol|yandex|proton(mail)?)\./i;
 
-function isJunkEmail(email: string): boolean {
+/**
+ * Exportada porque el cron de envío la vuelve a pasar antes de mandar: las
+ * fichas enriquecidas antes de un filtro nuevo no se re-enriquecen solas.
+ */
+export function isJunkEmail(email: string): boolean {
   if (email.length > 254) return true;
   const [local, domain] = email.toLowerCase().split("@");
   if (!local || !domain || local.length > 64) return true;
 
   const tld = domain.split(".").pop() ?? "";
   if (FILE_EXTENSIONS.has(tld)) return true;
+  if (TYPO_TLDS.has(tld)) return true;
   if (/^\d+x$/.test(local.split(".").pop() ?? "")) return true; // logo@2x, sprite@3x
 
   if (INFRA_DOMAINS.some((d) => domain === d || domain.endsWith(`.${d}`))) return true;

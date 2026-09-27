@@ -28,6 +28,7 @@ import {
   textoDelPaso,
   topeDiario,
 } from '@/lib/outreach'
+import { isJunkEmail } from '@/lib/prospects/extract'
 import type { Prospecto } from '@/lib/types'
 
 export const maxDuration = 60
@@ -128,13 +129,44 @@ export async function GET(req: Request) {
   const enviados: Array<{ empresa: string; email: string; paso: number }> = []
   const omitidos: Array<{ empresa: string; motivo: string }> = []
 
+  // Una ficha que no se va a mandar nunca tiene que salir de la cola. Si sólo
+  // se la saltea, vuelve primera en la corrida siguiente (la cola va por
+  // antigüedad) y ocupa un lugar del cupo: el 25/09/2026 siete fichas
+  // repetidas encabezaban la cola y ese día salieron 4 correos, con 19
+  // prospectos válidos esperando.
+  async function descartar(fila: Prospecto, motivo: string) {
+    omitidos.push({ empresa: fila.empresa, motivo })
+    if (simulacro) return
+    await supabase
+      .from('prospectos')
+      .update({
+        estado: 'descartado',
+        notas: [fila.notas, `Descartado por el envío automático: ${motivo}.`].filter(Boolean).join('\n'),
+      })
+      .eq('id', fila.id)
+    await supabase.from('interacciones').insert({
+      prospecto_id: fila.id,
+      tipo: 'cambio_estado',
+      contenido: `Envío automático: ${motivo}`,
+      estado_anterior: fila.estado,
+      estado_nuevo: 'descartado',
+    })
+  }
+
   for (const fila of candidatos) {
     if (cupo <= 0) break
+
+    // Correos que el extractor de hoy ya no guardaría (`returns@mail.com`,
+    // `…@gmail.con`): rebotan y le pegan a la reputación del dominio.
+    if (isJunkEmail(fila.email!)) {
+      await descartar(fila, `correo inválido (${fila.email})`)
+      continue
+    }
 
     // El seguimiento de una ficha ya contactada sí corresponde; lo que se
     // evita es escribirle a la misma dirección por una ficha distinta.
     if (yaUsados.has(fila.email!) && !fila.ultimo_envio_en) {
-      omitidos.push({ empresa: fila.empresa, motivo: `ya se le escribió a ${fila.email} por otra ficha` })
+      await descartar(fila, `ya se le escribió a ${fila.email} por otra ficha`)
       continue
     }
 
