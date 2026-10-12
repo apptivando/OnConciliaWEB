@@ -75,9 +75,14 @@ del medio.
 | Cuentas | 3 bancos + 1 billetera | 5 bancos + 1 billetera | 10 bancos + 1 billetera |
 | Administradores | 1 | 3 | 5 |
 | Editores | 2 | 5 | 10 |
-| Módulos | Mercado Pago | Mercado Pago + opcionales | Todos incluidos |
+| Mercado Pago | Incluido | Incluido | Incluido |
+| Módulos opcionales | Ninguno; cada uno con costo de instalación | **2 a elección** de cuatro | **Los 4 + canal de WhatsApp** |
+| **Historial cargado** | **Ninguno** — se cotiza aparte | **1 trimestre**, todas las cuentas | **1 año** |
+| Categorización | Reglas por defecto, sin asistencia | Asistida | Asistida |
+| Capacitación en vivo | Videos y manual | **2 sesiones, hasta 2 personas** | **5 sesiones, hasta 3 personas** |
+| Acompañamiento | — | Primer cierre | **Virtual durante el primer mes** |
 | Soporte | Por mail | Por mail | Prioritario + revisión trimestral de reglas |
-| Puesta en marcha | Sin cargo, autoservicio | Arranque asistido, $220.000 | Completa, $890.000 |
+| Puesta en marcha | Sin cargo, autoservicio | Arranque asistido, **$350.000** | Completa, **$1.000.000** |
 
 **Precios finales.** Se emite Factura C, sin IVA. Para una empresa responsable
 inscripta, el costo neto es el mismo que pagarle "$130.000 + IVA" a un competidor
@@ -98,39 +103,44 @@ integraciones en todos los planes, y Colppy desde sus planes medios. Cobrarlo co
 módulo nos dejaba fuera de mercado justo en Base, que es el plan de la pyme que más
 cobra por Mercado Pago.
 
-### Módulos opcionales, en Pro
+### Los cuatro módulos opcionales
 
 | Módulo | Qué resuelve | Precio / mes |
 |---|---|---|
+| Echeqs | Cheques electrónicos emitidos y recibidos, con vencimientos y cruce contra el movimiento real | $20.000 |
+| Préstamos | Préstamos bancarios con cuadro de amortización, capital e interés separados y cuotas por vencer | $20.000 |
 | Liquidaciones | Liquidaciones de tarjeta con desglose de aranceles, IVA y retenciones | $20.000 |
 | Comprobantes | Lectura con IA y match contra el extracto, cargados desde la app | $20.000 |
-| ↳ con canal de WhatsApp | Variante del mismo módulo: el vendedor manda la foto y el comprobante entra solo | $45.000 |
 
-La variante con WhatsApp **reemplaza** al módulo de Comprobantes, no se suma. Cuesta
-más del doble porque exige un **servidor dedicado corriendo permanentemente** para
-sostener la sesión del agente de mensajería: es el único módulo con costo de
-infraestructura propio y continuo.
+**En Base** no viene ninguno: se contratan sueltos a $20.000 por mes, **más $45.000 de
+instalación por módulo**, por única vez. **En Pro** entran dos a elección, y el tercero
+y el cuarto se suman a $20.000 cada uno, sin instalación. **En Enterprise** van los
+cuatro.
 
-**No hay bundle.** En Pro los dos módulos se venden sueltos, y "los dos juntos" es
-Enterprise, que los incluye con el canal de WhatsApp.
+### El canal de WhatsApp es sólo de Enterprise
+
+Es la variante del módulo de Comprobantes en la que el vendedor manda la foto por
+WhatsApp y el comprobante entra solo. **No se vende en Pro, a ningún precio.**
+
+El motivo no es de packaging: es el único módulo que exige un **servidor dedicado
+corriendo permanentemente** para sostener la sesión del agente de mensajería. Es el
+único con costo de infraestructura propio y continuo, y el único que no escala solo.
 
 ### Dónde está el señuelo
 
 La asimetría dominada vive en la configuración de módulos, no en un plan inventado:
 
-| Configuración | Precio / mes | Cuentas | Usuarios |
-|---|---|---|---|
-| Pro + los dos módulos | $195.000 | 5 bancos + 1 billetera | 8 |
-| **Enterprise** | **$245.000** | **10 bancos + 1 billetera** | **15** |
+| Configuración | Precio / mes | Cuentas | Usuarios | WhatsApp |
+|---|---|---|---|---|
+| Pro con los cuatro módulos | $170.000 | 5 bancos + 1 billetera | 8 | No |
+| **Enterprise** | **$245.000** | **10 bancos + 1 billetera** | **15** | **Sí** |
 
-Cincuenta mil pesos más por el doble de bancos y siete usuarios más. Nadie que
-quiera los dos módulos debería quedarse en Pro, y no hay pérdida: ahí se factura
-Enterprise. El que quiere un solo módulo se queda en Pro a $150.000, que es la venta
-que buscamos.
+Setenta y cinco mil pesos más por el doble de bancos, siete usuarios más, un año de
+historial cargado y el canal de WhatsApp. El que quiere los cuatro módulos no debería
+quedarse en Pro, y no hay pérdida: ahí se factura Enterprise.
 
-Con Mercado Pago incluido, la diferencia pasó de $30.000 a $50.000: el señuelo
-sigue funcionando, con menos filo. Si hiciera falta, se ajusta el precio de
-Enterprise.
+**La venta que buscamos sigue siendo Pro con sus dos módulos incluidos, a $130.000.**
+Los dos que elija son los que después hacen de ancla si quiere los otros dos.
 
 > **Enterprise tiene que mostrar su precio**, en la landing y en la hoja de precios,
 > aunque el botón diga "Hablemos". Si dice sólo "consultar", el ancla deja de
@@ -155,10 +165,19 @@ suscripción. La diferencia está en la bonificación de la puesta en marcha, qu
 que premia el anticipo del año completo. En Base la puesta en marcha no tiene cargo,
 así que ahí la diferencia no aplica.
 
-**Precio fundador para los betas: 30% sobre lista durante los primeros doce meses**,
-no acumulable con el descuento por medio de pago. Premia el feedback y facilita la
-conversación del día 30. ADN (Pro) queda en $91.000; Centroficina (Enterprise) en
-$171.500.
+**Programa beta: 60 días sin cargo del plan Pro y después 50% sobre lista durante
+3 meses**, no acumulable con el descuento por medio de pago. El beta entra con 90 días
+de historial de todas sus cuentas cargado por nosotros, y si trabaja con un banco que
+todavía no leemos se lo desarrollamos sin cargo. A cambio responde dos encuestas, a
+los 15 y a los 45 días: ese trabajo es lo que paga el descuento.
+
+Sobre un Pro, resignamos $195.000 contra los $468.000 que costaba el esquema anterior,
+y el beneficio se ve más grande de entrada. Son 20 lugares.
+
+> **ADN y Centroficina conservan el precio fundador que ya se les prometió**: 30% sobre
+> lista durante doce meses. ADN (Pro) queda en $91.000 y Centroficina (Enterprise) en
+> $171.500. Lo acordado se cumple; el esquema nuevo rige para los que entren de ahora
+> en más.
 
 **Prueba de 15 días con tarjeta**, cuando termine la beta. El cliente se suscribe al
 registrarse y el primer débito ocurre solo al día 15.
@@ -247,40 +266,47 @@ del aguinaldo son cálculo propio con parámetros estándar.
 
 ## 6. Puesta en marcha
 
-Cada plan tiene su modalidad. El autoservicio de Base y la carga del historial por
-parte del cliente en Pro dependen de las fases 1 y 3 del onboarding automático;
-hasta que estén listas, esas cuentas se ponen en marcha a mano.
+Cada plan tiene su modalidad. El autoservicio de Base depende de la fase 1 del
+onboarding automático; hasta que esté lista, esas cuentas se dan de alta a mano.
 
 | | Base | Pro | Enterprise |
 |---|---|---|---|
 | Modalidad | Autoservicio | Arranque asistido | Completa |
-| Cuentas e historial | Los carga el cliente | Los carga el cliente | Los cargamos nosotros: 5 cuentas × 12 meses |
+| Cuentas | Las carga el cliente | Las cargamos nosotros | Las cargamos nosotros |
+| **Historial** | **Ninguno** — se cotiza aparte | **1 trimestre, todas las cuentas** | **1 año: 5 cuentas × 12 meses** |
 | Reglas de categorización | Por defecto, automáticas | Ajustadas por nosotros | Ajustadas por nosotros |
 | Préstamo e inversiones vigentes | Los carga el cliente | 1 préstamo y 5 inversiones | 1 préstamo y 5 inversiones |
-| Capacitación | Videos y manual | Una sesión | Completa |
+| Capacitación | Videos y manual | **2 sesiones, hasta 2 personas** | **5 sesiones, hasta 3 personas** |
 | Primer cierre acompañado | — | Sí | Sí |
-| Horas nuestras | 0 | 8 | 32 |
-| **Precio** | **Sin cargo** | **$220.000** | **$890.000** |
+| Acompañamiento virtual | — | — | **Todo el primer mes** |
+| Horas nuestras | 0 | **12,5** | **36** |
+| **Precio** | **Sin cargo** | **$350.000** | **$1.000.000** |
 
-### Arranque asistido (Pro) — 8 horas
+### Arranque asistido (Pro) — 12,5 horas
 
-1. Revisión de las cuentas y del historial que cargó el cliente — **1,0 h**
-2. Ajuste de las reglas de categorización por banco — **2,5 h**
-3. Alta del préstamo y las inversiones vigentes — **1,0 h**
-4. Capacitación de operación diaria y de administración, en una sesión — **1,5 h**
-5. Acompañamiento del primer cierre mensual completo — **2,0 h**
+1. Alta de las cuentas y relevamiento — **1,0 h**
+2. **Carga de un trimestre de historial de todas las cuentas y validación de saldos — 3,0 h**
+3. Ajuste de las reglas de categorización por banco — **2,5 h**
+4. Alta del préstamo y las inversiones vigentes — **1,0 h**
+5. **Dos sesiones de capacitación, hasta dos personas — 3,0 h**
+6. Acompañamiento del primer cierre mensual completo — **2,0 h**
 
-### Puesta en marcha completa (Enterprise) — 32 horas
+### Puesta en marcha completa (Enterprise) — 36 horas
 
 1. Relevamiento ampliado, con circuito de tarjetas y billeteras — **2,0 h**
 2. Alta de la organización, usuarios y hasta cinco cuentas bancarias — **1,5 h**
 3. Carga del histórico (5 cuentas × 12 meses) y validación de saldos — **11,5 h**
 4. Armado y ajuste de reglas de categorización, hasta cinco bancos — **5,0 h**
 5. Alta del préstamo y las inversiones vigentes — **2,0 h**
-6. Configuración y capacitación de los tres módulos — **4,5 h**
-7. Capacitación operativa — **2,5 h**
-8. Capacitación de administrador — **2,0 h**
+6. Configuración de los cuatro módulos y del canal de WhatsApp — **4,5 h**
+7. **Cinco sesiones de capacitación, hasta tres personas — 7,5 h**
+8. **Acompañamiento virtual durante el primer mes — 4,0 h**
 9. Acompañamiento del primer cierre mensual completo — **2,5 h**
+
+> **De dónde salen los números nuevos.** Pro sumó la carga del trimestre de historial
+> —que antes hacía el cliente— y una segunda sesión de capacitación: 8 h + 3,0 + 1,5 =
+> 12,5 h. Enterprise sumó dos sesiones más y el mes de acompañamiento: 32 h + 4,0 =
+> 36 h. A $28.000 la hora dan $350.000 y $1.008.000, redondeado a $1.000.000.
 
 > **Contraste con el benchmark.** Las implementaciones de SaaS B2B en segmento pyme
 > promedian 25 horas; las de mid-market, 50. El arranque de Pro queda muy por debajo
@@ -293,10 +319,18 @@ Los precios se estimaron a $28.000 la hora de referencia y se cotizan cerrados.
 
 | Concepto | Detalle | Precio |
 |---|---|---|
+| **Historial** | **Por trimestre y por cuenta.** Es la venta natural de Base, que no trae historial | **$24.000** |
 | Cuenta bancaria adicional | Alta, reglas del banco y hasta 12 meses de histórico | $95.000 |
+| Instalación de un módulo en Base | Por única vez, por módulo | $45.000 |
 | Préstamo adicional | Alta con cuadro de amortización completo | $25.000 |
 | Inversión adicional | Plazo fijo o posición en fondo, más allá de las cinco incluidas | $15.000 |
 | Hora fuera de alcance | Capacitación extra, ajustes no previstos | $28.000 |
+
+> **El historial es la venta recurrente de Base.** Un año de una cuenta son cuatro
+> trimestres, $96.000 — prácticamente lo mismo que los $95.000 de la cuenta adicional
+> con su histórico, así que los dos precios no se contradicen. Y le da a Base algo
+> concreto para crecer: el cliente que entra sin historial lo compra de a trimestres
+> cuando lo necesita.
 
 ### Cotización tipo — Pro
 
@@ -304,31 +338,32 @@ Empresa con 4 bancos y Mercado Pago, plan Pro, año anticipado.
 
 | Concepto | Detalle | Importe |
 |---|---|---|
-| Suscripción Pro | 12 meses × $130.000, Mercado Pago incluido | $1.560.000 |
-| Arranque asistido | | $220.000 |
-| **Subtotal a precio de lista** | | **$1.780.000** |
+| Suscripción Pro | 12 meses × $130.000, Mercado Pago y 2 módulos incluidos | $1.560.000 |
+| Arranque asistido | Con un trimestre de historial cargado | $350.000 |
+| **Subtotal a precio de lista** | | **$1.910.000** |
 | Descuento por año anticipado | 10% sobre la suscripción | −$156.000 |
-| Bonificación del arranque | 50% por transferencia anual | −$110.000 |
-| **Total del primer año** | | **$1.514.000** |
+| Bonificación del arranque | 50% por transferencia anual | −$175.000 |
+| **Total del primer año** | | **$1.579.000** |
 
 La misma operación por débito automático mensual: $1.404.000 en doce cuotas de
-$117.000, más $154.000 de arranque con la bonificación del 30%. Total $1.558.000. Con
-una puesta en marcha liviana la diferencia a favor del anticipo se achica a $44.000:
-el argumento para empujarlo pasa a ser la caja anticipada más que el ahorro del
-cliente.
+$117.000, más $245.000 de arranque con la bonificación del 30%. Total $1.649.000. La
+diferencia a favor del anticipo es de $70.000, y creció respecto del esquema anterior
+porque la puesta en marcha pesa más: ahora sí hay un ahorro para mostrarle al cliente,
+además de la caja anticipada.
 
 ### Cotización tipo — Enterprise
 
-Empresa con 5 bancos y Mercado Pago que quiere los dos módulos, año anticipado.
+Empresa con 5 bancos y Mercado Pago que quiere los cuatro módulos y el canal de
+WhatsApp, año anticipado.
 
 | Concepto | Detalle | Importe |
 |---|---|---|
-| Suscripción Enterprise | 12 meses × $245.000, módulos incluidos | $2.940.000 |
-| Puesta en marcha completa | 5 cuentas × 12 meses | $890.000 |
-| **Subtotal a precio de lista** | | **$3.830.000** |
+| Suscripción Enterprise | 12 meses × $245.000, los 4 módulos y WhatsApp incluidos | $2.940.000 |
+| Puesta en marcha completa | 5 cuentas × 12 meses + mes de acompañamiento | $1.000.000 |
+| **Subtotal a precio de lista** | | **$3.940.000** |
 | Descuento por año anticipado | 10% sobre la suscripción | −$294.000 |
-| Bonificación de puesta en marcha | 50% por transferencia anual | −$445.000 |
-| **Total del primer año** | | **$3.091.000** |
+| Bonificación de puesta en marcha | 50% por transferencia anual | −$500.000 |
+| **Total del primer año** | | **$3.146.000** |
 
 ### Qué no incluye el servicio
 
@@ -361,7 +396,7 @@ escalonada por cartera activa, y sobre los servicios iniciales a tasa plena.
 - **El tramo se calcula sobre clientes activos totales** que el referidor haya traído, aunque algunos ya estén fuera de la ventana de doce meses. Premia la trayectoria, no sólo la cartera reciente.
 - **La comisión se calcula sobre el precio de lista**, aunque la venta se cierre con descuento anual o bonificación de puesta en marcha. Es una decisión deliberada: incentiva el cierre con anticipo.
 - **La comisión de servicios se devenga cuando se cobra el servicio.** Si la implementación queda diferida por cola de espera, la comisión acompaña esa fecha. En Base la puesta en marcha no tiene cargo, así que esa venta comisiona sólo sobre la suscripción.
-- **Mientras dure la beta**, los clientes referidos entran con 60 días sin cargo; como la comisión se liquida sobre lo cobrado, empieza con el primer pago.
+- **Mientras dure el programa beta**, los clientes referidos entran con 60 días sin cargo y siguen con 50% durante 3 meses. Como la comisión se liquida sobre lo cobrado y se calcula sobre lista, empieza con el primer pago y no se ve afectada por ese descuento.
 - **Cesa con la baja o la mora.** Se liquida sobre cobrado, no sobre facturado, dentro de los diez días del mes siguiente y contra factura.
 - **Sin cupo de cartera, sin exclusividad territorial ni por rubro, y sin límite de referidores.** El cliente queda asignado al referidor por el que entró y se respeta ese acuerdo. Cuando la demanda supera la capacidad de implementación, se pasa a cola de espera con fecha diferida.
 
@@ -374,8 +409,8 @@ escalonada por cartera activa, y sobre los servicios iniciales a tasa plena.
 | **5 Base + 4 Pro + 1 Enterprise** | $1.090.000 | 30% | **$327.000** |
 
 A esto se suma, por cada cliente cerrado y por única vez, el 30% de la puesta en
-marcha sobre precio de lista: $66.000 por un Pro, $267.000 por un Enterprise, nada
-por un Base.
+marcha sobre precio de lista: **$105.000 por un Pro**, **$300.000 por un Enterprise**,
+nada por un Base.
 
 Con la ventana de doce meses el ingreso no se acumula indefinidamente: en régimen
 estable el referidor sostiene alrededor de una docena de cuentas comisionando a la
@@ -383,26 +418,26 @@ vez, que a un ticket promedio de $110.000 y tramo del 30% dan cerca de **$400.00
 mensuales**, más el 30% de cada puesta en marcha nueva.
 
 > **El costo de pagar sobre lista.** En un Enterprise cerrado con año anticipado se
-> cobran $445.000 de puesta en marcha y se pagan $267.000 de comisión: quedan
-> $178.000 por 32 horas, unos $5.600 la hora. En un Pro, $110.000 cobrados menos
-> $66.000 de comisión dejan $44.000 por 8 horas, unos $5.500 la hora. No invalida la
-> decisión, porque la operación completa deja buen margen en el primer año; pero se
-> resigna margen de servicios para comprar velocidad de cierre y caja anticipada.
+> cobran $500.000 de puesta en marcha y se pagan $300.000 de comisión: quedan
+> $200.000 por 36 horas, unos $5.600 la hora. En un Pro, $175.000 cobrados menos
+> $105.000 de comisión dejan $70.000 por 12,5 horas, también unos $5.600 la hora. La
+> relación no cambió con los precios nuevos: se sigue resignando margen de servicios
+> para comprar velocidad de cierre y caja anticipada.
 
 ---
 
 ## 8. Qué queda para Apptivando
 
-Primer año de un cliente, con referidor en el tramo del 30%. Pro sin módulos
-opcionales.
+Primer año de un cliente, con referidor en el tramo del 30%. Pro con sus dos módulos
+incluidos y sin extras.
 
 | Concepto | Pro anticipado | Pro débito | Enterprise anticipado | Enterprise débito |
 |---|---|---|---|---|
 | Suscripción cobrada | $1.404.000 | $1.404.000 | $2.646.000 | $2.646.000 |
-| Puesta en marcha cobrada | $110.000 | $154.000 | $445.000 | $623.000 |
+| Puesta en marcha cobrada | $175.000 | $245.000 | $500.000 | $700.000 |
 | Comisión recurrente, 30% sobre lista | −$468.000 | −$468.000 | −$882.000 | −$882.000 |
-| Comisión de servicios, 30% sobre lista | −$66.000 | −$66.000 | −$267.000 | −$267.000 |
-| **Neto del primer año** | **$980.000** | **$1.024.000** | **$1.942.000** | **$2.120.000** |
+| Comisión de servicios, 30% sobre lista | −$105.000 | −$105.000 | −$300.000 | −$300.000 |
+| **Neto del primer año** | **$1.006.000** | **$1.076.000** | **$1.964.000** | **$2.164.000** |
 
 El débito mensual deja algo más de margen, pero cobrado a lo largo del año y con
 riesgo de baja anticipada. El anticipo compra caja y certeza.
@@ -418,13 +453,13 @@ cliente. **Desde el segundo año, sin comisión, cada cliente deja la suscripci�
 ## 9. Riesgo central: el cuello de botella somos nosotros
 
 Base no consume horas de puesta en marcha y su soporte se resuelve con videos y
-manual. El límite lo ponen Pro y Enterprise: 8 y 32 horas de puesta en marcha, y
-alrededor de **dos horas mensuales** de soporte cada uno.
+manual. El límite lo ponen Pro y Enterprise: **12,5 y 36 horas** de puesta en marcha,
+y alrededor de **dos horas mensuales** de soporte cada uno.
 
 | Cartera activa | Horas de soporte | Horas libres de 60 | Altas posibles por mes |
 |---|---|---|---|
-| 10 Pro/Enterprise + 10 Base | 25 h | 35 h | 4 Pro, o 1 Enterprise; Base sin límite |
-| 20 Pro/Enterprise + 20 Base | 50 h | 10 h | 1 Pro; Base sin límite |
+| 10 Pro/Enterprise + 10 Base | 25 h | 35 h | 2 Pro; ninguna Enterprise; Base sin límite |
+| 20 Pro/Enterprise + 20 Base | 50 h | 10 h | Ninguna; Base sin límite |
 | **25 Pro/Enterprise + 30 Base** | 65 h | — | **Ninguna: sobrecarga** |
 
 Soporte estimado en 2 horas mensuales por Pro o Enterprise y media hora por Base.
@@ -470,10 +505,14 @@ perder ventas, significa arruinar implementaciones ya vendidas.
 |---|---|
 | Planes | Base $65.000, Pro $130.000, Enterprise $245.000, precios finales, con piso y techo para negociar. |
 | Billeteras | Todos los planes suman una billetera de Mercado Pago, aparte de las cuentas bancarias. |
-| Módulos | Mercado Pago incluido en todos los planes. Liquidaciones y Comprobantes sueltos en Pro, a $20.000 (Comprobantes con WhatsApp, $45.000); incluidos en Enterprise. |
-| Puesta en marcha | Base sin cargo; Pro $220.000; Enterprise $890.000. |
+| Módulos | Mercado Pago incluido en los tres planes. Cuatro opcionales a $20.000 cada uno: echeqs, préstamos, liquidaciones y comprobantes. Base ninguno (+$45.000 de instalación por módulo), Pro dos a elección, Enterprise los cuatro. |
+| Canal de WhatsApp | **Sólo Enterprise.** Es el único módulo con servidor dedicado propio; no se vende en Pro a ningún precio. |
+| Historial | Base ninguno; Pro un trimestre de todas las cuentas; Enterprise un año. Suelto, $24.000 por trimestre y por cuenta. |
+| Capacitación | Base videos y manual; Pro 2 sesiones hasta 2 personas; Enterprise 5 sesiones hasta 3 personas más acompañamiento virtual el primer mes. |
+| Puesta en marcha | Base sin cargo; Pro $350.000 (12,5 h); Enterprise $1.000.000 (36 h). |
 | Medios de pago | Sólo transferencia anual anticipada (−10% y −50%) o débito automático mensual (−10% y −30%). |
-| Precio fundador | 30% sobre lista durante doce meses para los betas, no acumulable con el descuento por medio de pago. |
+| Programa beta | 60 días sin cargo del plan Pro y después 50% durante 3 meses, no acumulable con el descuento por medio de pago. Incluye 90 días de historial cargado. A cambio, dos encuestas (día 15 y día 45). |
+| Precio fundador | Sólo para ADN y Centroficina, que ya lo tenían prometido: 30% sobre lista durante doce meses. No se ofrece más. |
 | Prueba | 15 días con tarjeta, al terminar la beta. |
 | Índice de ajuste | ICL del BCRA, trimestral. |
 | Privacidad | Mención genérica de proveedores de infraestructura y de IA, sin nombres en público; detalle bajo NDA a clientes Enterprise que lo pidan. |

@@ -48,7 +48,7 @@ Lo que hace es la capa que ningún sistema de gestión resuelve bien:
 - **Impuestos por período, con cierre.** Deja de ser una planilla que alguien rehace todos los meses.
 - **Plazos fijos, fondos y préstamos** con su seguimiento de cuotas y vencimientos.
 - **Liquidaciones de tarjeta y Mercado Pago** cruzadas contra lo que efectivamente entró a la cuenta. Mercado Pago viene incluido en todos los planes.
-- **Comprobantes por WhatsApp:** el vendedor manda la foto del comprobante y entra solo al sistema, ya leído y buscando contra qué movimiento cruzarlo.
+- **Comprobantes por WhatsApp (sólo Enterprise):** el vendedor manda la foto del comprobante y entra solo al sistema, ya leído y buscando contra qué movimiento cruzarlo.
 
 > **Un argumento que casi siempre destraba.** Si el prospecto opera con un banco que
 > todavía no está soportado, no es un impedimento ni un costo extra: lo desarrollamos
@@ -62,7 +62,7 @@ Comisión durante doce meses por cada cliente.
 
 | | |
 |---|---|
-| **$267.000** | Por cada puesta en marcha Enterprise cerrada, de una sola vez |
+| **$300.000** | Por cada puesta en marcha Enterprise cerrada, de una sola vez |
 | **$327.000** | Por mes con diez clientes activos en cartera |
 | **30%** | Comisión máxima, sobre suscripción y sobre servicios |
 
@@ -83,7 +83,7 @@ La comisión sube con tu cartera y aplica a todos tus clientes, no sólo a los n
 | **5 Base + 4 Pro + 1 Enterprise** | $1.090.000 | 30% | **$327.000** |
 
 Además, por cada cliente cerrado y por única vez, el 30% de la puesta en marcha:
-**$66.000 por un Pro y $267.000 por un Enterprise.** El plan Base se da de alta solo y
+**$105.000 por un Pro y $300.000 por un Enterprise.** El plan Base se da de alta solo y
 no tiene costo de puesta en marcha, así que comisiona sólo sobre la suscripción.
 
 Todo se calcula sobre el precio de lista, aunque la venta se cierre con descuento por
@@ -94,7 +94,7 @@ que más nos conviene a los dos— cobrás igual sobre el valor pleno.
 - Ese compromiso **se honra aunque dejes de trabajar con nosotros**. Lo acordado se cumple hasta completar los doce meses.
 - La comisión de la puesta en marcha se paga **cuando el cliente abona ese servicio**.
 - Se liquida **dentro de los diez días de cada mes**, contra factura, sobre lo efectivamente cobrado.
-- **Mientras dure el período de lanzamiento**, los clientes que traigas entran con 60 días sin cargo. Tu comisión empieza con su primer pago.
+- **Mientras dure el programa beta**, los clientes que traigas entran con 60 días sin cargo y siguen con 50% durante tres meses. Tu comisión se calcula igual sobre el precio de lista, y empieza con su primer pago.
 
 ---
 
@@ -172,21 +172,37 @@ finales, sin IVA adicional.**
 | **Suscripción** | **$65.000 / mes** | **$130.000 / mes** | **$245.000 / mes** |
 | Cuentas | 3 bancos + 1 billetera | 5 bancos + 1 billetera | 10 bancos + 1 billetera |
 | Usuarios | 3 | 8 | 15 |
-| Módulos | Mercado Pago | Mercado Pago + opcionales | Todos incluidos |
-| Puesta en marcha | Sin cargo, se da de alta solo | $220.000, arranque asistido | $890.000, completa |
+| Mercado Pago | Incluido | Incluido | Incluido |
+| Módulos opcionales | Ninguno | **2 a elección** de cuatro | **Los 4 + WhatsApp** |
+| **Historial cargado** | **Ninguno** | **1 trimestre**, todas las cuentas | **1 año** |
+| Capacitación en vivo | Videos y manual | 2 sesiones, hasta 2 personas | 5 sesiones, hasta 3 personas |
+| Puesta en marcha | Sin cargo, se da de alta solo | $350.000, arranque asistido | $1.000.000, completa |
 
-### Módulos que se suman al plan Pro
+### Los cuatro módulos opcionales
 
-Mercado Pago está incluido en todos los planes, sin costo adicional.
+Mercado Pago está incluido en todos los planes, sin costo adicional. Estos cuatro van
+aparte, a $20.000 por mes cada uno:
 
-| Módulo | Para qué | Por mes |
-|---|---|---|
-| Liquidaciones | Liquidaciones de tarjeta con aranceles, IVA y retenciones desglosados | $20.000 |
-| Comprobantes | Lectura automática y cruce contra el extracto | $20.000 |
-| ↳ con canal de WhatsApp | El vendedor manda la foto y el comprobante entra solo | $45.000 |
+| Módulo | Para qué |
+|---|---|
+| Echeqs | Cheques electrónicos emitidos y recibidos, con sus vencimientos |
+| Préstamos | Préstamos bancarios con cuadro de amortización y cuotas por vencer |
+| Liquidaciones | Liquidaciones de tarjeta con aranceles, IVA y retenciones desglosados |
+| Comprobantes | Lectura automática y cruce contra el extracto |
 
-Si el cliente quiere los dos módulos, Enterprise ya los incluye: por $50.000 más que
-Pro con los dos sueltos, tiene el doble de bancos y siete usuarios más.
+**En Pro entran dos a elección**, y el tercero y el cuarto se suman a $20.000 cada uno.
+**En Enterprise van los cuatro**, más el canal de WhatsApp. **En Base** se contratan
+sueltos, con $45.000 de instalación por módulo, por única vez.
+
+Si el cliente quiere los cuatro, Enterprise conviene: por $75.000 más que Pro con los
+cuatro sueltos, tiene el doble de bancos, siete usuarios más, un año de historial
+cargado y el canal de WhatsApp, que en Pro no se vende.
+
+### El historial, la venta que casi siempre aparece
+
+Base no trae historial. Se vende aparte, **$24.000 por trimestre y por cuenta**, y es
+lo primero que pide el cliente cuando quiere comparar contra el año pasado. Pro ya
+viene con un trimestre de todas sus cuentas y Enterprise con un año.
 
 ### Formas de pago
 
