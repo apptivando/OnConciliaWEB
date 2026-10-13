@@ -76,15 +76,15 @@ export const DOCUMENTOS: Documento[] = [
   },
   {
     slug: 'programa-referidores',
-    titulo: 'Programa de referidores',
+    titulo: 'Programa de revendedores y referidos',
     resumen:
-      'La pieza que se le presenta a un referidor: qué vende, a quién buscar, cómo abrir la conversación, cuánto cobra y cómo funciona el circuito.',
-    cuando: 'Antes de la primera reunión con un referidor. Se le puede enviar tal cual.',
+      'La pieza que se le presenta a un revendedor o a un referido: qué vende, a quién buscar, cómo abrir la conversación, cuánto cobra cada uno y los precios.',
+    cuando: 'Antes de la primera reunión con un revendedor o un referido. Se le puede enviar tal cual.',
     nivel: 'compartible',
     grupo: 'acordar',
     archivo: 'programa-referidores.md',
     tags: [
-      'referidor', 'comision', 'precios', 'planes', 'base', 'pro', 'enterprise',
+      'revendedor', 'referido', 'referidor', 'comision', 'precios', 'planes', 'base', 'pro', 'enterprise',
       'modulos', 'puesta en marcha', 'formas de pago', 'cola de espera', 'calificacion',
     ],
   },
@@ -92,7 +92,7 @@ export const DOCUMENTOS: Documento[] = [
     slug: 'canal-de-reventa',
     titulo: 'Canal de reventa',
     resumen:
-      'El análisis completo: cómo se construyó el precio, cuántas horas lleva cada implementación, qué margen queda y dónde está el techo de capacidad.',
+      'El análisis completo: la comparación con Fonder, los tres planes, los servicios opcionales, la comisión de revendedores y referidos, el margen, el costo de las herramientas y el techo de capacidad.',
     cuando: 'Para decidir precios o revisar el esquema de comisión. Nunca en una reunión con terceros.',
     nivel: 'interno',
     grupo: 'acordar',
@@ -101,7 +101,21 @@ export const DOCUMENTOS: Documento[] = [
       'precio', 'margen', 'comision', 'capacidad', 'automatizacion', 'icl',
       'ajuste', 'benchmark', 'fonder', 'asentia', 'conciliac', 'roi', 'cct',
       'puesta en marcha', 'horas', 'base', 'pro', 'enterprise', 'fundador',
-      'monotributo', 'factura c', 'senuelo', 'ancla',
+      'iva', 'revendedor', 'referido', 'herramientas', 'costos', 'whatsapp', 'ancla',
+    ],
+  },
+  {
+    slug: 'pagina-precios',
+    titulo: 'Página de precios (borrador)',
+    resumen:
+      'El texto de la página de precios a publicar cuando cierre la beta: los tres planes, los módulos, las formas de pago, los servicios opcionales y las preguntas frecuentes.',
+    cuando: 'Para revisar el texto antes de publicarlo. Todavía no está en el sitio.',
+    nivel: 'interno',
+    grupo: 'acordar',
+    archivo: 'pagina-precios.md',
+    tags: [
+      'precios', 'planes', 'base', 'pro', 'enterprise', 'modulos', 'whatsapp',
+      'formas de pago', 'descuento', 'prueba', 'preguntas frecuentes', 'landing',
     ],
   },
   {
