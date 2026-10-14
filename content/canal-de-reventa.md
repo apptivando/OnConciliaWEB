@@ -52,7 +52,7 @@ debajo en los tres planes.
 |---|---|---|
 | Qué se cobra | Sólo el abono | Sólo el abono; los servicios son opcionales |
 | Cuentas | Sin límite | 3 / 5 / 10 |
-| Bancos | Vía Interbanking, aparte | 6 con lectura nativa |
+| Bancos | Vía Interbanking, aparte | 6 con lectura nativa; el resto, con columnas reconocidas por IA |
 | Historial | Lo carga el cliente | Lo carga el cliente con IA; nosotros, si lo pide |
 | Categorización | IA, 1 nivel | 2 niveles, con sugerencia de IA |
 | Echeqs, préstamos, liquidaciones, comprobantes | No | Sí, como módulos |
@@ -437,18 +437,18 @@ El techo sigue siendo de unos 25 clientes Pro o Enterprise por persona, y lo pon
 soporte. La puesta en marcha se vende con fecha pactada: si no hay horas, va a cola
 de espera.
 
-### El modelo depende de cuatro cosas que todavía no existen
+### El modelo depende de cuatro cosas
 
 | Qué | Para qué | Estado |
 |---|---|---|
-| Sugerencia de categoría con IA | Que el cliente categorice su historial sin nosotros | Decidida y sin construir |
+| Sugerencia de categoría con IA | Que el cliente categorice su historial sin nosotros | Construida el 2026-10-14, junto con el mapeo de columnas con IA para bancos sin lectura nativa. Falta el pase a producción |
 | Importación por lote | Subir de una vez todos los archivos de una cuenta | Sin construir |
 | Onboarding paso a paso | Que el alta no necesite una llamada | Sin construir |
 | Manual con videos | Capacitación de Base y apoyo del resto | Manual publicado; faltan los videos |
 
-**Hasta que estén, «el cliente carga su historial asistido por IA» no se puede
-vender.** Con la beta abierta se cubre a mano, porque el beta entra con el historial
-cargado por nosotros.
+**«El cliente carga su historial asistido por IA» se puede vender recién cuando la
+sugerencia esté en producción.** Hasta entonces, con la beta abierta se cubre a mano,
+porque el beta entra con el historial cargado por nosotros.
 
 ---
 

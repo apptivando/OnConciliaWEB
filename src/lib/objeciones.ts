@@ -169,7 +169,7 @@ export const ARGUMENTOS: Argumento[] = [
     titulo: 'Cobertura total desde el día uno',
     destacado: true,
     cuerpo:
-      'Los agregadores cubren los bancos grandes de CABA. BICA, BERSA, cooperativos y regionales no están, o se rompen seguido.\n\nNosotros ya soportamos Nación, Santander, BICA, Macro, BERSA y Galicia. Sumar un banco nuevo es escribir un parser, no negociar comercialmente con la entidad.\n\nPara una empresa del interior con cuentas en un banco regional, esto no es un argumento más: es la razón por la que nadie más la puede atender.',
+      'Los agregadores cubren los bancos grandes de CABA. BICA, BERSA, cooperativos y regionales no están, o se rompen seguido.\n\nNosotros ya soportamos Nación, Santander, BICA, Macro, BERSA y Galicia. Sumar un banco nuevo es escribir un parser, no negociar comercialmente con la entidad. Y mientras tanto el cliente no espera: sube el extracto, la IA reconoce las columnas y él solo las confirma.\n\nPara una empresa del interior con cuentas en un banco regional, esto no es un argumento más: es la razón por la que nadie más la puede atender.',
     frase:
       'Si el banco existe y te da un extracto, andamos. No dependemos de que un proveedor decida si tu banco vale la pena.',
     tags: ['cobertura', 'bancos', 'regional', 'bica', 'bersa', 'interior'],
@@ -295,7 +295,7 @@ export const NO_DECIR: { que: string; porque: string }[] = [
   {
     que: 'Prometer que un banco específico va a estar soportado sin haber visto un extracto real.',
     porque:
-      'Cada banco es un parser validado contra archivos reales. Galicia, por ejemplo, todavía no tiene categorización.',
+      'Cada banco es un parser validado contra archivos reales. La IA permite importar un banco nuevo desde el día uno, pero la lectura nativa se promete recién con un extracto real a la vista. Galicia, por ejemplo, todavía no tiene reglas precargadas: todo pasa por Revisión con la categoría sugerida por IA.',
   },
 ]
 

@@ -41,7 +41,8 @@ Debajo de la tabla:
 
 > ¿Necesitás más bancos de los que trae tu plan? Pasás al siguiente cuando quieras.
 >
-> ¿Trabajás con un banco que todavía no leemos? Lo desarrollamos sin cargo.
+> ¿Trabajás con un banco que todavía no leemos? Lo subís igual: la IA reconoce las
+> columnas y vos las confirmás. La lectura nativa la desarrollamos sin cargo.
 
 ---
 
@@ -112,8 +113,9 @@ No. Bajás el extracto de tu home banking y lo subís. Nunca te pedimos una clav
 No. OnConcilia no reemplaza nada: trabaja al lado de lo que ya usás.
 
 **¿Cómo cargo los meses anteriores?**
-Subís los extractos y el sistema te sugiere la categoría de cada movimiento. Si
-preferís, lo cargamos nosotros.
+Subís los extractos y la IA te sugiere la categoría y la subcategoría de lo que tus
+reglas todavía no reconocen. Lo confirmás en lote y queda como regla. Si preferís,
+lo cargamos nosotros.
 
 **¿Qué pasa cuando terminan los 15 días?**
 Se hace el primer débito del plan que elegiste. Podés darte de baja antes sin costo.
@@ -131,5 +133,5 @@ No. Todos los precios son + IVA.
 - **Enterprise muestra el precio** aunque el botón diga «Hablemos». Sin ese número Pro pierde la referencia.
 - **Pro va destacado** como «el más elegido»: es la venta que buscamos.
 - **No se nombra a la competencia.** El titular «Un abono. Nada más.» ya ocupa el lugar que Fonder ocupa con sus USD 350.
-- **Antes de publicar tienen que existir** la sugerencia de categoría con IA, el alta paso a paso y los videos. La página los promete.
+- **Antes de publicar tienen que existir** el alta paso a paso y los videos. La página los promete. La sugerencia de categoría con IA y el mapeo de columnas con IA ya están construidos (2026-10-14); se pueden prometer una vez que pasen a producción.
 - **«+ IVA» mientras se emita Factura C:** se cobra el importe publicado, sin sumarle nada. Conviene revisarlo con el contador antes de publicar.

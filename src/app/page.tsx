@@ -251,7 +251,8 @@ export default function Home() {
               <p className="text-slate-600 text-sm leading-relaxed mb-3">
                 Subí el extracto de Nación, Santander, Macro, BICA, BERSA o
                 Galicia y en segundos tenés todos los movimientos normalizados.
-                Reconoce el formato de cada banco solo.
+                Reconoce el formato de cada banco solo, y si el tuyo no está en
+                la lista, la IA identifica las columnas para que las confirmes.
               </p>
               <span className="inline-block bg-blue-50 text-blue-700 text-xs font-medium px-3 py-1 rounded-full">
                 Importación automática
@@ -267,11 +268,12 @@ export default function Home() {
               </h3>
               <p className="text-slate-600 text-sm leading-relaxed mb-3">
                 Ingresos, gastos, impuestos y comisiones se clasifican según
-                las reglas de tu empresa. Lo que no reconoce lo agrupa para
-                resolverlo en lote, sin revisar fila por fila.
+                las reglas de tu empresa. Lo que no reconoce lo agrupa con una
+                categoría sugerida por IA: lo confirmás en lote y queda como
+                regla para el mes que viene.
               </p>
               <span className="inline-block bg-emerald-50 text-emerald-700 text-xs font-medium px-3 py-1 rounded-full">
-                Reglas propias por banco
+                Reglas propias + sugerencia IA
               </span>
             </div>
 
