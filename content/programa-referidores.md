@@ -6,16 +6,16 @@ No contiene márgenes ni análisis interno.
 > **Dos formas de ganar con OnConcilia.**
 >
 > Si trabajás la venta, cobrás el primer abono entero y una comisión durante dos
-> años. Si sólo nos pasás el contacto, cobrás la mitad del primer abono. En los dos
-> casos no implementás, no capacitás, no das soporte y no facturás.
+> años. ¿Querés recomendarnos? Pasanos el contacto y te llevás el 50% del primer
+> abono. En ambos casos, todo lo demás lo hacemos nosotros.
 
 ---
 
 ## El problema: la hora diaria que nadie contabiliza
 
 La transferencia inmediata se volvió el medio de cobro y pago principal de la pyme
-argentina. En julio de 2026 el Banco Central registró **777 millones de
-transferencias** en un solo mes, un 22% más que un año atrás.
+argentina. En agosto de 2026 el Banco Central registró **779 millones de
+transferencias** en un solo mes, un 20% más que un año atrás.
 
 Eso rompió la vieja rutina de conciliar una vez por mes contra un resumen. Hoy
 alguien tiene que **revisar los pagos todos los días**: entrar al home banking de
@@ -38,11 +38,11 @@ tiene que desinstalar nada.
 
 Lo que hace es la capa que ningún sistema de gestión resuelve bien:
 
-- **Conciliación multi-banco real.** Importa el extracto de seis bancos, ordena los movimientos, detecta duplicados y avisa si falta un pedazo del historial.
+- **Conciliación multi-banco real.** Importa el extracto de los bancos con los que trabaja el cliente, ordena los movimientos y detecta duplicados. Si faltan movimientos, el sistema te lo dice.
 - **Comisiones bancarias con el IVA discriminado por alícuota** y el comprobante fiscal armado. Una empresa que paga cien mil pesos mensuales de comisiones tiene ahí más de veinte mil de crédito fiscal que muchas veces se pierde.
 - **Impuestos por período, con cierre.**
 - **Plazos fijos, fondos y préstamos** con su seguimiento de cuotas y vencimientos.
-- **Liquidaciones de tarjeta y Mercado Pago** cruzadas contra lo que entró a la cuenta. Mercado Pago viene incluido en todos los planes.
+- **Liquidaciones de tarjeta y Mercado Pago** cruzadas contra lo que entró a la cuenta.
 - **Comprobantes por WhatsApp:** el vendedor manda la foto del comprobante y entra solo al sistema, ya leído y buscando contra qué movimiento cruzarlo.
 
 **Se cobra sólo el abono.** No hay costo de alta, de licencia ni de instalación, y la
@@ -63,8 +63,7 @@ videos y un alta guiada paso a paso.
 | Primer abono del cliente | **100%** | **50%** |
 | Del mes 2 al 12 | **25%** de cada abono | — |
 | Del mes 13 al 24 | **10%** de cada abono | — |
-| Puesta en marcha, si el cliente la contrata | **50%** | — |
-| Otros servicios opcionales | 25% el primer año, 10% el segundo | — |
+| Puesta en marcha y servicios puntuales, si los contrata a través tuyo | **50%** | — |
 
 ### Cuánto es por cada cliente
 
@@ -87,7 +86,7 @@ mensuales y a los dos años $1.188.000.
 - **Sobre abonos cobrados.** Se paga cuando el cliente paga, y deja de pagarse si se da de baja o entra en mora.
 - **Si el cliente adelanta el semestre o el año**, cobrás junta la comisión de esos meses.
 - **El abono incluye los módulos y el WhatsApp** que el cliente contrate.
-- **Los servicios opcionales también comisionan** para el revendedor: el 50% de la puesta en marcha, y la carga de historial, préstamos o inversiones al mismo porcentaje que el abono, 25% el primer año y 10% el segundo.
+- **La puesta en marcha y los servicios puntuales también comisionan** si el cliente los contrata a través tuyo: te llevás el 50% de la puesta en marcha y de cada carga de historial, préstamo o inversión.
 - **Se liquida dentro de los diez días de cada mes**, contra factura.
 - **Los dos años se cumplen aunque dejes de trabajar con nosotros**, mientras el cliente siga activo.
 - **Mientras dure el programa beta**, los clientes entran con 60 días sin cargo y siguen con 50% durante tres meses. En esos tres meses la comisión se calcula sobre lo que el cliente paga.
