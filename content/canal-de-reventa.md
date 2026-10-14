@@ -276,6 +276,7 @@ No hay horas fuera de alcance, cuentas adicionales ni instalación de módulos.
 | Acompañamiento virtual | — | Todo el primer mes |
 | Horas nuestras | 9,5 | 33 |
 | Precio por hora | $50.500 | $42.300 |
+| Neto por hora si la vendió un revendedor | $25.300 | $21.100 |
 
 Las sesiones de capacitación no están acá porque ya vienen en el abono: 3 horas en
 Pro y 7,5 en Enterprise.
@@ -324,6 +325,8 @@ Hay dos figuras y se distinguen por el trabajo que hacen.
 | Primer abono | **100%** | **50%** |
 | Meses 2 a 12 | **25%** del abono | — |
 | Meses 13 a 24 | **10%** del abono | — |
+| Puesta en marcha, si se contrata | **50%** | — |
+| Historial y cargas | 25% el primer año, 10% el segundo | — |
 | Después | Nada: la cuenta es de OnConcilia | — |
 
 ### Reglas del esquema
@@ -331,7 +334,9 @@ Hay dos figuras y se distinguen por el trabajo que hacen.
 - **Se paga sobre abonos cobrados.** Sin cobro no hay comisión; cesa con la baja o la mora.
 - **Se calcula sobre el precio de lista.** El descuento por forma de pago lo absorbemos nosotros.
 - **El abono incluye los módulos y el WhatsApp** que el cliente tenga contratados.
-- **Los servicios opcionales no comisionan**: puesta en marcha, historial y cargas.
+- **La puesta en marcha comisiona el 50%** para el revendedor: $240.000 en Pro y $697.500 en Enterprise.
+- **El historial y las cargas comisionan como el abono**: 25% si se cobran en el primer año del cliente y 10% en el segundo.
+- **El referido no comisiona servicios**: sólo cobra el 50% del primer abono.
 - **Si el cliente paga por adelantado**, la comisión de esos meses se liquida junta.
 - **Se liquida dentro de los diez días del mes siguiente**, contra factura.
 - **Se honran los 24 meses aunque el revendedor deje de operar**, mientras el cliente siga activo.
@@ -361,7 +366,8 @@ segundo, al 10%.
 
 ## 8. Qué queda para Apptivando
 
-Primer año de un cliente, sin servicios opcionales.
+Primer año de un cliente, sin servicios opcionales. Si el revendedor vende además
+la puesta en marcha, nos queda la mitad: $240.000 en Pro y $697.500 en Enterprise.
 
 | Cliente por revendedor | Base | Pro | Enterprise |
 |---|---|---|---|
@@ -463,7 +469,8 @@ cargado por nosotros.
 | Formas de pago | Transferencia anual −25% o semestral −10%; débito semestral −10%; débito mensual sin descuento. |
 | Revendedor | Primer abono completo, 25% del mes 2 al 12 y 10% del 13 al 24. |
 | Referido | 50% del primer abono, por única vez. |
-| Base de la comisión | Precio de lista, sobre abonos cobrados. Los servicios no comisionan. |
+| Base de la comisión | Precio de lista, sobre abonos cobrados. |
+| Comisión de servicios | Sólo al revendedor: 50% de la puesta en marcha; historial y cargas al 25% el primer año y 10% el segundo. |
 | Programa beta | 60 días sin cargo de Pro y 50% durante 3 meses. 90 días de historial cargado. Dos encuestas. |
 | Precio fundador | Sólo ADN y Centroficina: $91.000 y $171.500 durante doce meses. |
 | Prueba | 15 días con tarjeta, al terminar la beta. |
@@ -476,5 +483,4 @@ cargado por nosotros.
 - **Confirmar con Fonder** si los USD 350 son más IVA y si hay mínimo anual.
 - **Cuentas ilimitadas en Enterprise.** Sin cuenta adicional, quien supera los 10 bancos no tiene a dónde pasar.
 - **Qué entra en la puesta en marcha.** El alcance de la sección 6 es el anterior sin la capacitación; falta validarlo.
-- **Si los servicios opcionales comisionan.** Hoy no.
 - **El costo real de un administrativo en Centroficina**, para reemplazar el cálculo de convenio.

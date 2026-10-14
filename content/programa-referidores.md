@@ -63,6 +63,8 @@ videos y un alta guiada paso a paso.
 | Primer abono del cliente | **100%** | **50%** |
 | Del mes 2 al 12 | **25%** de cada abono | — |
 | Del mes 13 al 24 | **10%** de cada abono | — |
+| Puesta en marcha, si el cliente la contrata | **50%** | — |
+| Otros servicios opcionales | 25% el primer año, 10% el segundo | — |
 
 ### Cuánto es por cada cliente
 
@@ -73,6 +75,7 @@ videos y un alta guiada paso a paso.
 | Del mes 2 al 12, por mes | $31.875 | $60.000 | $116.250 |
 | Del mes 13 al 24, por mes | $12.750 | $24.000 | $46.500 |
 | **Total en dos años** | **$631.125** | **$1.188.000** | **$2.301.750** |
+| Revendedor — si contrata la puesta en marcha | — | + $240.000 | + $697.500 |
 | **Referido** — pago único | **$63.750** | **$120.000** | **$232.500** |
 
 Si como revendedor cerrás un cliente Pro por mes, al año estás cobrando $900.000
@@ -83,7 +86,8 @@ mensuales y a los dos años $1.188.000.
 - **Sobre el precio de lista.** Si el cliente paga con descuento por adelantar un semestre o un año, tu comisión no baja: el descuento lo absorbemos nosotros.
 - **Sobre abonos cobrados.** Se paga cuando el cliente paga, y deja de pagarse si se da de baja o entra en mora.
 - **Si el cliente adelanta el semestre o el año**, cobrás junta la comisión de esos meses.
-- **El abono incluye los módulos y el WhatsApp** que el cliente contrate. Los servicios opcionales (puesta en marcha, carga de historial) no llevan comisión.
+- **El abono incluye los módulos y el WhatsApp** que el cliente contrate.
+- **Los servicios opcionales también comisionan** para el revendedor: el 50% de la puesta en marcha, y la carga de historial, préstamos o inversiones al mismo porcentaje que el abono, 25% el primer año y 10% el segundo.
 - **Se liquida dentro de los diez días de cada mes**, contra factura.
 - **Los dos años se cumplen aunque dejes de trabajar con nosotros**, mientras el cliente siga activo.
 - **Mientras dure el programa beta**, los clientes entran con 60 días sin cargo y siguen con 50% durante tres meses. En esos tres meses la comisión se calcula sobre lo que el cliente paga.
