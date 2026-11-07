@@ -1,41 +1,27 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import Cal, { getCalApi } from '@calcom/embed-react'
-
-const CAL_LINK = process.env.NEXT_PUBLIC_CAL_LINK ?? 'guillermo-onconcilia/15min'
-const CAL_NAMESPACE = '15min'
+import { useState } from 'react'
 
 /**
- * Formulario de la landing. Es el mismo de `/coordinar/[id]` —datos primero,
- * calendario después— con dos diferencias: acá el visitante es anónimo (no
- * hay prospecto que actualizar, se crea un lead) y se le pide el correo,
- * que es lo que permite seguirlo si no agenda.
+ * Formulario de la landing. Desde el 2026-11-07 lo recibe Apptivando CRM
+ * (crm.apptivando.com), formulario «OnConciliaBETA» de la marca OnConcilia: el
+ * CRM crea o actualiza el contacto, avisa al equipo, le manda la copia y, si no
+ * agenda, lo sigue con la secuencia «Interesado que no agendó».
  *
- * Por qué en dos pasos y no directo al calendario: el que abandona en el
- * calendario se pierde entero. Guardando los datos primero, ese abandono
- * entra igual a la secuencia de correos, que son recordatorios de agendar.
+ * Datos primero, calendario después: el que abandona en el calendario igual
+ * queda guardado. Al responder, el CRM devuelve `next`, su página de agenda con
+ * la marca de OnConcilia, y la reserva queda enlazada al contacto.
+ *
+ * La clave del formulario es pública (identifica el formulario, no da acceso).
  */
-export default function BetaForm({ fuente = 'landing' }: { fuente?: string }) {
-  const [form, setForm] = useState({ nombre: '', email: '', telefono: '', nota: '' })
-  const [estado, setEstado] = useState<'idle' | 'enviando' | 'agendar' | 'error'>('idle')
-  const [errorMsg, setErrorMsg] = useState('')
+const CRM_FORM_URL = 'https://crm.apptivando.com/api/forms/0df63f3574cd450ea33510a81a4169fc'
 
-  // Boilerplate oficial de @calcom/embed-react: hay que inicializar la API
-  // antes de que el <Cal> embebido pueda pintar el calendario. theme:'light'
-  // fuerza el tema claro — sin esto Cal.com usa el del sistema del visitante,
-  // y en modo oscuro rompe contra la tarjeta blanca.
-  useEffect(() => {
-    ;(async function () {
-      const cal = await getCalApi({ namespace: CAL_NAMESPACE })
-      cal('ui', {
-        theme: 'light',
-        styles: { branding: { brandColor: '#2563EB' } },
-        hideEventTypeDetails: false,
-        layout: 'month_view',
-      })
-    })()
-  }, [])
+// `fuente` queda por compatibilidad con page.tsx; el CRM registra el formulario.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export default function BetaForm(_props: { fuente?: string }) {
+  const [form, setForm] = useState({ nombre: '', email: '', telefono: '', nota: '', website: '' })
+  const [estado, setEstado] = useState<'idle' | 'enviando' | 'listo' | 'error'>('idle')
+  const [mensaje, setMensaje] = useState('')
 
   function set(campo: keyof typeof form, valor: string) {
     setForm((prev) => ({ ...prev, [campo]: valor }))
@@ -44,57 +30,46 @@ export default function BetaForm({ fuente = 'landing' }: { fuente?: string }) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setEstado('enviando')
-    setErrorMsg('')
+    setMensaje('')
 
     try {
-      const res = await fetch('/api/leads/capture', {
+      const res = await fetch(CRM_FORM_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, fuente }),
+        body: JSON.stringify({
+          name: form.nombre,
+          email: form.email,
+          phone: form.telefono,
+          message: form.nota ? `Trabaja con: ${form.nota}` : '',
+          website: form.website, // trampa para bots: una persona no la ve
+        }),
       })
-      if (res.ok) {
-        setEstado('agendar')
+      const data = (await res.json().catch(() => null)) as { ok?: boolean; next?: string | null; message?: string; error?: string } | null
+      if (res.ok && data?.ok) {
+        if (data.next) {
+          window.location.href = data.next
+          return
+        }
+        setMensaje(data.message ?? '¡Gracias! Te vamos a contactar.')
+        setEstado('listo')
       } else {
-        setErrorMsg('Algo salió mal. Intentá de nuevo.')
+        setMensaje(data?.error ?? 'Algo salió mal. Intentá de nuevo.')
         setEstado('error')
       }
     } catch {
-      setErrorMsg('Algo salió mal. Intentá de nuevo.')
+      setMensaje('Algo salió mal. Intentá de nuevo.')
       setEstado('error')
     }
   }
 
-  // El paso del calendario necesita bastante más ancho: month_view de Cal.com
-  // recién pone el calendario y los horarios lado a lado a partir de ~900px
-  // de iframe; con menos los apila y obliga a scrollear.
-  const ancho = estado === 'agendar' ? 'max-w-5xl' : 'max-w-md'
-  const padding = estado === 'agendar' ? 'p-4' : 'p-6'
-
   return (
-    <div className={`w-full ${ancho} bg-white rounded-2xl ${padding} shadow-xl mx-auto text-left`}>
-      {estado === 'agendar' ? (
-        <>
-          <p className="text-navy font-semibold text-sm mb-1">
-            ¡Gracias{form.nombre ? `, ${form.nombre.split(' ')[0]}` : ''}!
-          </p>
-          <p className="text-slate-500 text-sm mb-4">
-            Elegí el horario que más te convenga. Son 15 minutos, por videollamada.
-          </p>
-          <Cal
-            namespace={CAL_NAMESPACE}
-            calLink={CAL_LINK}
-            style={{ width: '100%', height: '680px', overflow: 'auto' }}
-            config={{
-              theme: 'light',
-              layout: 'month_view',
-              name: form.nombre,
-              email: form.email,
-              notes: form.nota,
-            }}
-          />
-        </>
+    <div className="w-full max-w-md bg-white rounded-2xl p-6 shadow-xl mx-auto text-left">
+      {estado === 'listo' ? (
+        <p className="text-navy font-semibold text-sm">{mensaje}</p>
       ) : (
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          {/* Trampa para bots: oculta para las personas. */}
+          <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" value={form.website} onChange={(e) => set('website', e.target.value)} />
           <div>
             <label className="text-xs font-medium text-slate-600 mb-1 block">Tu nombre *</label>
             <input
@@ -145,7 +120,7 @@ export default function BetaForm({ fuente = 'landing' }: { fuente?: string }) {
             />
           </div>
 
-          {errorMsg && <p className="text-red-500 text-xs">{errorMsg}</p>}
+          {estado === 'error' && <p className="text-red-500 text-xs">{mensaje}</p>}
 
           <button
             type="submit"

@@ -9,16 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.104.2",
-    "@calcom/embed-react": "^1.5.3",
-    "@supabase/ssr": "^0.12.0",
-    "@supabase/supabase-js": "^2.108.1",
     "next": "14.2.35",
     "react": "^18",
-    "react-dom": "^18",
-    "react-markdown": "^10.1.0",
-    "remark-gfm": "^4.0.1",
-    "resend": "^6.12.4"
+    "react-dom": "^18"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
